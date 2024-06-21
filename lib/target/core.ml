@@ -68,9 +68,9 @@ let rec sizeof (ctx : Ctx.t) (typ : Type.t) =
   match typ with
   | BoolT -> 1
   | IntT width | BitT width -> Bigint.to_int width |> Option.get
-  | HeaderT fields ->
-      List.fold_left (fun acc (_, typ) -> acc + sizeof ctx typ) 0 fields
-  | NameT _ | NewT _ -> Eval.eval_simplify_type ctx typ |> sizeof ctx
+  | StructT fields | HeaderT fields ->
+      List.fold_left (fun size (_, typ) -> size + sizeof ctx typ) 0 fields
+  | NameT _ | NewT _ -> Runtime.Ops.eval_simplify_type ctx typ |> sizeof ctx
   | _ -> assert false
 
 module PacketIn = struct

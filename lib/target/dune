@@ -1,0 +1,4 @@
+(library
+ (name target)
+ (libraries syntax runtime instance stf driver)
+ (modules core hash dummy v1model custom))

@@ -21,7 +21,7 @@ let make_func (path : string list) (func : string) =
 let make_args (args : Var.t list) =
   List.map (fun arg -> ExprA (VarE (Bare arg))) args
 
-module Make (Interp : INTERP) : ARCH = struct
+module Make (Inst : INST) (Interp : INTERP) : ARCH = struct
   type extern = PacketIn of Core.PacketIn.t | PacketOut of Core.PacketOut.t
 
   let pp_extern fmt = function
@@ -37,8 +37,7 @@ module Make (Interp : INTERP) : ARCH = struct
     let ictx = ICtx.init ctx.env_glob ctx.env_obj in
     let path = [ "packet_in" ] in
     let sto =
-      Instance.Instantiate.instantiate_from_cclos ccenv sto ictx path
-        cclos_packet_in [] []
+      Inst.instantiate_from_cclos ccenv sto ictx path cclos_packet_in [] []
     in
     sto
 
@@ -48,8 +47,7 @@ module Make (Interp : INTERP) : ARCH = struct
     let ictx = ICtx.init ctx.env_glob ctx.env_obj in
     let path = [ "packet_out" ] in
     let sto =
-      Instance.Instantiate.instantiate_from_cclos ccenv sto ictx path
-        cclos_packet_out [] []
+      Inst.instantiate_from_cclos ccenv sto ictx path cclos_packet_out [] []
     in
     sto
 
@@ -149,8 +147,8 @@ module Make (Interp : INTERP) : ARCH = struct
         ctx
     | _ -> ctx
 
-  let drive (ccenv : CCEnv.t) (sto : Sto.t) (ctx : Ctx.t)
-      (stf : Stf.Ast.stmt list) =
+  let drive (program : program) (stf : Stf.Ast.stmt list) =
+    let ccenv, sto, ctx = Inst.instantiate_program program in
     let sto, ctx = init ccenv sto ctx in
     Interp.init sto;
     let ctx = List.fold_left (fun ctx stf -> drive_stf ctx stf) ctx stf in

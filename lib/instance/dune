@@ -1,4 +1,4 @@
 (library
  (name instance)
- (libraries syntax runtime)
- (modules instantiate eval))
+ (libraries syntax runtime driver)
+ (modules instantiate))

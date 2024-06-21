@@ -19,17 +19,18 @@ let () =
   Format.printf "Desugaring %s\n" filename;
   let program = Frontend.Desugar.desugar_program program in
 
-  Format.printf "Instantiating %s\n" filename;
-  let ccenv, sto, ctx = Instance.Instantiate.instantiate_program program in
-
-  Format.printf "Interpreting %s\n" filename;
+  Format.printf "Instantiating and Interpreting %s\n" filename;
   let (module Driver) =
+    let open Instance in
     let open Exec in
+    let open Target in
     match arch with
     | "v1model" ->
-        (module Driver.Make (V1model.Make) (Interp.Make) : Driver.DRIVER)
+        (module Driver.Make (V1model.Make) (Instantiate.Make) (Interp.Make)
+        : Driver.DRIVER)
     | "custom" ->
-        (module Driver.Make (Custom.Make) (Interp.Make) : Driver.DRIVER)
+        (module Driver.Make (Custom.Make) (Instantiate.Make) (Interp.Make)
+        : Driver.DRIVER)
     | _ -> failwith "Unknown target: target = v1model | custom"
   in
   let stf =
@@ -37,5 +38,5 @@ let () =
     | Some stf -> stf
     | None -> failwith "Error while parsing stf."
   in
-  Driver.run ccenv sto ctx stf |> ignore;
+  Driver.run program stf |> ignore;
   ()

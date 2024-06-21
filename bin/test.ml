@@ -104,10 +104,13 @@ let test_desugar () =
     total
   |> print_endline
 
+module Driver =
+  Driver.Make (Target.Dummy.Make) (Instance.Instantiate.Make) (Exec.Interp.Make)
+
 let instantiate filename =
   let* program = parse_file filename in
   let* program = desugar_program filename program in
-  try Some (Instance.Instantiate.instantiate_program program)
+  try Some (Driver.inst program)
   with e ->
     instantiate_fails := !instantiate_fails + 1;
     Printf.sprintf "Instantiation fail: %s due to %s" filename

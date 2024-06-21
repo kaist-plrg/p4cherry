@@ -15,6 +15,7 @@
 
 open Syntax.Ast
 open Base
+open Context
 
 (* Bit manipulation *)
 
@@ -74,10 +75,27 @@ let int_of_raw_int (n : Bigint.t) (w : Bigint.t) : Value.t =
 
 let extract_bigint (value : Value.t) : Bigint.t =
   match value with
+  | BoolV b -> if b then Bigint.one else Bigint.zero
   | AIntV value -> value
   | IntV (_, value) -> value
   | BitV (_, value) -> value
+  | VBitV (_, value) -> value
   | _ -> Format.asprintf "Not a int/bit value: %a" Value.pp value |> failwith
+
+let rec extract_width (value : Value.t) : Bigint.t =
+  match value with
+  | BoolV _ -> Bigint.one
+  | IntV (width, _) | BitV (width, _) | VBitV (width, _) -> width
+  | TupleV values ->
+      List.fold_left
+        (fun acc value -> Bigint.(acc + extract_width value))
+        Bigint.zero values
+  | StructV fields | HeaderV (_, fields) ->
+      let values = List.map snd fields in
+      List.fold_left
+        (fun acc value -> Bigint.(acc + extract_width value))
+        Bigint.zero values
+  | _ -> assert false
 
 (* Unop evaluation *)
 
@@ -413,17 +431,17 @@ let rec eval_binop_gt (lvalue : Value.t) (rvalue : Value.t) : Value.t =
         rvalue
       |> failwith
 
-let rec eval_binop_eq_entries (lentries : (string * Value.t) list)
-    (rentries : (string * Value.t) list) : bool =
-  List.length lentries = List.length rentries
+let rec eval_binop_eq_fields (lfields : (string * Value.t) list)
+    (rfields : (string * Value.t) list) : bool =
+  List.length lfields = List.length rfields
   && List.for_all
-       (fun lentry ->
-         let lfield, lvalue = lentry in
+       (fun lfield ->
+         let lfield, lvalue = lfield in
          try
-           let rvalue = List.assoc lfield rentries in
+           let rvalue = List.assoc lfield rfields in
            eval_binop_eq lvalue rvalue
          with _ -> false)
-       lentries
+       lfields
 
 and eval_binop_eq (lvalue : Value.t) (rvalue : Value.t) : bool =
   match (lvalue, rvalue) with
@@ -440,11 +458,11 @@ and eval_binop_eq (lvalue : Value.t) (rvalue : Value.t) : bool =
       eval_binop_eq lvalue (int_of_raw_int rvalue width)
   | AIntV lvalue, IntV (width, _) ->
       eval_binop_eq (int_of_raw_int lvalue width) rvalue
-  | HeaderV (lvalid, lentries), HeaderV (rvalid, rentries) ->
-      lvalid = rvalid && eval_binop_eq_entries lentries rentries
-  | StructV lentries, StructV rentries ->
-      List.length lentries = List.length rentries
-      && eval_binop_eq_entries lentries rentries
+  | HeaderV (lvalid, lfields), HeaderV (rvalid, rfields) ->
+      lvalid = rvalid && eval_binop_eq_fields lfields rfields
+  | StructV lfields, StructV rfields ->
+      List.length lfields = List.length rfields
+      && eval_binop_eq_fields lfields rfields
   | TupleV lvalues, TupleV rvalues ->
       List.length lvalues = List.length rvalues
       && List.for_all2
@@ -639,6 +657,8 @@ and eval_cast (typ : Type.t) (value : Value.t) : Value.t =
   | _ ->
       Format.asprintf "(TODO) Cast to type %a undefined" Type.pp typ |> failwith
 
+(* Default value evaluation *)
+
 let rec eval_default_value (typ : Type.t) : Value.t =
   match typ with
   | BoolT -> BoolV false
@@ -678,3 +698,11 @@ let rec eval_default_value (typ : Type.t) : Value.t =
   | _ ->
       Format.asprintf "(TODO) default_value: not implemented for %a" Type.pp typ
       |> failwith
+
+(* Type simplification *)
+
+let rec eval_simplify_type (ctx : Ctx.t) (typ : Type.t) : Type.t =
+  match typ with
+  | NameT name -> Ctx.find_td name ctx |> Option.get |> eval_simplify_type ctx
+  | NewT name -> Ctx.find_td name ctx |> Option.get
+  | _ -> typ

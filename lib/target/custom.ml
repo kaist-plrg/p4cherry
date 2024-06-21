@@ -1,12 +1,10 @@
 open Syntax.Ast
 open Runtime.Domain
 open Runtime.Base
-open Runtime.Object
-open Runtime.Cclos
 open Runtime.Context
 open Driver
 
-module Make (Interp : INTERP) : ARCH = struct
+module Make (Inst : INST) (Interp : INTERP) : ARCH = struct
   let init (ctx : Ctx.t) =
     (* Add "b" to the object environment *)
     let typ = Type.BitT (Bigint.of_int 32) in
@@ -22,8 +20,8 @@ module Make (Interp : INTERP) : ARCH = struct
     let args = make_args [ "b" ] in
     Interp.interp_call ctx func targs args |> snd
 
-  let drive (_ccenv : CCEnv.t) (sto : Sto.t) (ctx : Ctx.t)
-      (_stf : Stf.Ast.stmt list) =
+  let drive (program : program) (_stf : Stf.Ast.stmt list) =
+    let _ccenv, sto, ctx = Inst.instantiate_program program in
     let ctx = init ctx in
     Interp.init sto;
     Format.printf "Initial context\n%a@\n" Ctx.pp ctx;

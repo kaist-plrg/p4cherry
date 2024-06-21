@@ -22,7 +22,7 @@ module Make (Arch : ARCH) : INTERP = struct
   let fetch_enum_field (value : Value.t) =
     match value with EnumFieldV field -> field | _ -> assert false
 
-  (* Interpreter for type simplification,
+  (* Interpreter from syntactic to runtime types
      Assume: evaluation of bit width should never change the context *)
 
   let rec interp_type (ctx : Ctx.t) (typ : typ) : Type.t =
@@ -148,7 +148,7 @@ module Make (Arch : ARCH) : INTERP = struct
     interp_expr ctx expr
 
   and interp_cast (ctx : Ctx.t) (typ : typ) (expr : expr) : Ctx.t * Value.t =
-    let typ = interp_type ctx typ |> Eval.eval_simplify_type ctx in
+    let typ = interp_type ctx typ |> Runtime.Ops.eval_simplify_type ctx in
     let ctx, value = interp_expr ctx expr in
     let value = Runtime.Ops.eval_cast typ value in
     (ctx, value)
@@ -163,7 +163,9 @@ module Make (Arch : ARCH) : INTERP = struct
     match value_base with
     (* (TODO) Insert bounds checking *)
     | StackV (values, _, _) ->
-        let idx = Eval.unpack_value value_idx |> Bigint.to_int |> Option.get in
+        let idx =
+          Runtime.Ops.extract_bigint value_idx |> Bigint.to_int |> Option.get
+        in
         let value = List.nth values idx in
         (ctx, value)
     | _ -> assert false
@@ -482,11 +484,22 @@ module Make (Arch : ARCH) : INTERP = struct
 
   (* Call semantics *)
 
+  (* It is illegal to use names only for some arguments:
+     either all or no arguments must specify the parameter name. (8.20) *)
+  and check_args (args : arg list) =
+    assert (
+      List.for_all
+        (fun (arg : arg) -> match arg with ExprA _ -> true | _ -> false)
+        args
+      || List.for_all
+           (fun (arg : arg) -> match arg with NameA _ -> true | _ -> false)
+           args)
+
   (* align parameters by argument order *)
   and align_params_with_args (params : param list) (args : arg list) =
     (* (TODO) assume there is no default argument *)
     assert (List.length params = List.length args);
-    Instance.Instantiate.check_args args;
+    check_args args;
     let module PMap = Map.Make (String) in
     let params_map =
       List.fold_left
@@ -766,7 +779,9 @@ module Make (Arch : ARCH) : INTERP = struct
           (match List.hd args with ExprA expr -> expr | _ -> assert false)
           |> interp_expr ctx
         in
-        let count = Eval.unpack_value count |> Bigint.to_int |> Option.get in
+        let count =
+          Runtime.Ops.extract_bigint count |> Bigint.to_int |> Option.get
+        in
         let values =
           let values = Array.of_list values in
           let size = Bigint.to_int size |> Option.get in

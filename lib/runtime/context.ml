@@ -169,6 +169,16 @@ module Ctx = struct
     let vis_obj = env_to_vis env_obj in
     { id; env_glob; vis_glob; env_obj; vis_obj; env_loc }
 
+  let of_ictx (ictx : ICtx.t) =
+    let ctx = empty in
+    {
+      ctx with
+      env_glob = ictx.env_glob;
+      vis_glob = ictx.vis_glob;
+      env_obj = ictx.env_obj;
+      vis_obj = ictx.vis_obj;
+    }
+
   (* Adders and updaters *)
 
   let add_td_obj name typ ctx =
