@@ -350,8 +350,7 @@ module Make (Arch : ARCH) : INTERP = struct
     | Ret _ | Exit -> (sign, ctx)
     | Cont ->
         let ctx, cond = interp_expr ctx cond in
-        let cond = Runtime.Ops.eval_cast Type.BoolT cond in
-        let cond = match cond with BoolV b -> b | _ -> assert false in
+        let cond = Value.get_bool cond in
         let branch = if cond then tru else fls in
         interp_stmt sign ctx branch
 
