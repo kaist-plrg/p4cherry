@@ -42,7 +42,7 @@ rule Interp_stmt/i_if-cont-tru:
   ----
   -- Interp_expr: S C |- expr_c : C' val_c
   ----
-  -- if V_BOOL true = $cast(val_c, RT_BOOL)
+  -- if V_BOOL true = val_c
   ----
   -- Interp_stmt: S CONT C' |- stmt_t : sig C''
 
@@ -51,7 +51,7 @@ rule Interp_stmt/i_if-cont-fls:
   ----
   -- Interp_expr: S C |- expr_c : C' val_c
   ----
-  -- if V_BOOL false = $cast(val_c, RT_BOOL)
+  -- if V_BOOL false = val_c
   ----
   -- Interp_stmt: S CONT C' |- stmt_f : sig C''
 
