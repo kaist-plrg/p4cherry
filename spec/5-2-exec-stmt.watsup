@@ -39,20 +39,14 @@ rule Interp_stmt/i_assign-nocont:
 
 rule Interp_stmt/i_if-cont-tru:
   S CONT C |- I_IF expr_c stmt_t stmt_f : sig C''
-  ----
   -- Interp_expr: S C |- expr_c : C' val_c
-  ----
   -- if V_BOOL true = val_c
-  ----
   -- Interp_stmt: S CONT C' |- stmt_t : sig C''
 
 rule Interp_stmt/i_if-cont-fls:
   S CONT C |- I_IF expr_c stmt_t stmt_f : sig C''
-  ----
   -- Interp_expr: S C |- expr_c : C' val_c
-  ----
   -- if V_BOOL false = val_c
-  ----
   -- Interp_stmt: S CONT C' |- stmt_f : sig C''
 
 rule Interp_stmt/i_if-nocont:
