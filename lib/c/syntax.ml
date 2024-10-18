@@ -1,3 +1,5 @@
+type bitwidth = BW8 | BW16 | BW32 | BW64
+
 type ctyp =
   | CTVoid
   | CTChar
@@ -5,8 +7,10 @@ type ctyp =
   | CTUInt
   | CTLInt
   | CTULInt
+  | CTUIntBW of bitwidth
   | CTArray of ctyp
   | CTStruct of string
+  | CTPointer of ctyp
 
 type cvar = string
 
@@ -27,6 +31,8 @@ type bop =
   
 type uop = 
   | CUNeg
+  | CUReference
+  | CUDereference
 
 type cexpr =
   | CEVar of cvar
@@ -35,25 +41,28 @@ type cexpr =
   | CEMember of cexpr * string
   | CECompExpr of bop * cexpr * cexpr
   | CEUniExpr of uop * cexpr
+  | CECall of cvar * cexpr list
 
-type cparam = ctyp * string
+type cparam = ctyp * cvar
 
 and cdecl =
+  | CDVar of ctyp * cvar
   | CDStruct of string * (ctyp * string) list
   | CDFunction of ctyp * string * cparam list * cblk
+  | CDEmpty (* Not an actual C type. Hack for compiler to print empty code for unimplemented components *)
 
 and cstmt =
-  | CSDecl of cdecl
   | CSSkip
   | CSAssign of cexpr * cexpr
   | CSIf of cexpr * cblk * cblk
-  | CSCall of cvar * cexpr list
   | CSLabel of string
   | CSGoto of string
   | CSReturn of cexpr option
+  | CSDecl of cdecl
+  | CSExpr of cexpr
 
 and cblk = cstmt list
-                 
-type cprog =
-  | CProgram of cdecl list 
 
+type cpreprocessor = string list
+                 
+type cprog = CProgram of cpreprocessor * cdecl list

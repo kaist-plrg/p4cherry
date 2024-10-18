@@ -1,4 +1,5 @@
 (* Contains the list of type declarations to be inserted at the beginning of the file *)
+(* TODO: Maybe extract this from EL syntax? *)
 type t = Il.Ast.typ' list
 
 let empty = []

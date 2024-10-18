@@ -1,4 +1,4 @@
 (library
  (name compiler)
- (libraries util lang runtime il)
- (modules cimpl compile ctx))
+ (libraries util lang runtime il c)
+ (modules compile ctx))

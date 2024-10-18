@@ -1,0 +1,8 @@
+(library
+ (name c)
+ ; (libraries util lang runtime il)
+ (modules syntax pp)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect))
+ )
