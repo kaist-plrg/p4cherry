@@ -6,11 +6,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-struct metadata { char ok; } metadata;
+struct metadata { bool ok; } metadata;
 
 struct headers { } headers;
 
-void MyParser (uint16_t packet_addr, struct headers* hdr, struct metadata* meta, struct standard_metadata_t* standard_metadata) {
+void MyParser (uint16_t* packet_in_addr, struct headers* hdr, struct metadata* meta, struct standard_metadata_t* standard_metadata) {
   start:
     goto accept;
 
@@ -26,7 +26,7 @@ void MyIngress (struct headers* hdr, struct metadata* meta, struct standard_meta
 void MyEgress (struct headers* hdr,struct metadata* meta, struct standard_metadata_t* standard_metadata)
 { }
 void MyUpdateChecksum (struct headers* hdr, struct metadata* meta) { }
-void MyDeparser (struct headers* hdr) { }
+void MyDeparser (uint16_t* packet_out_addr, struct headers* hdr) { }
 int main () {
   uint16_t pkt_address = get_packet_addr();
   struct headers h;

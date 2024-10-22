@@ -3,6 +3,7 @@ type bitwidth = BW8 | BW16 | BW32 | BW64
 type ctyp =
   | CTVoid
   | CTChar
+  | CTBool
   | CTInt
   | CTUInt
   | CTLInt

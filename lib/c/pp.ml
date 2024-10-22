@@ -5,6 +5,7 @@ let rec pp_ctyp ppf (typ: ctyp) =
   match typ with
   | CTVoid -> F.fprintf ppf "void"
   | CTChar -> F.fprintf ppf "char"
+  | CTBool -> F.fprintf ppf "bool"
   | CTInt -> F.fprintf ppf "int"
   | CTUInt -> F.fprintf ppf "unsigned int"
   | CTLInt -> F.fprintf ppf "long int"
