@@ -10,12 +10,12 @@ let rec pp_ctyp ppf (typ: ctyp) =
   | CTUInt -> F.fprintf ppf "unsigned int"
   | CTLInt -> F.fprintf ppf "long int"
   | CTULInt -> F.fprintf ppf "unsigned long int"
-  | CTUIntBW bw -> F.fprintf ppf "uint%d_t" (match bw with
+  (* | CTUIntBW bw -> F.fprintf ppf "uint%d_t" (match bw with
     | BW8 -> 8
     | BW16 -> 16
     | BW32 -> 32
     | BW64 -> 64
-  )
+  ) *)
   | CTArray typ -> F.fprintf ppf "%a[]" pp_ctyp typ
   | CTStruct name -> F.fprintf ppf "struct %s" name
   | CTPointer typ -> F.fprintf ppf "%a*" pp_ctyp typ
@@ -107,7 +107,6 @@ and pp_decl ppf (decl: cdecl) =
   | CDVar (typ, name) -> F.fprintf ppf "%a %s;" pp_ctyp typ name
   | CDStruct (name, kv_list)-> pp_struct ppf (name, kv_list)
   | CDFunction (ret_type, name, param_list, block) -> pp_func ppf (ret_type, name, param_list, block)
-  | CDEmpty -> F.fprintf ppf ""
 
 and pp_decls ppf (decls: cdecl list) = 
   (F.pp_print_list ~pp_sep:(fun ppf () -> F.fprintf ppf "@,@,") pp_decl) ppf decls
@@ -168,8 +167,7 @@ let sample_program = CProgram ( [ "#include <cluj_core.h>"
   [ CDStruct ("metadata", [(CTChar, "ok")])
   ; CDStruct ("headers", [])
   ; CDFunction (CTVoid, "MyParser", 
-    [ (CTUIntBW BW16, "packet_addr")
-    ; (CTPointer (CTStruct "headers"), "hdr")
+    [ (CTPointer (CTStruct "headers"), "hdr")
     ; (CTPointer (CTStruct "metadata"), "meta")
     ; (CTPointer (CTStruct "standard_metadata_t"), "standard_metadata")
     ], 
@@ -211,8 +209,7 @@ let sample_program = CProgram ( [ "#include <cluj_core.h>"
     [ CSReturn None
     ])
   ; CDFunction (CTInt, "main", [], 
-    [ CSDecl (CDVar (CTUIntBW BW16, "pkt_address"))
-    ; CSAssign (CEVar "pkt_address", CECall ("get_packet_addr", []))
+    [ CSAssign (CEVar "pkt_address", CECall ("get_packet_addr", []))
     ; CSDecl (CDVar (CTStruct "headers", "h"))
     ; CSDecl (CDVar (CTStruct "metadata", "m"))
     ; CSDecl (CDVar (CTStruct "standard_metadata_t", "sm"))

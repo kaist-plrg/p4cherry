@@ -8,7 +8,7 @@ type ctyp =
   | CTUInt
   | CTLInt
   | CTULInt
-  | CTUIntBW of bitwidth
+  (* | CTUIntBW of bitwidth *)
   | CTArray of ctyp
   | CTStruct of string
   | CTPointer of ctyp
@@ -50,7 +50,6 @@ and cdecl =
   | CDVar of ctyp * cvar
   | CDStruct of string * (ctyp * string) list
   | CDFunction of ctyp * string * cparam list * cblk
-  | CDEmpty (* Not an actual C type. Hack for compiler to print empty code for unimplemented components *)
 
 and cstmt =
   | CSSkip

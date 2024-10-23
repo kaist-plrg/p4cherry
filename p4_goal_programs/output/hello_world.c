@@ -1,16 +1,12 @@
 #include "cluj_core.h"
 #include <cluj.h>
-#include <endian.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-struct metadata { bool ok; } metadata;
+struct metadata { bool ok; };
 
-struct headers { } headers;
+struct headers { };
 
-void MyParser (uint16_t* packet_in_addr, struct headers* hdr, struct metadata* meta, struct standard_metadata_t* standard_metadata) {
+void MyParser (struct packet_t* packet_in, struct headers* hdr, struct metadata* meta, struct standard_metadata_t* standard_metadata) {
   start:
     goto accept;
 
@@ -21,14 +17,16 @@ void MyParser (uint16_t* packet_in_addr, struct headers* hdr, struct metadata* m
 void MyVerifyChecksum (struct headers* hdr, struct metadata* meta) { }
 void MyIngress (struct headers* hdr, struct metadata* meta, struct standard_metadata_t* standard_metadata)
 {
-  (*standard_metadata).egress_spec = 2;
+  (*standard_metadata).egress_spec = 1;
 }
 void MyEgress (struct headers* hdr,struct metadata* meta, struct standard_metadata_t* standard_metadata)
 { }
 void MyUpdateChecksum (struct headers* hdr, struct metadata* meta) { }
-void MyDeparser (uint16_t* packet_out_addr, struct headers* hdr) { }
+void MyDeparser (struct* packet_out, struct headers* hdr) { }
 int main () {
-  uint16_t pkt_address = get_packet_addr();
+  struct packet_t packet_in, packet_out;
+  init_packet_in(&packet_in);
+  init_packet_in(&packet_out);
   struct headers h;
   struct metadata m;
   struct standard_metadata_t sm;

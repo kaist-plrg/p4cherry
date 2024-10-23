@@ -1,0 +1,1053 @@
+[{it =
+   Compiler.Compile.Il.ParserD
+    {Compiler.Compile.Il.id =
+      {it = "MyParser";
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 7; line_end = None; col_start = 7; col_end = 15};
+       note = ()};
+     tparams = [];
+     params =
+      [{it =
+         ({it = "packet";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 7; line_end = None; col_start = 26; col_end = 32};
+           note = ()},
+          {it = Compiler.Compile.Il.L.No; at = M ""; note = ()},
+          {it = Runtime.Types.ExternT ("packet_in", <abstr>);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 7; line_end = None; col_start = 16; col_end = 25};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 7; line_end = None; col_start = 16; col_end = 32};
+        note = ()};
+       {it =
+         ({it = "hdr";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 8; line_end = None; col_start = 28; col_end = 31};
+           note = ()},
+          {it = Compiler.Compile.Il.L.Out;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 8; line_end = None; col_start = 16; col_end = 19};
+           note = ()},
+          {it = Runtime.Types.StructT ("headers", []);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 8; line_end = None; col_start = 20; col_end = 27};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 8; line_end = None; col_start = 16; col_end = 31};
+        note = ()};
+       {it =
+         ({it = "meta";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 9; line_end = None; col_start = 31; col_end = 35};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 9; line_end = None; col_start = 16; col_end = 21};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("metadata", [("ok", Runtime.Types.BoolT)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 9; line_end = None; col_start = 22; col_end = 30};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 9; line_end = None; col_start = 16; col_end = 35};
+        note = ()};
+       {it =
+         ({it = "standard_metadata";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 10; line_end = None; col_start = 42; col_end = 59};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 10; line_end = None; col_start = 16; col_end = 21};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("standard_metadata_t",
+             [("ingress_port", Runtime.Types.FBitT <abstr>);
+              ("egress_spec", Runtime.Types.FBitT <abstr>);
+              ("egress_port", Runtime.Types.FBitT <abstr>);
+              ("instance_type", Runtime.Types.FBitT <abstr>);
+              ("packet_length", Runtime.Types.FBitT <abstr>);
+              ("enq_timestamp", Runtime.Types.FBitT <abstr>);
+              ("enq_qdepth", Runtime.Types.FBitT <abstr>);
+              ("deq_timedelta", Runtime.Types.FBitT <abstr>);
+              ("deq_qdepth", Runtime.Types.FBitT <abstr>);
+              ("ingress_global_timestamp", Runtime.Types.FBitT <abstr>);
+              ("egress_global_timestamp", Runtime.Types.FBitT <abstr>);
+              ("mcast_grp", Runtime.Types.FBitT <abstr>);
+              ("egress_rid", Runtime.Types.FBitT <abstr>);
+              ("checksum_error", Runtime.Types.FBitT <abstr>);
+              ("parser_error", Runtime.Types.ErrT);
+              ("priority", Runtime.Types.FBitT <abstr>)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 10; line_end = None; col_start = 22; col_end = 41};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 10; line_end = None; col_start = 16; col_end = 59};
+        note = ()}];
+     cparams = []; locals = [];
+     states =
+      [{it =
+         ({it = "start";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 11; line_end = None; col_start = 10; col_end = 15};
+           note = ()},
+          {it =
+            ([{it =
+                Compiler.Compile.Il.L.TransS
+                 {Compiler.Compile.Il.L.expr_label =
+                   {it =
+                     Compiler.Compile.Il.VarE
+                      {Compiler.Compile.Il.var =
+                        {it =
+                          Compiler.Compile.Il.L.Current
+                           {it = "accept";
+                            at =
+                             I
+                              {Util.Source.filename =
+                                "p4_goal_programs/input/hello_world.p4";
+                               line_start = 12; line_end = None;
+                               col_start = 19; col_end = 25};
+                            note = ()};
+                         at = M ""; note = ()}};
+                    at =
+                     I
+                      {Util.Source.filename =
+                        "p4_goal_programs/input/hello_world.p4";
+                       line_start = 12; line_end = None; col_start = 8;
+                       col_end = 26};
+                    note =
+                     {Compiler.Compile.Il.typ = Runtime.Types.StateT;
+                      ctk = Compiler.Compile.Il.Ctk.DYN}}};
+               at =
+                I
+                 {Util.Source.filename =
+                   "p4_goal_programs/input/hello_world.p4";
+                  line_start = 12; line_end = None; col_start = 8;
+                  col_end = 26};
+               note = ()}],
+             []);
+           at = M ""; note = ()},
+          []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 11; line_end = Some 13; col_start = 4; col_end = 5};
+        note = ()}];
+     annos = []};
+  at = M ""; note = ()};
+ {it =
+   Compiler.Compile.Il.ControlD
+    {Compiler.Compile.Il.id =
+      {it = "MyVerifyChecksum";
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 16; line_end = None; col_start = 8; col_end = 24};
+       note = ()};
+     tparams = [];
+     params =
+      [{it =
+         ({it = "hdr";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 16; line_end = None; col_start = 39; col_end = 42};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 16; line_end = None; col_start = 25; col_end = 30};
+           note = ()},
+          {it = Runtime.Types.StructT ("headers", []);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 16; line_end = None; col_start = 31; col_end = 38};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 16; line_end = None; col_start = 25; col_end = 42};
+        note = ()};
+       {it =
+         ({it = "meta";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 16; line_end = None; col_start = 59; col_end = 63};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 16; line_end = None; col_start = 44; col_end = 49};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("metadata", [("ok", Runtime.Types.BoolT)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 16; line_end = None; col_start = 50; col_end = 58};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 16; line_end = None; col_start = 44; col_end = 63};
+        note = ()}];
+     cparams = []; locals = [];
+     body =
+      {it = ([], []);
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 17; line_end = None; col_start = 10; col_end = 13};
+       note = ()};
+     annos = []};
+  at = M ""; note = ()};
+ {it =
+   Compiler.Compile.Il.ControlD
+    {Compiler.Compile.Il.id =
+      {it = "MyIngress";
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 20; line_end = None; col_start = 8; col_end = 17};
+       note = ()};
+     tparams = [];
+     params =
+      [{it =
+         ({it = "hdr";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 20; line_end = None; col_start = 32; col_end = 35};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 20; line_end = None; col_start = 18; col_end = 23};
+           note = ()},
+          {it = Runtime.Types.StructT ("headers", []);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 20; line_end = None; col_start = 24; col_end = 31};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 20; line_end = None; col_start = 18; col_end = 35};
+        note = ()};
+       {it =
+         ({it = "meta";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 21; line_end = None; col_start = 33; col_end = 37};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 21; line_end = None; col_start = 18; col_end = 23};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("metadata", [("ok", Runtime.Types.BoolT)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 21; line_end = None; col_start = 24; col_end = 32};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 21; line_end = None; col_start = 18; col_end = 37};
+        note = ()};
+       {it =
+         ({it = "standard_metadata";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 22; line_end = None; col_start = 44; col_end = 61};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 22; line_end = None; col_start = 18; col_end = 23};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("standard_metadata_t",
+             [("ingress_port", Runtime.Types.FBitT <abstr>);
+              ("egress_spec", Runtime.Types.FBitT <abstr>);
+              ("egress_port", Runtime.Types.FBitT <abstr>);
+              ("instance_type", Runtime.Types.FBitT <abstr>);
+              ("packet_length", Runtime.Types.FBitT <abstr>);
+              ("enq_timestamp", Runtime.Types.FBitT <abstr>);
+              ("enq_qdepth", Runtime.Types.FBitT <abstr>);
+              ("deq_timedelta", Runtime.Types.FBitT <abstr>);
+              ("deq_qdepth", Runtime.Types.FBitT <abstr>);
+              ("ingress_global_timestamp", Runtime.Types.FBitT <abstr>);
+              ("egress_global_timestamp", Runtime.Types.FBitT <abstr>);
+              ("mcast_grp", Runtime.Types.FBitT <abstr>);
+              ("egress_rid", Runtime.Types.FBitT <abstr>);
+              ("checksum_error", Runtime.Types.FBitT <abstr>);
+              ("parser_error", Runtime.Types.ErrT);
+              ("priority", Runtime.Types.FBitT <abstr>)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 22; line_end = None; col_start = 24; col_end = 43};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 22; line_end = None; col_start = 18; col_end = 61};
+        note = ()}];
+     cparams = []; locals = [];
+     body =
+      {it =
+        ([{it =
+            Compiler.Compile.Il.L.AssignS
+             {Compiler.Compile.Il.L.expr_l =
+               {it =
+                 Compiler.Compile.Il.ExprAccE
+                  {Compiler.Compile.Il.expr_base =
+                    {it =
+                      Compiler.Compile.Il.VarE
+                       {Compiler.Compile.Il.var =
+                         {it =
+                           Compiler.Compile.Il.L.Current
+                            {it = "standard_metadata";
+                             at =
+                              I
+                               {Util.Source.filename =
+                                 "p4_goal_programs/input/hello_world.p4";
+                                line_start = 24; line_end = None;
+                                col_start = 8; col_end = 25};
+                             note = ()};
+                          at =
+                           I
+                            {Util.Source.filename =
+                              "p4_goal_programs/input/hello_world.p4";
+                             line_start = 24; line_end = None; col_start = 8;
+                             col_end = 25};
+                          note = ()}};
+                     at =
+                      I
+                       {Util.Source.filename =
+                         "p4_goal_programs/input/hello_world.p4";
+                        line_start = 24; line_end = None; col_start = 8;
+                        col_end = 25};
+                     note =
+                      {Compiler.Compile.Il.typ =
+                        Runtime.Types.StructT ("standard_metadata_t",
+                         [("ingress_port", Runtime.Types.FBitT <abstr>);
+                          ("egress_spec", Runtime.Types.FBitT <abstr>);
+                          ("egress_port", Runtime.Types.FBitT <abstr>);
+                          ("instance_type", Runtime.Types.FBitT <abstr>);
+                          ("packet_length", Runtime.Types.FBitT <abstr>);
+                          ("enq_timestamp", Runtime.Types.FBitT <abstr>);
+                          ("enq_qdepth", Runtime.Types.FBitT <abstr>);
+                          ("deq_timedelta", Runtime.Types.FBitT <abstr>);
+                          ("deq_qdepth", Runtime.Types.FBitT <abstr>);
+                          ("ingress_global_timestamp",
+                           Runtime.Types.FBitT <abstr>);
+                          ("egress_global_timestamp",
+                           Runtime.Types.FBitT <abstr>);
+                          ("mcast_grp", Runtime.Types.FBitT <abstr>);
+                          ("egress_rid", Runtime.Types.FBitT <abstr>);
+                          ("checksum_error", Runtime.Types.FBitT <abstr>);
+                          ("parser_error", Runtime.Types.ErrT);
+                          ("priority", Runtime.Types.FBitT <abstr>)]);
+                       ctk = Compiler.Compile.Il.Ctk.DYN}};
+                   member =
+                    {it = "egress_spec";
+                     at =
+                      I
+                       {Util.Source.filename =
+                         "p4_goal_programs/input/hello_world.p4";
+                        line_start = 24; line_end = None; col_start = 26;
+                        col_end = 37};
+                     note = ()}};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 24; line_end = None; col_start = 8;
+                   col_end = 37};
+                note =
+                 {Compiler.Compile.Il.typ = Runtime.Types.FBitT <abstr>;
+                  ctk = Compiler.Compile.Il.Ctk.DYN}};
+              expr_r =
+               {it =
+                 Compiler.Compile.Il.ValueE
+                  {Compiler.Compile.Il.value =
+                    {it = Compiler.Compile.Il.Value.FBitV (<abstr>, <abstr>);
+                     at =
+                      I
+                       {Util.Source.filename =
+                         "p4_goal_programs/input/hello_world.p4";
+                        line_start = 24; line_end = None; col_start = 40;
+                        col_end = 43};
+                     note = ()}};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 24; line_end = None; col_start = 40;
+                   col_end = 43};
+                note =
+                 {Compiler.Compile.Il.typ = Runtime.Types.FBitT <abstr>;
+                  ctk = Compiler.Compile.Il.Ctk.LCTK}}};
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 24; line_end = None; col_start = 8; col_end = 44};
+           note = ()}],
+         []);
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 23; line_end = Some 25; col_start = 10; col_end = 5};
+       note = ()};
+     annos = []};
+  at = M ""; note = ()};
+ {it =
+   Compiler.Compile.Il.ControlD
+    {Compiler.Compile.Il.id =
+      {it = "MyEgress";
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 28; line_end = None; col_start = 8; col_end = 16};
+       note = ()};
+     tparams = [];
+     params =
+      [{it =
+         ({it = "hdr";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 28; line_end = None; col_start = 31; col_end = 34};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 28; line_end = None; col_start = 17; col_end = 22};
+           note = ()},
+          {it = Runtime.Types.StructT ("headers", []);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 28; line_end = None; col_start = 23; col_end = 30};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 28; line_end = None; col_start = 17; col_end = 34};
+        note = ()};
+       {it =
+         ({it = "meta";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 29; line_end = None; col_start = 32; col_end = 36};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 29; line_end = None; col_start = 17; col_end = 22};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("metadata", [("ok", Runtime.Types.BoolT)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 29; line_end = None; col_start = 23; col_end = 31};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 29; line_end = None; col_start = 17; col_end = 36};
+        note = ()};
+       {it =
+         ({it = "standard_metadata";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 30; line_end = None; col_start = 43; col_end = 60};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 30; line_end = None; col_start = 17; col_end = 22};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("standard_metadata_t",
+             [("ingress_port", Runtime.Types.FBitT <abstr>);
+              ("egress_spec", Runtime.Types.FBitT <abstr>);
+              ("egress_port", Runtime.Types.FBitT <abstr>);
+              ("instance_type", Runtime.Types.FBitT <abstr>);
+              ("packet_length", Runtime.Types.FBitT <abstr>);
+              ("enq_timestamp", Runtime.Types.FBitT <abstr>);
+              ("enq_qdepth", Runtime.Types.FBitT <abstr>);
+              ("deq_timedelta", Runtime.Types.FBitT <abstr>);
+              ("deq_qdepth", Runtime.Types.FBitT <abstr>);
+              ("ingress_global_timestamp", Runtime.Types.FBitT <abstr>);
+              ("egress_global_timestamp", Runtime.Types.FBitT <abstr>);
+              ("mcast_grp", Runtime.Types.FBitT <abstr>);
+              ("egress_rid", Runtime.Types.FBitT <abstr>);
+              ("checksum_error", Runtime.Types.FBitT <abstr>);
+              ("parser_error", Runtime.Types.ErrT);
+              ("priority", Runtime.Types.FBitT <abstr>)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 30; line_end = None; col_start = 23; col_end = 42};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 30; line_end = None; col_start = 17; col_end = 60};
+        note = ()}];
+     cparams = []; locals = [];
+     body =
+      {it = ([], []);
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 31; line_end = None; col_start = 10; col_end = 13};
+       note = ()};
+     annos = []};
+  at = M ""; note = ()};
+ {it =
+   Compiler.Compile.Il.ControlD
+    {Compiler.Compile.Il.id =
+      {it = "MyUpdateChecksum";
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 34; line_end = None; col_start = 8; col_end = 24};
+       note = ()};
+     tparams = [];
+     params =
+      [{it =
+         ({it = "hdr";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 34; line_end = None; col_start = 39; col_end = 42};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 34; line_end = None; col_start = 25; col_end = 30};
+           note = ()},
+          {it = Runtime.Types.StructT ("headers", []);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 34; line_end = None; col_start = 31; col_end = 38};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 34; line_end = None; col_start = 25; col_end = 42};
+        note = ()};
+       {it =
+         ({it = "meta";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 34; line_end = None; col_start = 59; col_end = 63};
+           note = ()},
+          {it = Compiler.Compile.Il.L.InOut;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 34; line_end = None; col_start = 44; col_end = 49};
+           note = ()},
+          {it =
+            Runtime.Types.StructT ("metadata", [("ok", Runtime.Types.BoolT)]);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 34; line_end = None; col_start = 50; col_end = 58};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 34; line_end = None; col_start = 44; col_end = 63};
+        note = ()}];
+     cparams = []; locals = [];
+     body =
+      {it = ([], []);
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 35; line_end = None; col_start = 10; col_end = 13};
+       note = ()};
+     annos = []};
+  at = M ""; note = ()};
+ {it =
+   Compiler.Compile.Il.ControlD
+    {Compiler.Compile.Il.id =
+      {it = "MyDeparser";
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 38; line_end = None; col_start = 8; col_end = 18};
+       note = ()};
+     tparams = [];
+     params =
+      [{it =
+         ({it = "packet";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 38; line_end = None; col_start = 30; col_end = 36};
+           note = ()},
+          {it = Compiler.Compile.Il.L.No; at = M ""; note = ()},
+          {it = Runtime.Types.ExternT ("packet_out", <abstr>);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 38; line_end = None; col_start = 19; col_end = 29};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 38; line_end = None; col_start = 19; col_end = 36};
+        note = ()};
+       {it =
+         ({it = "hdr";
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 38; line_end = None; col_start = 49; col_end = 52};
+           note = ()},
+          {it = Compiler.Compile.Il.L.In;
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 38; line_end = None; col_start = 38; col_end = 40};
+           note = ()},
+          {it = Runtime.Types.StructT ("headers", []);
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 38; line_end = None; col_start = 41; col_end = 48};
+           note = ()},
+          None, []);
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 38; line_end = None; col_start = 38; col_end = 52};
+        note = ()}];
+     cparams = []; locals = [];
+     body =
+      {it = ([], []);
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 39; line_end = None; col_start = 10; col_end = 13};
+       note = ()};
+     annos = []};
+  at = M ""; note = ()};
+ {it =
+   Compiler.Compile.Il.InstD
+    {Compiler.Compile.Il.id =
+      {it = "main";
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 51; line_end = None; col_start = 0; col_end = 4};
+       note = ()};
+     var_inst =
+      {it =
+        Compiler.Compile.Il.L.Current
+         {it = "V1Switch";
+          at =
+           I
+            {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+             line_start = 43; line_end = None; col_start = 0; col_end = 8};
+          note = ()};
+       at =
+        I
+         {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+          line_start = 43; line_end = None; col_start = 0; col_end = 8};
+       note = ()};
+     targs =
+      [{it = Runtime.Types.StructT ("headers", []); at = M ""; note = ()};
+       {it = Runtime.Types.StructT ("metadata", [("ok", Runtime.Types.BoolT)]);
+        at = M ""; note = ()}];
+     args =
+      [{it =
+         Compiler.Compile.Il.L.ExprA
+          {it =
+            Compiler.Compile.Il.InstE
+             {Compiler.Compile.Il.var_inst =
+               {it =
+                 Compiler.Compile.Il.L.Current
+                  {it = "MyParser";
+                   at =
+                    I
+                     {Util.Source.filename =
+                       "p4_goal_programs/input/hello_world.p4";
+                      line_start = 44; line_end = None; col_start = 4;
+                      col_end = 12};
+                   note = ()};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 44; line_end = None; col_start = 4;
+                   col_end = 12};
+                note = ()};
+              targs = []; args = []};
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 44; line_end = None; col_start = 4; col_end = 14};
+           note =
+            {Compiler.Compile.Il.typ =
+              Runtime.Types.ParserT
+               [("packet", Runtime.Types.L.No,
+                 Runtime.Types.ExternT ("packet_in", <abstr>), None);
+                ("hdr", Runtime.Types.L.Out,
+                 Runtime.Types.StructT ("headers", []), None);
+                ("meta", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("metadata",
+                  [("ok", Runtime.Types.BoolT)]),
+                 None);
+                ("standard_metadata", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("standard_metadata_t",
+                  [("ingress_port", Runtime.Types.FBitT <abstr>);
+                   ("egress_spec", Runtime.Types.FBitT <abstr>);
+                   ("egress_port", Runtime.Types.FBitT <abstr>);
+                   ("instance_type", Runtime.Types.FBitT <abstr>);
+                   ("packet_length", Runtime.Types.FBitT <abstr>);
+                   ("enq_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("enq_qdepth", Runtime.Types.FBitT <abstr>);
+                   ("deq_timedelta", Runtime.Types.FBitT <abstr>);
+                   ("deq_qdepth", Runtime.Types.FBitT <abstr>);
+                   ("ingress_global_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("egress_global_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("mcast_grp", Runtime.Types.FBitT <abstr>);
+                   ("egress_rid", Runtime.Types.FBitT <abstr>);
+                   ("checksum_error", Runtime.Types.FBitT <abstr>);
+                   ("parser_error", Runtime.Types.ErrT);
+                   ("priority", Runtime.Types.FBitT <abstr>)]),
+                 None)];
+             ctk = Compiler.Compile.Il.Ctk.CTK}};
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 44; line_end = None; col_start = 4; col_end = 14};
+        note = ()};
+       {it =
+         Compiler.Compile.Il.L.ExprA
+          {it =
+            Compiler.Compile.Il.InstE
+             {Compiler.Compile.Il.var_inst =
+               {it =
+                 Compiler.Compile.Il.L.Current
+                  {it = "MyVerifyChecksum";
+                   at =
+                    I
+                     {Util.Source.filename =
+                       "p4_goal_programs/input/hello_world.p4";
+                      line_start = 45; line_end = None; col_start = 4;
+                      col_end = 20};
+                   note = ()};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 45; line_end = None; col_start = 4;
+                   col_end = 20};
+                note = ()};
+              targs = []; args = []};
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 45; line_end = None; col_start = 4; col_end = 22};
+           note =
+            {Compiler.Compile.Il.typ =
+              Runtime.Types.ControlT
+               [("hdr", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("headers", []), None);
+                ("meta", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("metadata",
+                  [("ok", Runtime.Types.BoolT)]),
+                 None)];
+             ctk = Compiler.Compile.Il.Ctk.CTK}};
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 45; line_end = None; col_start = 4; col_end = 22};
+        note = ()};
+       {it =
+         Compiler.Compile.Il.L.ExprA
+          {it =
+            Compiler.Compile.Il.InstE
+             {Compiler.Compile.Il.var_inst =
+               {it =
+                 Compiler.Compile.Il.L.Current
+                  {it = "MyIngress";
+                   at =
+                    I
+                     {Util.Source.filename =
+                       "p4_goal_programs/input/hello_world.p4";
+                      line_start = 46; line_end = None; col_start = 4;
+                      col_end = 13};
+                   note = ()};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 46; line_end = None; col_start = 4;
+                   col_end = 13};
+                note = ()};
+              targs = []; args = []};
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 46; line_end = None; col_start = 4; col_end = 15};
+           note =
+            {Compiler.Compile.Il.typ =
+              Runtime.Types.ControlT
+               [("hdr", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("headers", []), None);
+                ("meta", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("metadata",
+                  [("ok", Runtime.Types.BoolT)]),
+                 None);
+                ("standard_metadata", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("standard_metadata_t",
+                  [("ingress_port", Runtime.Types.FBitT <abstr>);
+                   ("egress_spec", Runtime.Types.FBitT <abstr>);
+                   ("egress_port", Runtime.Types.FBitT <abstr>);
+                   ("instance_type", Runtime.Types.FBitT <abstr>);
+                   ("packet_length", Runtime.Types.FBitT <abstr>);
+                   ("enq_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("enq_qdepth", Runtime.Types.FBitT <abstr>);
+                   ("deq_timedelta", Runtime.Types.FBitT <abstr>);
+                   ("deq_qdepth", Runtime.Types.FBitT <abstr>);
+                   ("ingress_global_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("egress_global_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("mcast_grp", Runtime.Types.FBitT <abstr>);
+                   ("egress_rid", Runtime.Types.FBitT <abstr>);
+                   ("checksum_error", Runtime.Types.FBitT <abstr>);
+                   ("parser_error", Runtime.Types.ErrT);
+                   ("priority", Runtime.Types.FBitT <abstr>)]),
+                 None)];
+             ctk = Compiler.Compile.Il.Ctk.CTK}};
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 46; line_end = None; col_start = 4; col_end = 15};
+        note = ()};
+       {it =
+         Compiler.Compile.Il.L.ExprA
+          {it =
+            Compiler.Compile.Il.InstE
+             {Compiler.Compile.Il.var_inst =
+               {it =
+                 Compiler.Compile.Il.L.Current
+                  {it = "MyEgress";
+                   at =
+                    I
+                     {Util.Source.filename =
+                       "p4_goal_programs/input/hello_world.p4";
+                      line_start = 47; line_end = None; col_start = 4;
+                      col_end = 12};
+                   note = ()};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 47; line_end = None; col_start = 4;
+                   col_end = 12};
+                note = ()};
+              targs = []; args = []};
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 47; line_end = None; col_start = 4; col_end = 14};
+           note =
+            {Compiler.Compile.Il.typ =
+              Runtime.Types.ControlT
+               [("hdr", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("headers", []), None);
+                ("meta", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("metadata",
+                  [("ok", Runtime.Types.BoolT)]),
+                 None);
+                ("standard_metadata", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("standard_metadata_t",
+                  [("ingress_port", Runtime.Types.FBitT <abstr>);
+                   ("egress_spec", Runtime.Types.FBitT <abstr>);
+                   ("egress_port", Runtime.Types.FBitT <abstr>);
+                   ("instance_type", Runtime.Types.FBitT <abstr>);
+                   ("packet_length", Runtime.Types.FBitT <abstr>);
+                   ("enq_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("enq_qdepth", Runtime.Types.FBitT <abstr>);
+                   ("deq_timedelta", Runtime.Types.FBitT <abstr>);
+                   ("deq_qdepth", Runtime.Types.FBitT <abstr>);
+                   ("ingress_global_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("egress_global_timestamp", Runtime.Types.FBitT <abstr>);
+                   ("mcast_grp", Runtime.Types.FBitT <abstr>);
+                   ("egress_rid", Runtime.Types.FBitT <abstr>);
+                   ("checksum_error", Runtime.Types.FBitT <abstr>);
+                   ("parser_error", Runtime.Types.ErrT);
+                   ("priority", Runtime.Types.FBitT <abstr>)]),
+                 None)];
+             ctk = Compiler.Compile.Il.Ctk.CTK}};
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 47; line_end = None; col_start = 4; col_end = 14};
+        note = ()};
+       {it =
+         Compiler.Compile.Il.L.ExprA
+          {it =
+            Compiler.Compile.Il.InstE
+             {Compiler.Compile.Il.var_inst =
+               {it =
+                 Compiler.Compile.Il.L.Current
+                  {it = "MyUpdateChecksum";
+                   at =
+                    I
+                     {Util.Source.filename =
+                       "p4_goal_programs/input/hello_world.p4";
+                      line_start = 48; line_end = None; col_start = 4;
+                      col_end = 20};
+                   note = ()};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 48; line_end = None; col_start = 4;
+                   col_end = 20};
+                note = ()};
+              targs = []; args = []};
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 48; line_end = None; col_start = 4; col_end = 22};
+           note =
+            {Compiler.Compile.Il.typ =
+              Runtime.Types.ControlT
+               [("hdr", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("headers", []), None);
+                ("meta", Runtime.Types.L.InOut,
+                 Runtime.Types.StructT ("metadata",
+                  [("ok", Runtime.Types.BoolT)]),
+                 None)];
+             ctk = Compiler.Compile.Il.Ctk.CTK}};
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 48; line_end = None; col_start = 4; col_end = 22};
+        note = ()};
+       {it =
+         Compiler.Compile.Il.L.ExprA
+          {it =
+            Compiler.Compile.Il.InstE
+             {Compiler.Compile.Il.var_inst =
+               {it =
+                 Compiler.Compile.Il.L.Current
+                  {it = "MyDeparser";
+                   at =
+                    I
+                     {Util.Source.filename =
+                       "p4_goal_programs/input/hello_world.p4";
+                      line_start = 49; line_end = None; col_start = 4;
+                      col_end = 14};
+                   note = ()};
+                at =
+                 I
+                  {Util.Source.filename =
+                    "p4_goal_programs/input/hello_world.p4";
+                   line_start = 49; line_end = None; col_start = 4;
+                   col_end = 14};
+                note = ()};
+              targs = []; args = []};
+           at =
+            I
+             {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+              line_start = 49; line_end = None; col_start = 4; col_end = 16};
+           note =
+            {Compiler.Compile.Il.typ =
+              Runtime.Types.ControlT
+               [("packet", Runtime.Types.L.No,
+                 Runtime.Types.ExternT ("packet_out", <abstr>), None);
+                ("hdr", Runtime.Types.L.In,
+                 Runtime.Types.StructT ("headers", []), None)];
+             ctk = Compiler.Compile.Il.Ctk.CTK}};
+        at =
+         I
+          {Util.Source.filename = "p4_goal_programs/input/hello_world.p4";
+           line_start = 49; line_end = None; col_start = 4; col_end = 16};
+        note = ()}];
+     init = []; annos = []};
+  at = M ""; note = ()}]
