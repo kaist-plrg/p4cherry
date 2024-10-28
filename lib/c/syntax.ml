@@ -15,25 +15,22 @@ type ctyp =
 
 type cvar = string
 
-type bop = 
+type bop =
   | CBEq
   | CBNe
   | CBLt
   | CBGt
   | CBGte
   | CBLte
-  | CBAnd  
+  | CBAnd
   | CBOr
-  | CBAdd 
-  | CBSub 
-  | CBMul 
-  | CBDiv 
-  | CBMod 
-  
-type uop = 
-  | CUNeg
-  | CUReference
-  | CUDereference
+  | CBAdd
+  | CBSub
+  | CBMul
+  | CBDiv
+  | CBMod
+
+type uop = CUNeg | CUAddressOf | CUDereference
 
 type cexpr =
   | CEVar of cvar
@@ -42,12 +39,12 @@ type cexpr =
   | CEMember of cexpr * string
   | CECompExpr of bop * cexpr * cexpr
   | CEUniExpr of uop * cexpr
-  | CECall of cvar * cexpr list
+  | CECall of cexpr * cexpr list
 
 type cparam = ctyp * cvar
 
 and cdecl =
-  | CDVar of ctyp * cvar
+  | CDVar of ctyp * cvar * cexpr option
   | CDStruct of string * (ctyp * string) list
   | CDFunction of ctyp * string * cparam list * cblk
 
@@ -60,9 +57,9 @@ and cstmt =
   | CSReturn of cexpr option
   | CSDecl of cdecl
   | CSExpr of cexpr
+  | CSBlock of cblk
 
 and cblk = cstmt list
 
 type cpreprocessor = string list
-                 
 type cprog = CProgram of cpreprocessor * cdecl list

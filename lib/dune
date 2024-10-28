@@ -2,6 +2,7 @@
  (name p4cherry)
  (modules)
  (libraries
+  (re_export compiler)
   (re_export util)
   (re_export surface)
   (re_export frontend)
