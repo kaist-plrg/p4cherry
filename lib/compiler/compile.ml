@@ -82,9 +82,33 @@ and compile_params (params : Il.param list) : C.cparam list =
       | L.No -> (C.CTPointer ctyp, S.it id))
     params
 
-and compile_locals (locals : Il.decl list) : C.cstmt list =
-  let decls = List.map compile_decl locals in
-  List.map (fun x -> C.CSDecl x) decls
+and compile_parser_local (local : Il.decl) : C.cstmt =
+  C.CSDecl (compile_decl local)
+
+and compile_table (ctx : Ctx.t) (prefix : string) (id : Il.id)
+    (keys : Il.table_key list) (actions : Il.table_action list)
+    (entries : Il.table_entry list) (default : Il.table_default option)
+    (customs : Il.table_custom list) : C.cdecl =
+  failwith "Not implemented"
+
+and compile_control_local (ctx : Ctx.t) (prefix : string) (local : Il.decl) :
+    C.cdecl =
+  match S.it local with
+  | ActionD { id; params; body; _ } ->
+      let compiled_params = compile_params params in
+      let ctx = Ctx.add_params ctx compiled_params in
+      C.CDFunction
+        ( C.CTVoid,
+          prefix ^ "_" ^ id.it,
+          List.rev (Ctx.get_params ctx),
+          List.fold_left
+            (fun acc stmt -> acc @ compile_statement ctx stmt)
+            []
+            (fst (S.it body)) )
+  | TableD { id; table; _ } ->
+      let { L.keys; L.actions; L.entries; L.default; L.customs } = table in
+      compile_table ctx prefix id keys actions entries default customs
+  | _ -> failwith "Not implemented"
 
 and compile_var (var : Il.var) : C.cexpr = C.CEVar (get_var_name var)
 
@@ -100,17 +124,45 @@ and compile_value (value : Il.value) : C.cexpr =
   | (V.IntV _ | V.FIntV _ | V.FBitV _) as v -> compile_z v
   | _ -> failwith "Not implemented"
 
+and compile_binop (op : Il.binop) : C.bop =
+  match S.it op with
+  | PlusOp -> C.CBAdd
+  | SPlusOp -> C.CBAdd
+  | MinusOp -> C.CBSub
+  | SMinusOp -> C.CBSub
+  | MulOp -> C.CBMul
+  | DivOp -> C.CBDiv
+  | ModOp -> C.CBMod
+  | ShlOp -> C.CBShl
+  | ShrOp -> C.CBShr
+  | LeOp -> C.CBLte
+  | GeOp -> C.CBGte
+  | LtOp -> C.CBLt
+  | GtOp -> C.CBGt
+  | EqOp -> C.CBEq
+  | NeOp -> C.CBNe
+  | BAndOp -> C.CBAnd
+  | BXorOp -> C.CBXor
+  | BOrOp -> C.CBOr
+  | ConcatOp -> raise (CompileError "ConcatOp not supported")
+  | LAndOp -> C.CBLAnd
+  | LOrOp -> C.CBLOr
+
 and compile_expr (ctx : Ctx.t) (expr : Il.expr) : C.cexpr =
   match S.it expr with
   | Il.ValueE { value } -> compile_value value
+  | Il.CastE { typ; expr } -> C.CECast (compile_type typ, compile_expr ctx expr)
   | Il.VarE { var } ->
       let cvar = compile_var var in
-      if Ctx.mem_params ctx (get_var_name var) then
+      if Ctx.mem_param ctx (get_var_name var) then
         C.CEUniExpr (C.CUDereference, cvar)
         (* All function parameters are pointer variables to comply with in, inout, out semantics of parameters. However, P4 programs have no notion of addresses. Only values. So within a block, pointers must always be dereferenced before use. *)
       else cvar
   | Il.ExprAccE { expr_base; member } ->
       C.CEMember (compile_expr ctx expr_base, S.it member)
+  | Il.BinE { binop; expr_l; expr_r } ->
+      C.CECompExpr
+        (compile_binop binop, compile_expr ctx expr_l, compile_expr ctx expr_r)
   | _ -> failwith "Not implemented"
 
 and compile_arg_helper (ctx : Ctx.t) (arg : Il.arg) : C.cstmt option * C.cexpr =
@@ -135,6 +187,16 @@ and compile_arg_without_address_of_op (ctx : Ctx.t) (arg : Il.arg) :
     C.cstmt option * C.cexpr =
   compile_arg_helper ctx arg
 
+and compile_args (ctx : Ctx.t) (args : Il.arg list) :
+    C.cstmt list * C.cexpr list =
+  List.fold_left
+    (fun (stmts, exprs) arg ->
+      match arg with
+      | Some x, expr -> (stmts @ [ x ], exprs @ [ expr ])
+      | None, expr -> (stmts, exprs @ [ expr ]))
+    ([], [])
+    (List.map (compile_arg ctx) args)
+
 and compile_special_extern_function (ctx : Ctx.t) (expr_base : Il.expr)
     (member : Il.member) (args : Il.arg list) : C.cstmt list =
   let extern_typ =
@@ -142,15 +204,7 @@ and compile_special_extern_function (ctx : Ctx.t) (expr_base : Il.expr)
   in
   let cexpr_base = C.CEUniExpr (C.CUAddressOf, compile_expr ctx expr_base) in
   let c_member = S.it member in
-  let c_temp_stmts, cargs =
-    List.fold_left
-      (fun (stmts, exprs) arg ->
-        match arg with
-        | Some x, expr -> (stmts @ [ x ], exprs @ [ expr ])
-        | None, expr -> (stmts, exprs @ [ expr ]))
-      ([], [])
-      (List.map (compile_arg ctx) args)
-  in
+  let c_temp_stmts, cargs = compile_args ctx args in
   let cargs_without_address_of_op =
     List.map (fun arg -> snd (compile_arg_without_address_of_op ctx arg)) args
   in
@@ -201,6 +255,14 @@ and compile_special_extern_function (ctx : Ctx.t) (expr_base : Il.expr)
                ("Unexpected member function called on packet_out object:"
               ^ c_member))
   | _ -> failwith "Not implemented"
+
+and compile_function_call (ctx : Ctx.t) (var_func : Il.var) (args : Il.arg list)
+    : C.cstmt list =
+  let fname = get_var_name var_func in
+  match fname with
+  | _ ->
+      let c_temp_stmts, cargs = compile_args ctx args in
+      c_temp_stmts @ [ C.CSExpr (C.CECall (compile_var var_func, cargs)) ]
 
 (* Assumption: method call will always invoke an extern object as expr_base *)
 and compile_method_call (ctx : Ctx.t) (expr_base : Il.expr) (member : Il.member)
@@ -279,6 +341,7 @@ and compile_statement (ctx : Ctx.t) (stmt : Il.stmt) : C.cstmt list =
       [ C.CSAssign (compile_expr ctx expr_l, compile_expr ctx expr_r) ]
   | L.CallMethodS { expr_base; member; args } ->
       compile_method_call ctx expr_base member args
+  | L.CallFuncS { var_func; args; _ } -> compile_function_call ctx var_func args
   | _ -> failwith "Not implemented"
 
 and compile_state (ctx : Ctx.t) (state : Il.parser_state) : C.cstmt list =
@@ -304,12 +367,8 @@ and compile_parser (id : Il.id) (tparams : Il.tparam list)
     let ctx = Ctx.empty in
     let fname = id.it in
     let compiled_params = compile_params params in
-    let ctx =
-      List.fold_left
-        (fun ctx param -> Ctx.add_params ctx param)
-        ctx compiled_params
-    in
-    let compiled_locals = compile_locals locals in
+    let ctx = Ctx.add_params ctx compiled_params in
+    let compiled_locals = List.map compile_parser_local locals in
     let compiled_states = compile_states ctx states in
     C.CDFunction
       ( C.CTVoid,
@@ -324,7 +383,9 @@ and compile_parser (id : Il.id) (tparams : Il.tparam list)
                    [
                      C.CEUniExpr
                        ( C.CUAddressOf,
-                         C.CEVar (snd (List.nth compiled_params 3)) );
+                         C.CEUniExpr
+                           ( C.CUDereference,
+                             C.CEVar (snd (List.nth compiled_params 3)) ) );
                    ] ));
             C.CSLabel "accept";
             C.CSReturn None;
@@ -332,7 +393,7 @@ and compile_parser (id : Il.id) (tparams : Il.tparam list)
 
 and compile_control (id : Il.id) (tparams : Il.tparam list)
     (params : Il.param list) (cparams : Il.cparam list) (locals : Il.decl list)
-    (body : Il.block) (annos : Il.anno list) : C.cdecl =
+    (body : Il.block) (annos : Il.anno list) : C.cdecl list =
   if tparams <> [] then raise (CompileError "Type parameters are not supported")
   else if cparams <> [] then
     raise (CompileError "Constructor parameters are not supported")
@@ -341,18 +402,13 @@ and compile_control (id : Il.id) (tparams : Il.tparam list)
     let ctx = Ctx.empty in
     let fname = id.it in
     let compiled_params = compile_params params in
-    let ctx =
-      List.fold_left
-        (fun ctx param -> Ctx.add_params ctx param)
-        ctx compiled_params
-    in
-    let compiled_locals = compile_locals locals in
+    let ctx = Ctx.add_params ctx compiled_params in
+    let compiled_locals = List.map (compile_control_local ctx fname) locals in
     let stmts, _ = S.it body in
     let compiled_body =
       List.fold_left (fun acc stmt -> acc @ compile_statement ctx stmt) [] stmts
     in
-    C.CDFunction
-      (C.CTVoid, fname, compiled_params, compiled_locals @ compiled_body)
+    []
 
 and compile_decl' (decl : Il.decl') : C.cdecl =
   match decl with
@@ -443,19 +499,21 @@ and generate_main_fn (inst_decl : Il.decl) =
 
 and compile (program : Il.program) =
   let c_includes = [ "#include <stdbool.h>"; "#include \"cluj_core.h\"" ] in
+  (* TODO: process all declarations in order instead of fetching from instantiate *)
   let il_inst_d = fetch_instantiate program "V1Switch" in
+  (* TODO: Change instantiation method invocations and append apply at the end. Example: MyParser() -> MyParser_apply()*)
   let il_targs = fetch_targs il_inst_d in
   let c_targs_decls = snd (compile_decls_from_type il_targs) in
   let il_parser = fetch_parser il_inst_d program in
   let c_parser = compile_decl il_parser in
-  (* Pp.pp_program Format.std_formatter (C.CProgram ([], [ c_parser ])) *)
-  let il_controls = fetch_control il_inst_d program in
-  let c_controls = List.map compile_decl il_controls in
-  let c_program =
-    C.CProgram
-      ( c_includes,
-        c_targs_decls @ [ c_parser ] @ c_controls
-        @ [ generate_main_fn il_inst_d ] )
-  in
-  Pp.pp_program Format.std_formatter c_program
+  Pp.pp_program Format.std_formatter (C.CProgram ([], [ c_parser ]))
+(* let il_controls = fetch_control il_inst_d program in
+   let c_controls = List.map compile_decl il_controls in
+   let c_program =
+     C.CProgram
+       ( c_includes,
+         c_targs_decls @ [ c_parser ] @ c_controls
+         @ [ generate_main_fn il_inst_d ] )
+   in
+   Pp.pp_program Format.std_formatter c_program *)
 (* program *)

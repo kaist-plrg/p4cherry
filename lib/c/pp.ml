@@ -29,13 +29,18 @@ and pp_bop ppf (op : bop) =
     | CBGt -> ">"
     | CBGte -> ">="
     | CBLte -> "<="
-    | CBAnd -> "&&"
-    | CBOr -> "||"
+    | CBAnd -> "&"
+    | CBOr -> "|"
     | CBAdd -> "+"
     | CBSub -> "-"
     | CBMul -> "*"
     | CBDiv -> "/"
-    | CBMod -> "%")
+    | CBMod -> "%"
+    | CBShl -> "<<"
+    | CBShr -> ">>"
+    | CBXor -> "^"
+    | CBLAnd -> "&&"
+    | CBLOr -> "||")
 
 and pp_uop ppf (op : uop) =
   F.fprintf ppf "%s"
@@ -62,6 +67,7 @@ and pp_expr ppf (expr : cexpr) =
   | CEVar var -> F.fprintf ppf "%s" var
   | CEBool b -> F.fprintf ppf "%b" b
   | CEInt i -> F.fprintf ppf "%d" i
+  | CECast (typ, expr) -> F.fprintf ppf "(%a) %a" pp_ctyp typ pp_expr expr
   | CEMember (expr, field) -> F.fprintf ppf "%a.%s" pp_expr expr field
   | CECompExpr (op, lhs, rhs) ->
       F.fprintf ppf "%a %a %a" pp_expr lhs pp_bop op pp_expr rhs

@@ -24,11 +24,16 @@ type bop =
   | CBLte
   | CBAnd
   | CBOr
+  | CBXor
+  | CBLAnd
+  | CBLOr
   | CBAdd
   | CBSub
   | CBMul
   | CBDiv
   | CBMod
+  | CBShl
+  | CBShr
 
 type uop = CUNeg | CUAddressOf | CUDereference
 
@@ -36,6 +41,7 @@ type cexpr =
   | CEVar of cvar
   | CEBool of bool
   | CEInt of int
+  | CECast of ctyp * cexpr
   | CEMember of cexpr * string
   | CECompExpr of bop * cexpr * cexpr
   | CEUniExpr of uop * cexpr
