@@ -17,6 +17,8 @@ open Helper
 exception CompileError of string
 exception V1Model of string
 
+type action_info = { action_name : string; action_data_type_name : string }
+
 let rec compile_type' (typ : T.typ) : C.ctyp =
   match typ with
   | T.StructT (name, _) -> C.CTStruct name
@@ -83,31 +85,380 @@ and compile_params (params : Il.param list) : C.cparam list =
     params
 
 and compile_parser_local (local : Il.decl) : C.cstmt =
-  C.CSDecl (compile_decl local)
+  match compile_decl local with
+  | hd :: [] -> C.CSDecl hd
+  | _ -> failwith "Expected a single declaration"
+
+(* Returns corresponding struct field name *)
+and generate_key (ctx : Ctx.t) (prefix : string) (key : Il.table_key) :
+    C.ctyp * string =
+  let expr, match_kind, _ = S.it key in
+  let cexpr = compile_expr Ctx.empty expr in
+  let typ = compile_type' (get_type_from_note (S.note expr)) in
+  (* ctx is made empty. Otherwise, compile_expr will dereference variables and struct fields can't have dereferenced variables in the declaration *)
+  match S.it match_kind with
+  | "exact" ->
+      let expr_string = Format.asprintf "%a" Pp.pp_expr cexpr in
+      let expr_string =
+        String.map (fun c -> if c = '.' then '_' else c) expr_string
+      in
+      (typ, expr_string)
+  | m -> raise (CompileError ("Unsupported match kind: " ^ m))
+
+and compile_keys (ctx : Ctx.t) (prefix : string) (keys : Il.table_key list) :
+    C.cdecl =
+  C.CDStruct (prefix ^ "_key_t", List.map (generate_key ctx prefix) keys)
+
+and generate_action_enum (ctx : Ctx.t) (prefix : string)
+    (actions : Il.table_action list) : C.cdecl =
+  let action_enum_name = prefix ^ "_action_type_t" in
+  let action_enum_members =
+    List.map
+      (fun action ->
+        let var, args, _ = S.it action in
+        "ACTION_" ^ get_var_name var)
+      actions
+  in
+  C.CDEnum (action_enum_name, action_enum_members)
+
+and generate_action_data_fields (ctx : Ctx.t) (action_name : string) :
+    (C.ctyp * C.cvar) list =
+  match Ctx.get_action_signature ctx action_name with
+  | Some { action_data; _ } ->
+      List.map
+        (fun (ctyp, field_name) ->
+          match ctyp with
+          | C.CTPointer ctyp -> (ctyp, field_name)
+          | ctyp -> (ctyp, field_name))
+        action_data
+  | None -> (
+      match action_name with
+      | "NoAction" -> []
+      | _ -> raise (CompileError ("Unknown action: " ^ action_name)))
+
+and generate_action_data (ctx : Ctx.t) (prefix : string)
+    (action : Il.table_action) : C.cdecl =
+  (* 1. create struct with name prefix_[action_name]_data_t
+     2. Check the ctx for the action signature. If not there, test if it is NoAction
+     3. If ctx has it, retrieve the name of the field and remove the CTPointer from the type to create the field in the struct
+     4. If ctx does not have it and it is NoAction, return empty struct
+  *)
+  let action_name =
+    get_var_name
+      (let var, _, _ = S.it action in
+       var)
+  in
+  let action_data_name = prefix ^ "_" ^ action_name ^ "_data_t" in
+  let action_data_fields = generate_action_data_fields ctx action_name in
+  C.CDStruct (action_data_name, action_data_fields)
+
+and generate_action_data_union (ctx : Ctx.t) (prefix : string)
+    (action_info : action_info list) : C.cdecl =
+  let action_data_union_name = prefix ^ "_action_data_t" in
+  let action_data_union_fields =
+    List.map
+      (fun { action_name; action_data_type_name } ->
+        (C.CTStruct action_data_type_name, action_name))
+      action_info
+  in
+  C.CDUnion (action_data_union_name, action_data_union_fields)
+
+and generate_action_entry_type (ctx : Ctx.t) (prefix : string) : C.cdecl =
+  let action_entry_type_name = prefix ^ "_action_t" in
+  let action_entry_type_members =
+    [
+      (C.CTStruct (prefix ^ "_action_type_t"), "action");
+      (C.CTUnion (prefix ^ "_action_data_t"), "data");
+    ]
+  in
+  C.CDStruct (action_entry_type_name, action_entry_type_members)
+
+and compile_actions (ctx : Ctx.t) (prefix : string)
+    (actions : Il.table_action list) : C.cdecl list =
+  (* Structs to declare:
+      [x] action type with all the actions (enum)
+      [x] action data for each action (struct)
+      [x] union type for all action data types
+      - action type combining action enum type and action data union type *)
+  let action_types_enum = generate_action_enum ctx prefix actions in
+  let action_data_structs =
+    List.map (generate_action_data ctx prefix) actions
+  in
+  let action_data_union =
+    generate_action_data_union ctx prefix
+      (List.map
+         (fun action ->
+           let var, _, _ = S.it action in
+           {
+             action_name = get_var_name var;
+             action_data_type_name = prefix ^ "_" ^ get_var_name var ^ "_data_t";
+           })
+         actions)
+  in
+  let action_entry_struct = generate_action_entry_type ctx prefix in
+  [ action_types_enum ] @ action_data_structs
+  @ [ action_data_union; action_entry_struct ]
+
+and generate_table_entry (ctx : Ctx.t) (prefix : string) : C.cdecl =
+  C.CDStruct
+    ( prefix ^ "_entry_t",
+      [
+        (C.CTStruct (prefix ^ "_key_t"), "key");
+        (C.CTStruct (prefix ^ "_action_t"), "action");
+      ] )
+
+and generate_table_size_const (ctx : Ctx.t) (prefix : string)
+    (customs : Il.table_custom list) : C.cdecl =
+  let lst =
+    List.map
+      (fun custom ->
+        match S.it custom with
+        | member, value, _, _ -> (
+            match S.it member with
+            | "size" ->
+                C.CDVar
+                  ( C.CTLInt,
+                    prefix ^ "_table_size",
+                    Some (compile_expr ctx value) )
+            | x ->
+                raise (CompileError ("Unexpected custom table property: " ^ x))))
+      customs
+  in
+  if List.length lst = 0 then
+    raise
+      (CompileError
+         "Table size not specified. Since tables are statically allocated, \
+          size must be specified")
+  else List.hd lst
+
+and generate_table_array (ctx : Ctx.t) (prefix : string) (size_expr : C.cexpr) :
+    C.cdecl =
+  C.CDArray
+    (C.CTArray (C.CTStruct (prefix ^ "_entry_t")), prefix ^ "_table", size_expr)
+
+and compile_table_default_action (ctx : Ctx.t) (prefix : string)
+    (default : Il.table_default option) : C.cdecl =
+  let default_action_name = prefix ^ "_default_action" in
+  match default with
+  | Some v ->
+      let table_action, _ = S.it v in
+      let action_name, args, _ = S.it table_action in
+      let action_name = get_var_name action_name in
+      let action_data =
+        C.CEStruct (List.map (compile_arg_without_address_of_op ctx) args)
+      in
+      (* TODO: Add locals in scope to ctx *)
+      C.CDVar
+        ( C.CTStruct (prefix ^ "_action_t"),
+          default_action_name,
+          Some (C.CEStruct [ C.CEVar action_name; action_data ]) )
+  | None ->
+      C.CDVar
+        ( C.CTStruct (prefix ^ "_action_t"),
+          default_action_name,
+          Some (C.CEStruct [ C.CEVar "NoAction"; C.CEStruct [] ]) )
+
+and generate_table_action_result (ctx : Ctx.t) (prefix : string) : C.cdecl =
+  C.CDStruct
+    ( prefix ^ "_apply_result_t",
+      [ (C.CTBool, "hit"); (C.CTStruct (prefix ^ "_action_t"), "action_run") ]
+    )
+
+and generate_table_apply_function (ctx : Ctx.t) (control_prefix : string)
+    (table_prefix : string) (keys : Il.table_key list)
+    (actions : Il.table_action list) : C.cdecl =
+  let prefix = control_prefix ^ "_" ^ table_prefix in
+  let apply_result_type = C.CTStruct (prefix ^ "_apply_result_t") in
+  let table_entry_type = C.CTStruct (prefix ^ "_entry_t") in
+  let apply_result_var = "result" in
+  let key_type = C.CTStruct (prefix ^ "_key_t") in
+  let lookup_key_var = "lookup_key" in
+  let default_action_var = prefix ^ "_default_action" in
+  let table_size_var = prefix ^ "_table_size" in
+  let table_entry_var = "table_entry" in
+  let build_key_stmts =
+    List.map
+      (fun key ->
+        let expr, _, _ = S.it key in
+        C.CSAssign
+          ( C.CEMember
+              (C.CEVar lookup_key_var, snd (generate_key ctx prefix key)),
+            compile_expr ctx expr ))
+      keys
+  in
+  let key_field_names =
+    List.map (fun key -> snd (generate_key ctx prefix key)) keys
+  in
+  let gen_equality_predicate key =
+    C.CECompExpr
+      ( C.CBEq,
+        C.CEMember (C.CEVar lookup_key_var, key),
+        C.CEMember (C.CEMember (C.CEVar table_entry_var, "key"), key) )
+  in
+  let lookup_equality_predicate =
+    List.fold_left
+      (fun acc x -> C.CECompExpr (C.CBLogicalAnd, acc, x))
+      (C.CEBool true)
+      (List.map gen_equality_predicate key_field_names)
+  in
+  let switch_case_stmts =
+    List.map
+      (fun action ->
+        let action_name, _, _ = S.it action in
+        let action_name = get_var_name action_name in
+        if action_name = "NoAction" then
+          (C.CEVar "ACTION_NoAction", [ C.CSBreak ])
+        else
+          let case_label = "ACTION_" ^ action_name in
+          let action_fname =
+            match Ctx.get_action_signature ctx action_name with
+            | Some { compiled_function_name; _ } -> compiled_function_name
+            | None ->
+                raise (CompileError ("Action not defined: " ^ action_name))
+          in
+          let lambda_lifted_arguments =
+            List.map (fun param -> C.CEVar (snd param)) (Ctx.get_params ctx)
+          in
+          let action_data_fields =
+            generate_action_data_fields ctx action_name
+          in
+          let action_data_params =
+            List.map
+              (fun (typ, name) ->
+                C.CEUniExpr
+                  ( C.CUAddressOf,
+                    C.CEMember
+                      ( C.CEMember
+                          ( C.CEMember
+                              ( C.CEMember
+                                  (C.CEVar apply_result_var, "action_run"),
+                                "data" ),
+                            action_name ),
+                        name ) ))
+              action_data_fields
+          in
+          ( C.CEVar case_label,
+            [
+              C.CSExpr
+                (C.CECall
+                   ( C.CEVar action_fname,
+                     lambda_lifted_arguments @ action_data_params ));
+              C.CSBreak;
+            ] ))
+      actions
+  in
+  let func =
+    C.CDFunction
+      ( apply_result_type,
+        prefix ^ "_apply",
+        Ctx.get_params ctx,
+        [
+          C.CSDecl (C.CDVar (apply_result_type, apply_result_var, None));
+          (* Build Key *)
+          C.CSDecl (C.CDVar (key_type, lookup_key_var, None));
+        ]
+        @ build_key_stmts
+        @ (* Perform lookup *)
+        [
+          C.CSAssign
+            (C.CEMember (C.CEVar apply_result_var, "hit"), C.CEBool false);
+          C.CSAssign
+            ( C.CEMember (C.CEVar apply_result_var, "action_run"),
+              C.CEVar default_action_var );
+          C.CSDecl (C.CDVar (C.CTInt, "i", Some (C.CEInt 0)));
+          C.CSWhile
+            ( C.CECompExpr (C.CBLt, C.CEVar "i", C.CEVar table_size_var),
+              [
+                C.CSDecl
+                  (C.CDVar
+                     ( table_entry_type,
+                       table_entry_var,
+                       Some
+                         (C.CEArrayAccess
+                            (C.CEVar (prefix ^ "_table"), C.CEVar "i")) ));
+                C.CSIf
+                  ( lookup_equality_predicate,
+                    [
+                      C.CSAssign
+                        ( C.CEMember (C.CEVar apply_result_var, "hit"),
+                          C.CEBool true );
+                      C.CSAssign
+                        ( C.CEMember (C.CEVar apply_result_var, "action_run"),
+                          C.CEMember (C.CEVar table_entry_var, "action") );
+                      C.CSBreak;
+                    ],
+                    [] );
+                C.CSAssign
+                  (C.CEVar "i", C.CECompExpr (C.CBAdd, C.CEVar "i", C.CEInt 1));
+              ] );
+          (* Execute Action *)
+          C.CSSwitch
+            ( C.CEMember
+                (C.CEMember (C.CEVar apply_result_var, "action_run"), "action"),
+              switch_case_stmts,
+              None );
+          C.CSReturn (Some (C.CEVar apply_result_var));
+        ] )
+  in
+  func
 
 and compile_table (ctx : Ctx.t) (prefix : string) (id : Il.id)
     (keys : Il.table_key list) (actions : Il.table_action list)
     (entries : Il.table_entry list) (default : Il.table_default option)
-    (customs : Il.table_custom list) : C.cdecl =
-  failwith "Not implemented"
+    (customs : Il.table_custom list) : C.cdecl list =
+  let prefix = prefix ^ "_" ^ id.it in
+  let key_struct = compile_keys ctx prefix keys in
+  let action_decls = compile_actions ctx prefix actions in
+  let table_entry_struct = generate_table_entry ctx prefix in
+  let table_size_decl = generate_table_size_const ctx prefix customs in
+  let table_array_decl =
+    generate_table_array ctx prefix (C.CEVar (prefix ^ "_table_size"))
+  in
+  let table_default_action = compile_table_default_action ctx prefix default in
+  let table_action_result = generate_table_action_result ctx prefix in
+  let table_apply_function =
+    generate_table_apply_function ctx prefix prefix keys actions
+  in
+  [ key_struct ] @ action_decls
+  @ [
+      table_entry_struct;
+      table_size_decl;
+      table_array_decl;
+      table_default_action;
+      table_action_result;
+      table_apply_function;
+    ]
 
 and compile_control_local (ctx : Ctx.t) (prefix : string) (local : Il.decl) :
-    C.cdecl =
+    Ctx.t * C.cdecl list =
   match S.it local with
   | ActionD { id; params; body; _ } ->
       let compiled_params = compile_params params in
-      let ctx = Ctx.add_params ctx compiled_params in
-      C.CDFunction
-        ( C.CTVoid,
-          prefix ^ "_" ^ id.it,
-          List.rev (Ctx.get_params ctx),
-          List.fold_left
-            (fun acc stmt -> acc @ compile_statement ctx stmt)
-            []
-            (fst (S.it body)) )
+      let compiled_fname = prefix ^ "_" ^ id.it in
+      let ctx2 = Ctx.add_params ctx compiled_params in
+      let action_sig =
+        Ctx.
+          {
+            action_name = id.it;
+            action_data = compiled_params;
+            compiled_function_name = compiled_fname;
+          }
+      in
+      let ctx_out = Ctx.add_action_signature ctx action_sig in
+      let action_func =
+        C.CDFunction
+          ( C.CTVoid,
+            compiled_fname,
+            Ctx.get_params ctx2,
+            List.fold_left
+              (fun acc stmt -> acc @ compile_statement ctx2 stmt)
+              []
+              (fst (S.it body)) )
+      in
+      (ctx_out, [ action_func ])
   | TableD { id; table; _ } ->
       let { L.keys; L.actions; L.entries; L.default; L.customs } = table in
-      compile_table ctx prefix id keys actions entries default customs
+      (ctx, compile_table ctx prefix id keys actions entries default customs)
   | _ -> failwith "Not implemented"
 
 and compile_var (var : Il.var) : C.cexpr = C.CEVar (get_var_name var)
@@ -145,8 +496,8 @@ and compile_binop (op : Il.binop) : C.bop =
   | BXorOp -> C.CBXor
   | BOrOp -> C.CBOr
   | ConcatOp -> raise (CompileError "ConcatOp not supported")
-  | LAndOp -> C.CBLAnd
-  | LOrOp -> C.CBLOr
+  | LAndOp -> C.CBLogicalAnd
+  | LOrOp -> C.CBLogicalOr
 
 and compile_expr (ctx : Ctx.t) (expr : Il.expr) : C.cexpr =
   match S.it expr with
@@ -183,9 +534,11 @@ and compile_arg (ctx : Ctx.t) (arg : Il.arg) : C.cstmt option * C.cexpr =
   let stmt, expr = compile_arg_helper ctx arg in
   (stmt, C.CEUniExpr (C.CUAddressOf, expr))
 
-and compile_arg_without_address_of_op (ctx : Ctx.t) (arg : Il.arg) :
-    C.cstmt option * C.cexpr =
-  compile_arg_helper ctx arg
+and compile_arg_without_address_of_op (ctx : Ctx.t) (arg : Il.arg) : C.cexpr =
+  match S.it arg with
+  | L.ExprA x -> compile_expr ctx x
+  | L.NameA (id, expr) -> raise @@ CompileError "Named Arguments not supported"
+  | L.AnyA -> failwith "Not implemented"
 
 and compile_args (ctx : Ctx.t) (args : Il.arg list) :
     C.cstmt list * C.cexpr list =
@@ -206,7 +559,7 @@ and compile_special_extern_function (ctx : Ctx.t) (expr_base : Il.expr)
   let c_member = S.it member in
   let c_temp_stmts, cargs = compile_args ctx args in
   let cargs_without_address_of_op =
-    List.map (fun arg -> snd (compile_arg_without_address_of_op ctx arg)) args
+    List.map (fun arg -> compile_arg_without_address_of_op ctx arg) args
   in
   match extern_typ with
   | "packet_in" -> (
@@ -403,26 +756,34 @@ and compile_control (id : Il.id) (tparams : Il.tparam list)
     let fname = id.it in
     let compiled_params = compile_params params in
     let ctx = Ctx.add_params ctx compiled_params in
-    let compiled_locals = List.map (compile_control_local ctx fname) locals in
+    let compiled_locals =
+      List.fold_left
+        (fun (ctx_in, compiled_locals) local ->
+          let ctx_out, compiled_local =
+            compile_control_local ctx_in fname local
+          in
+          (ctx_out, compiled_locals @ compiled_local))
+        (ctx, []) locals
+    in
     let stmts, _ = S.it body in
     let compiled_body =
       List.fold_left (fun acc stmt -> acc @ compile_statement ctx stmt) [] stmts
     in
     []
 
-and compile_decl' (decl : Il.decl') : C.cdecl =
+and compile_decl' (decl : Il.decl') : C.cdecl list =
   match decl with
   | ParserD { id; tparams; params; cparams; locals; states; annos } ->
-      compile_parser id tparams params cparams locals states annos
+      [ compile_parser id tparams params cparams locals states annos ]
   | ControlD { id; tparams; params; cparams; locals; body; annos } ->
       compile_control id tparams params cparams locals body annos
   | ConstD { id; typ; value; annos } ->
       let ctyp = compile_type typ in
       let cvalue = compile_value value in
-      C.CDVar (ctyp, id.it, Some cvalue)
+      [ C.CDVar (ctyp, id.it, Some cvalue) ]
   | _ -> failwith "Not implemented"
 
-and compile_decl (decl : Il.decl) : C.cdecl = compile_decl' (S.it decl)
+and compile_decl (decl : Il.decl) : C.cdecl list = compile_decl' (S.it decl)
 
 and generate_main_fn (inst_decl : Il.decl) =
   let header_type_name = type_name (List.nth (fetch_targs inst_decl) 0) in
@@ -506,14 +867,18 @@ and compile (program : Il.program) =
   let c_targs_decls = snd (compile_decls_from_type il_targs) in
   let il_parser = fetch_parser il_inst_d program in
   let c_parser = compile_decl il_parser in
-  Pp.pp_program Format.std_formatter (C.CProgram ([], [ c_parser ]))
-(* let il_controls = fetch_control il_inst_d program in
-   let c_controls = List.map compile_decl il_controls in
-   let c_program =
-     C.CProgram
-       ( c_includes,
-         c_targs_decls @ [ c_parser ] @ c_controls
-         @ [ generate_main_fn il_inst_d ] )
-   in
-   Pp.pp_program Format.std_formatter c_program *)
+  (* Pp.pp_program Format.std_formatter (C.CProgram ([], c_parser)) *)
+  let il_controls = fetch_control il_inst_d program in
+  let c_controls =
+    List.fold_left
+      (fun acc il_control -> acc @ compile_decl il_control)
+      [] il_controls
+  in
+  let c_program =
+    C.CProgram
+      ( c_includes,
+        c_targs_decls @ c_parser @ c_controls @ [ generate_main_fn il_inst_d ]
+      )
+  in
+  Pp.pp_program Format.std_formatter c_program
 (* program *)

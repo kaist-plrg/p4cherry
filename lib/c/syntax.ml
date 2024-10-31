@@ -9,13 +9,16 @@ type ctyp =
   | CTLInt
   | CTULInt
   (* | CTUIntBW of bitwidth *)
-  | CTArray of ctyp
+  (* | CTArray of ctyp *)
   | CTStruct of string
+  | CTUnion of string
+  | CTEnum of string
   | CTPointer of ctyp
+  | CTArray of ctyp
 
-type cvar = string
+and cvar = string
 
-type bop =
+and bop =
   | CBEq
   | CBNe
   | CBLt
@@ -25,8 +28,8 @@ type bop =
   | CBAnd
   | CBOr
   | CBXor
-  | CBLAnd
-  | CBLOr
+  | CBLogicalAnd
+  | CBLogicalOr
   | CBAdd
   | CBSub
   | CBMul
@@ -35,9 +38,9 @@ type bop =
   | CBShl
   | CBShr
 
-type uop = CUNeg | CUAddressOf | CUDereference
+and uop = CUNeg | CUAddressOf | CUDereference
 
-type cexpr =
+and cexpr =
   | CEVar of cvar
   | CEBool of bool
   | CEInt of int
@@ -46,13 +49,18 @@ type cexpr =
   | CECompExpr of bop * cexpr * cexpr
   | CEUniExpr of uop * cexpr
   | CECall of cexpr * cexpr list
+  | CEStruct of cexpr list
+  | CEArrayAccess of cexpr * cexpr
 
-type cparam = ctyp * cvar
+and cparam = ctyp * cvar
 
 and cdecl =
   | CDVar of ctyp * cvar * cexpr option
   | CDStruct of string * (ctyp * string) list
+  | CDUnion of string * (ctyp * string) list
+  | CDEnum of string * string list
   | CDFunction of ctyp * string * cparam list * cblk
+  | CDArray of ctyp * cvar * cexpr
 
 and cstmt =
   | CSSkip
@@ -64,8 +72,10 @@ and cstmt =
   | CSDecl of cdecl
   | CSExpr of cexpr
   | CSBlock of cblk
+  | CSWhile of cexpr * cblk
+  | CSBreak
+  | CSSwitch of cexpr * (cexpr * cblk) list * cblk option
 
 and cblk = cstmt list
-
-type cpreprocessor = string list
-type cprog = CProgram of cpreprocessor * cdecl list
+and cpreprocessor = string list
+and cprog = CProgram of cpreprocessor * cdecl list
