@@ -14,6 +14,12 @@ build:
 	ln -f $(EXEMAIN) ./$(MAIN)
 	ln -f $(EXETEST) ./$(TEST)
 
+debug:
+	rm -f ./$(MAIN)
+	dune build --profile release && echo
+	ln -f $(EXEMAIN) ./$(MAIN)
+	ln -f $(EXETEST) ./$(TEST)
+
 # Format
 
 .PHONY: fmt

@@ -49,7 +49,7 @@ and compile_decl_from_type (typ : T.typ) : C.ctyp * C.cdecl list =
               (typ_list @ [ (ctyp, fname) ], decl_list @ cdecls))
             ([], []) fields
         in
-        C.CDStruct (name, typ_list) :: decl_list )
+        decl_list @ [ C.CDStruct (name, typ_list) ] )
   | T.HeaderT (name, fields) as x ->
       ( compile_type' x,
         let typ_list, decl_list =
@@ -60,7 +60,8 @@ and compile_decl_from_type (typ : T.typ) : C.ctyp * C.cdecl list =
               (typ_list @ [ (ctyp, fname) ], decl_list @ cdecls))
             ([], []) fields
         in
-        C.CDStruct (name, typ_list @ [ (C.CTBool, "isValid") ]) :: decl_list )
+        decl_list @ [ C.CDStruct (name, typ_list @ [ (C.CTBool, "isValid") ]) ]
+      )
       (* TODO: the header declaration must precede the struct declaration. Also, add an isValid field: This is complicated-memcpy relies on size of struct and isValid increases the size *)
       (* isValid must be set to true on packet.extract *)
   | _ -> (compile_type' typ, [])
@@ -586,7 +587,7 @@ and compile_special_extern_function (ctx : Ctx.t) (expr_base : Il.expr)
             @@ CompileError "packet_out.emit(...) has more than 1 argument"
           else
             C.CECall
-              ( C.CEVar "extract",
+              ( C.CEVar c_member,
                 (cexpr_base :: carg_pointers)
                 @ [
                     C.CECompExpr
@@ -790,6 +791,7 @@ and compile_decl' (decl : Il.decl') : C.cdecl list =
       let ctyp = compile_type typ in
       let cvalue = compile_value value in
       [ C.CDVar (ctyp, id.it, Some cvalue) ]
+  | InstD _ -> []
   | _ -> failwith "Not implemented"
 
 and compile_decl (decl : Il.decl) : C.cdecl list = compile_decl' (S.it decl)
@@ -874,20 +876,20 @@ and compile (program : Il.program) =
   (* TODO: Change instantiation method invocations and append apply at the end. Example: MyParser() -> MyParser_apply()*)
   let il_targs = fetch_targs il_inst_d in
   let c_targs_decls = snd (compile_decls_from_type il_targs) in
-  let il_parser = fetch_parser il_inst_d program in
-  let c_parser = compile_decl il_parser in
-  (* Pp.pp_program Format.std_formatter (C.CProgram ([], c_parser)) *)
-  let il_controls = fetch_control il_inst_d program in
-  let c_controls =
-    List.fold_left
-      (fun acc il_control -> acc @ compile_decl il_control)
-      [] il_controls
+  (* let il_parser = fetch_parser il_inst_d program in
+     let c_parser = compile_decl il_parser in
+     let il_controls = fetch_control il_inst_d program in
+     let c_controls =
+       List.fold_left
+         (fun acc il_control -> acc @ compile_decl il_control)
+         [] il_controls *)
+  let compiled_decls =
+    List.fold_left (fun acc il_decl -> acc @ compile_decl il_decl) [] program
   in
   let c_program =
     C.CProgram
       ( c_includes,
-        c_targs_decls @ c_parser @ c_controls @ [ generate_main_fn il_inst_d ]
-      )
+        c_targs_decls @ compiled_decls @ [ generate_main_fn il_inst_d ] )
   in
   Pp.pp_program Format.std_formatter c_program
 (* program *)
