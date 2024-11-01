@@ -19,6 +19,12 @@ exception V1Model of string
 
 type action_info = { action_name : string; action_data_type_name : string }
 
+type cparameters = {
+  pointer_params : C.cparam list;
+  value_params : C.cparam list;
+  all_params_in_order : C.cparam list;
+}
+
 let rec compile_type' (typ : T.typ) : C.ctyp =
   match typ with
   | T.StructT (name, _) -> C.CTStruct name
@@ -75,15 +81,32 @@ and compile_decls_from_type (typ_list : Il.typ list) :
       (typ_list @ [ ctyp ], decl_list @ cdecls))
     ([], []) typ_list
 
-and compile_params (params : Il.param list) : C.cparam list =
-  List.map
-    (fun param ->
-      let id, dir, typ, _, _ = S.it param in
-      let ctyp = compile_type typ in
-      match S.it dir with
-      | L.In | L.InOut | L.Out -> (C.CTPointer ctyp, S.it id)
-      | L.No -> (C.CTPointer ctyp, S.it id))
-    params
+and compile_params (params : Il.param list) : cparameters =
+  let compiled_params =
+    List.map
+      (fun param ->
+        let id, dir, typ, _, _ = S.it param in
+        let ctyp = compile_type typ in
+        match S.it dir with
+        | L.In | L.InOut | L.Out -> (C.CTPointer ctyp, S.it id)
+        | L.No -> (
+            match ctyp with
+            | C.CTStruct "packet_in" -> (C.CTPointer ctyp, S.it id)
+            | C.CTStruct "packet_out" -> (C.CTPointer ctyp, S.it id)
+            | _ -> (ctyp, S.it id)))
+      params
+  in
+  {
+    pointer_params =
+      List.filter
+        (fun (ctyp, _) -> match ctyp with C.CTPointer _ -> true | _ -> false)
+        compiled_params;
+    value_params =
+      List.filter
+        (fun (ctyp, _) -> match ctyp with C.CTPointer _ -> false | _ -> true)
+        compiled_params;
+    all_params_in_order = compiled_params;
+  }
 
 and compile_parser_local (local : Il.decl) : C.cstmt =
   match compile_decl local with
@@ -129,7 +152,7 @@ and generate_action_data_fields (ctx : Ctx.t) (action_name : string) :
       List.map
         (fun (ctyp, field_name) ->
           match ctyp with
-          | C.CTPointer ctyp -> (ctyp, field_name)
+          | C.CTPointer ctyp -> (C.CTPointer ctyp, field_name)
           | ctyp -> (ctyp, field_name))
         action_data
   | None -> (
@@ -328,17 +351,19 @@ and generate_table_apply_function (ctx : Ctx.t) (control_prefix : string)
           in
           let action_data_params =
             List.map
-              (fun (_, name) ->
-                C.CEUniExpr
-                  ( C.CUAddressOf,
-                    C.CEMember
-                      ( C.CEMember
-                          ( C.CEMember
-                              ( C.CEMember
-                                  (C.CEVar apply_result_var, "action_run"),
-                                "data" ),
-                            action_name ),
-                        name ) ))
+              (fun (typ, name) ->
+                let temp =
+                  C.CEMember
+                    ( C.CEMember
+                        ( C.CEMember
+                            ( C.CEMember (C.CEVar apply_result_var, "action_run"),
+                              "data" ),
+                          action_name ),
+                      name )
+                in
+                match typ with
+                | C.CTPointer _ -> C.CEUniExpr (C.CUAddressOf, temp)
+                | _ -> temp)
               action_data_fields
           in
           ( C.CEVar case_label,
@@ -440,9 +465,10 @@ and compile_control_local (ctx : Ctx.t) (local : Il.decl) : Ctx.t * C.cdecl list
     =
   match S.it local with
   | ActionD { id; params; body; _ } ->
-      let compiled_params = compile_params params in
+      let { pointer_params; all_params_in_order; _ } = compile_params params in
+      let compiled_params = all_params_in_order in
       let compiled_fname = Ctx.get_prefix_string ctx ^ "_" ^ id.it in
-      let ctx2 = Ctx.add_params ctx compiled_params in
+      let ctx2 = Ctx.add_params ctx pointer_params in
       let action_sig =
         Ctx.
           {
@@ -451,12 +477,12 @@ and compile_control_local (ctx : Ctx.t) (local : Il.decl) : Ctx.t * C.cdecl list
             compiled_function_name = compiled_fname;
           }
       in
-      let ctx_out = Ctx.add_action_signature ctx action_sig in
+      let ctx_out = Ctx.add_action_signature ctx2 action_sig in
       let action_func =
         C.CDFunction
           ( C.CTVoid,
             compiled_fname,
-            Ctx.get_params ctx2,
+            Ctx.get_params ctx @ compiled_params,
             List.fold_left
               (fun acc stmt -> acc @ compile_statement ctx2 stmt)
               []
@@ -729,8 +755,9 @@ and compile_parser (id : Il.id) (tparams : Il.tparam list)
   else
     let ctx = Ctx.empty in
     let fname = id.it in
-    let compiled_params = compile_params params in
-    let ctx = Ctx.add_params ctx compiled_params in
+    let { pointer_params; all_params_in_order; _ } = compile_params params in
+    let compiled_params = all_params_in_order in
+    let ctx = Ctx.add_params ctx pointer_params in
     let compiled_locals = List.map compile_parser_local locals in
     let compiled_states = compile_states ctx states in
     C.CDFunction
@@ -765,8 +792,9 @@ and compile_control (id : Il.id) (tparams : Il.tparam list)
     let ctx = Ctx.empty in
     let fname = id.it in
     let ctx = Ctx.set_prefix_string ctx fname in
-    let compiled_params = compile_params params in
-    let ctx = Ctx.add_params ctx compiled_params in
+    let { pointer_params; all_params_in_order; _ } = compile_params params in
+    let compiled_params = all_params_in_order in
+    let ctx = Ctx.add_params ctx pointer_params in
     let ctx, compiled_locals =
       List.fold_left
         (fun (ctx_in, compiled_locals) local ->
