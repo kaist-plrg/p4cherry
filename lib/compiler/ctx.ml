@@ -7,9 +7,13 @@ type action_signature = {
   compiled_function_name : string;
 }
 
-type t = { params : CS.cparam list; action_signatures : action_signature list }
+type t = {
+  params : CS.cparam list;
+  action_signatures : action_signature list;
+  prefix_string : string;
+}
 
-let empty : t = { params = []; action_signatures = [] }
+let empty : t = { params = []; action_signatures = []; prefix_string = "" }
 
 let mem_param (ctx : t) (id : string) : bool =
   List.exists (fun (_, cvar) -> cvar = id) ctx.params
@@ -47,6 +51,11 @@ let get_action_signature (ctx : t) (action_name : string) :
   List.find_opt
     (fun { action_name = name; _ } -> name = action_name)
     ctx.action_signatures
+
+let set_prefix_string (ctx : t) (prefix_string : string) : t =
+  { ctx with prefix_string }
+
+let get_prefix_string (ctx : t) : string = ctx.prefix_string
 
 (* Note: I don't have to maintain a symbol table from symbols to types.
    The only case where I need scope so far is when I need to know the type of a symbol

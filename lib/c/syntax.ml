@@ -13,8 +13,10 @@ type ctyp =
   | CTStruct of string
   | CTUnion of string
   | CTEnum of string
+  (* Type Qualifiers *)
   | CTPointer of ctyp
   | CTArray of ctyp
+  | CTConst of ctyp
 
 and cvar = string
 
@@ -45,6 +47,7 @@ and cexpr =
   | CEBool of bool
   | CEInt of int
   | CECast of ctyp * cexpr
+  | CECompoundLiteral of ctyp * cexpr list
   | CEMember of cexpr * string
   | CECompExpr of bop * cexpr * cexpr
   | CEUniExpr of uop * cexpr

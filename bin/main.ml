@@ -14,7 +14,7 @@ let typecheck includes filename =
 let remove_core decl =
   let filename =
     match Util.Source.at decl with
-    | Util.Source.I { filename = f } -> f
+    | Util.Source.I { filename = f; _ } -> f
     | _ -> ""
   in
   if

@@ -21,6 +21,7 @@ let rec pp_ctyp ppf (typ : ctyp) =
   | CTPointer typ -> F.fprintf ppf "%a*" pp_ctyp typ
   | CTUnion name -> F.fprintf ppf "union %s" name
   | CTEnum name -> F.fprintf ppf "enum %s" name
+  | CTConst typ -> F.fprintf ppf "const %a" pp_ctyp typ
 
 and pp_bop ppf (op : bop) =
   F.fprintf ppf "%s"
@@ -81,6 +82,10 @@ and pp_expr ppf (expr : cexpr) =
         (F.pp_print_list ~pp_sep:(fun ppf () -> F.fprintf ppf ", ") pp_expr)
         expr_list
   | CEArrayAccess (arr, idx) -> F.fprintf ppf "%a[%a]" pp_expr arr pp_expr idx
+  | CECompoundLiteral (typ, expr_list) ->
+      F.fprintf ppf "(%a) {%a}" pp_ctyp typ
+        (F.pp_print_list ~pp_sep:(fun ppf () -> F.fprintf ppf ", ") pp_expr)
+        expr_list
 
 and pp_arg_list ppf (arg_list : cexpr list) =
   F.pp_print_list
