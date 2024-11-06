@@ -25,49 +25,58 @@ type cparameters = {
   all_params_in_order : C.cparam list;
 }
 
-let rec compile_type' (typ : T.typ) : C.ctyp =
+let rec compile_type' (typ : T.typ) : C.ctyp * int option =
   match typ with
-  | T.StructT (name, _) -> C.CTStruct name
-  | T.HeaderT (name, _) -> C.CTStruct name
-  | T.BoolT -> C.CTBool
+  | T.StructT (name, _) -> (C.CTStruct name, None)
+  | T.HeaderT (name, _) -> (C.CTStruct name, None)
+  | T.BoolT -> (C.CTBool, None)
   | T.ExternT (name, _) -> (
       match name with
-      | "packet_in" -> C.CTStruct "packet_in"
-      | "packet_out" -> C.CTStruct "packet_out"
+      | "packet_in" -> (C.CTStruct "packet_in", None)
+      | "packet_out" -> (C.CTStruct "packet_out", None)
       | _ -> raise (CompileError ("Unsupported extern type: " ^ name)))
   | T.FBitT width ->
-      if Bigint.to_int_exn width <= 32 then C.CTUInt else C.CTULInt
-  | T.FIntT width -> if Bigint.to_int_exn width <= 32 then C.CTInt else C.CTLInt
+      let w = Bigint.to_int_exn width in
+      if w <= 32 then (C.CTUInt, Some w) else (C.CTULInt, Some w)
+  | T.FIntT width ->
+      let w = Bigint.to_int_exn width in
+      if w <= 8 then (C.CTChar, Some w)
+      else if w <= 32 then (C.CTInt, Some w)
+      else if w <= 64 then (C.CTLLInt, Some w)
+      else raise (CompileError ("Unsupported bitwidth: " ^ string_of_int w))
   | _ -> failwith "Not implemented"
 
-and compile_type (typ : Il.typ) : C.ctyp = compile_type' (S.it typ)
+and compile_type (typ : Il.typ) : C.ctyp * int option = compile_type' (S.it typ)
 
 (* Given input type, returns compiled type and compiled declarations to be added in the global namespace. Eg. structs, headers, etc. *)
-and compile_decl_from_type (typ : T.typ) : C.ctyp * C.cdecl list =
+and compile_decl_from_type (typ : T.typ) : (C.ctyp * int option) * C.cdecl list
+    =
   match typ with
   | T.StructT (name, fields) as x ->
-      ( compile_type' x,
+      let struct_t, _ = compile_type' x in
+      ( (struct_t, None),
         let typ_list, decl_list =
           List.fold_left
             (fun acc (fname, ftyp) ->
-              let ctyp, cdecls = compile_decl_from_type ftyp in
+              let (ctyp, w), cdecls = compile_decl_from_type ftyp in
               let typ_list, decl_list = acc in
-              (typ_list @ [ (ctyp, fname) ], decl_list @ cdecls))
+              (typ_list @ [ (ctyp, fname, w) ], decl_list @ cdecls))
             ([], []) fields
         in
         decl_list @ [ C.CDStruct (name, typ_list) ] )
   | T.HeaderT (name, fields) as x ->
-      ( compile_type' x,
+      let header_t, _ = compile_type' x in
+      ( (header_t, None),
         let typ_list, decl_list =
           List.fold_left
             (fun acc (fname, ftyp) ->
-              let ctyp, cdecls = compile_decl_from_type ftyp in
+              let (ctyp, w), cdecls = compile_decl_from_type ftyp in
               let typ_list, decl_list = acc in
-              (typ_list @ [ (ctyp, fname) ], decl_list @ cdecls))
+              (typ_list @ [ (ctyp, fname, w) ], decl_list @ cdecls))
             ([], []) fields
         in
-        decl_list @ [ C.CDStruct (name, typ_list @ [ (C.CTBool, "isValid") ]) ]
-      )
+        decl_list
+        @ [ C.CDStruct (name, typ_list @ [ (C.CTBool, "isValid", None) ]) ] )
       (* TODO: the header declaration must precede the struct declaration. Also, add an isValid field: This is complicated-memcpy relies on size of struct and isValid increases the size *)
       (* isValid must be set to true on packet.extract *)
   | _ -> (compile_type' typ, [])
@@ -76,7 +85,7 @@ and compile_decls_from_type (typ_list : Il.typ list) :
     C.ctyp list * C.cdecl list =
   List.fold_left
     (fun acc typ ->
-      let ctyp, cdecls = compile_decl_from_type (S.it typ) in
+      let (ctyp, _), cdecls = compile_decl_from_type (S.it typ) in
       let typ_list, decl_list = acc in
       (typ_list @ [ ctyp ], decl_list @ cdecls))
     ([], []) typ_list
@@ -86,7 +95,7 @@ and compile_params (params : Il.param list) : cparameters =
     List.map
       (fun param ->
         let id, dir, typ, _, _ = S.it param in
-        let ctyp = compile_type typ in
+        let ctyp, _ = compile_type typ in
         match S.it dir with
         | L.In | L.InOut | L.Out -> (C.CTPointer ctyp, S.it id)
         | L.No -> (
@@ -114,11 +123,11 @@ and compile_parser_local (local : Il.decl) : C.cstmt =
   | _ -> failwith "Expected a single declaration"
 
 (* Returns corresponding struct field name *)
-and generate_key (_ : Ctx.t) (_ : string) (key : Il.table_key) : C.ctyp * string
+and compile_key (_ : Ctx.t) (_ : string) (key : Il.table_key) : C.ctyp * string
     =
   let expr, match_kind, _ = S.it key in
   let cexpr = compile_expr Ctx.empty expr in
-  let typ = compile_type' (get_type_from_note (S.note expr)) in
+  let typ, _ = compile_type' (get_type_from_note (S.note expr)) in
   (* ctx is made empty. Otherwise, compile_expr will dereference variables and struct fields can't have dereferenced variables in the declaration *)
   match S.it match_kind with
   | "exact" ->
@@ -131,7 +140,13 @@ and generate_key (_ : Ctx.t) (_ : string) (key : Il.table_key) : C.ctyp * string
 
 and compile_keys (ctx : Ctx.t) (prefix : string) (keys : Il.table_key list) :
     C.cdecl =
-  C.CDStruct (prefix ^ "_key_t", List.map (generate_key ctx prefix) keys)
+  C.CDStruct
+    ( prefix ^ "_key_t",
+      List.map
+        (fun k ->
+          let t, n = compile_key ctx prefix k in
+          (t, n, None))
+        keys )
 
 and generate_action_enum (_ : Ctx.t) (prefix : string)
     (actions : Il.table_action list) : C.cdecl =
@@ -148,13 +163,7 @@ and generate_action_enum (_ : Ctx.t) (prefix : string)
 and generate_action_data_fields (ctx : Ctx.t) (action_name : string) :
     (C.ctyp * C.cvar) list =
   match Ctx.get_action_signature ctx action_name with
-  | Some { action_data; _ } ->
-      List.map
-        (fun (ctyp, field_name) ->
-          match ctyp with
-          | C.CTPointer ctyp -> (C.CTPointer ctyp, field_name)
-          | ctyp -> (ctyp, field_name))
-        action_data
+  | Some { action_data; _ } -> action_data
   | None -> (
       match action_name with
       | "NoAction" -> []
@@ -173,7 +182,11 @@ and generate_action_data (ctx : Ctx.t) (prefix : string)
        var)
   in
   let action_data_name = prefix ^ "_" ^ action_name ^ "_data_t" in
-  let action_data_fields = generate_action_data_fields ctx action_name in
+  let action_data_fields =
+    List.map
+      (fun (t, n) -> (t, n, None))
+      (generate_action_data_fields ctx action_name)
+  in
   C.CDStruct (action_data_name, action_data_fields)
 
 and generate_action_data_union (_ : Ctx.t) (prefix : string)
@@ -191,8 +204,8 @@ and generate_action_entry_type (_ : Ctx.t) (prefix : string) : C.cdecl =
   let action_entry_type_name = prefix ^ "_action_t" in
   let action_entry_type_members =
     [
-      (C.CTEnum (prefix ^ "_action_type_t"), "action");
-      (C.CTUnion (prefix ^ "_action_data_t"), "data");
+      (C.CTEnum (prefix ^ "_action_type_t"), "action", None);
+      (C.CTUnion (prefix ^ "_action_data_t"), "data", None);
     ]
   in
   C.CDStruct (action_entry_type_name, action_entry_type_members)
@@ -231,8 +244,8 @@ and generate_table_entry (_ : Ctx.t) (prefix : string) : C.cdecl =
   C.CDStruct
     ( prefix ^ "_entry_t",
       [
-        (C.CTStruct (prefix ^ "_key_t"), "key");
-        (C.CTStruct (prefix ^ "_action_t"), "action");
+        (C.CTStruct (prefix ^ "_key_t"), "key", None);
+        (C.CTStruct (prefix ^ "_action_t"), "action", None);
       ] )
 
 and generate_table_size_const (ctx : Ctx.t) (prefix : string)
@@ -288,8 +301,10 @@ and compile_table_default_action (ctx : Ctx.t) (prefix : string)
 and generate_table_action_result (_ : Ctx.t) (prefix : string) : C.cdecl =
   C.CDStruct
     ( prefix ^ "_apply_result_t",
-      [ (C.CTBool, "hit"); (C.CTStruct (prefix ^ "_action_t"), "action_run") ]
-    )
+      [
+        (C.CTBool, "hit", None);
+        (C.CTStruct (prefix ^ "_action_t"), "action_run", None);
+      ] )
 
 and generate_table_apply_function (ctx : Ctx.t) (control_prefix : string)
     (table_prefix : string) (keys : Il.table_key list)
@@ -308,13 +323,12 @@ and generate_table_apply_function (ctx : Ctx.t) (control_prefix : string)
       (fun key ->
         let expr, _, _ = S.it key in
         C.CSAssign
-          ( C.CEMember
-              (C.CEVar lookup_key_var, snd (generate_key ctx prefix key)),
+          ( C.CEMember (C.CEVar lookup_key_var, snd (compile_key ctx prefix key)),
             compile_expr ctx expr ))
       keys
   in
   let key_field_names =
-    List.map (fun key -> snd (generate_key ctx prefix key)) keys
+    List.map (fun key -> snd (compile_key ctx prefix key)) keys
   in
   let gen_equality_predicate key =
     C.CECompExpr
@@ -441,10 +455,10 @@ and compile_table (ctx : Ctx.t) (id : Il.id) (keys : Il.table_key list)
   let _ = List.map (compile_table_entry ctx prefix) entries in
   let table_entry_struct = generate_table_entry ctx prefix in
   let table_size_decl = generate_table_size_const ctx prefix customs in
+  let table_default_action = compile_table_default_action ctx prefix default in
   let table_array_decl =
     generate_table_array ctx prefix (C.CEVar (prefix ^ "_table_size"))
   in
-  let table_default_action = compile_table_default_action ctx prefix default in
   let table_action_result = generate_table_action_result ctx prefix in
   let table_apply_function =
     generate_table_apply_function ctx
@@ -455,8 +469,8 @@ and compile_table (ctx : Ctx.t) (id : Il.id) (keys : Il.table_key list)
   @ [
       table_entry_struct;
       table_size_decl;
-      table_array_decl;
       table_default_action;
+      table_array_decl;
       table_action_result;
       table_apply_function;
     ]
@@ -535,7 +549,9 @@ and compile_binop (op : Il.binop) : C.bop =
 and compile_expr (ctx : Ctx.t) (expr : Il.expr) : C.cexpr =
   match S.it expr with
   | Il.ValueE { value } -> compile_value value
-  | Il.CastE { typ; expr } -> C.CECast (compile_type typ, compile_expr ctx expr)
+  | Il.CastE { typ; expr } ->
+      let t, _ = compile_type typ in
+      C.CECast (t, compile_expr ctx expr)
   | Il.VarE { var } ->
       let cvar = compile_var var in
       if Ctx.mem_param ctx (get_var_name var) then
@@ -556,7 +572,9 @@ and compile_arg (ctx : Ctx.t) (arg : Il.arg) : C.cexpr =
   | L.ExprA x ->
       let { Il.typ; _ } = S.note x in
       if is_lval x then compile_expr ctx x
-      else C.CECompoundLiteral (compile_type' typ, [ compile_expr ctx x ])
+      else
+        let t, _ = compile_type' typ in
+        C.CECompoundLiteral (t, [ compile_expr ctx x ])
   | L.NameA _ -> raise @@ CompileError "Named Arguments not supported"
   | L.AnyA -> failwith "Not implemented"
 
@@ -719,7 +737,19 @@ and compile_statement (ctx : Ctx.t) (stmt : Il.stmt) : C.cstmt list =
   | L.AssignS { expr_l; expr_r } ->
       [ C.CSAssign (compile_expr ctx expr_l, compile_expr ctx expr_r) ]
   | L.CallMethodS { expr_base; member; args; _ } ->
-      [ C.CSExpr (compile_method_call ctx expr_base member args) ]
+      let method_call =
+        [ C.CSExpr (compile_method_call ctx expr_base member args) ]
+      in
+      let set_isValid =
+        if S.it member = "extract" then
+          [
+            C.CSAssign
+              ( C.CEMember (compile_arg ctx (List.nth args 0), "isValid"),
+                C.CEBool true );
+          ]
+        else []
+      in
+      method_call @ set_isValid
   | L.CallFuncS { var_func; args; _ } ->
       [ C.CSExpr (compile_function_call ctx var_func args) ]
   | L.IfS { expr_cond; stmt_then; stmt_else } ->
@@ -816,7 +846,7 @@ and compile_decl' (decl : Il.decl') : C.cdecl list =
   | ControlD { id; tparams; params; cparams; locals; body; annos } ->
       compile_control id tparams params cparams locals body annos
   | ConstD { id; typ; value; _ } ->
-      let ctyp = compile_type typ in
+      let ctyp, _ = compile_type typ in
       let cvalue = compile_value value in
       [ C.CDVar (ctyp, id.it, Some cvalue) ]
   | InstD _ -> []

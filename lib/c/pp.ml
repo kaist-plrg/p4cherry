@@ -10,6 +10,8 @@ let rec pp_ctyp ppf (typ : ctyp) =
   | CTUInt -> F.fprintf ppf "unsigned int"
   | CTLInt -> F.fprintf ppf "long int"
   | CTULInt -> F.fprintf ppf "unsigned long int"
+  | CTLLInt -> F.fprintf ppf "long long int"
+  | CTULLInt -> F.fprintf ppf "unsigned long long int"
   (* | CTUIntBW bw -> F.fprintf ppf "uint%d_t" (match bw with
        | BW8 -> 8
        | BW16 -> 16
@@ -54,8 +56,20 @@ and pp_kv ppf (typ, field) = F.fprintf ppf "%a %s;" pp_ctyp typ field
 and pp_kv_list ppf (kv_list : (ctyp * string) list) =
   F.pp_print_list ~pp_sep:(fun ppf () -> F.fprintf ppf "@ ") pp_kv ppf kv_list
 
-and pp_struct ppf ((name, kv_list) : string * (ctyp * string) list) =
-  F.fprintf ppf "struct %s {@;<1 2>@[<v 0>%a@]@ };" name pp_kv_list kv_list
+and pp_struct_kv ppf (typ, field, width) =
+  match width with
+  | Some w -> F.fprintf ppf "%a %s: %i;" pp_ctyp typ field w
+  | None -> F.fprintf ppf "%a %s;" pp_ctyp typ field
+
+and pp_struct_kv_list ppf (kv_list : (ctyp * string * int option) list) =
+  F.pp_print_list
+    ~pp_sep:(fun ppf () -> F.fprintf ppf "@ ")
+    pp_struct_kv ppf kv_list
+
+and pp_struct ppf ((name, kv_list) : string * (ctyp * string * int option) list)
+    =
+  F.fprintf ppf "struct %s {@;<1 2>@[<v 0>%a@]@ };" name pp_struct_kv_list
+    kv_list
 
 and pp_param ppf ((typ, name) : ctyp * string) =
   F.fprintf ppf "%a %s" pp_ctyp typ name
@@ -222,7 +236,7 @@ let sample_program =
         "#include <unistd.h>";
       ],
       [
-        CDStruct ("metadata", [ (CTChar, "ok") ]);
+        CDStruct ("metadata", [ (CTChar, "ok", None) ]);
         CDStruct ("headers", []);
         CDFunction
           ( CTVoid,

@@ -8,6 +8,8 @@ type ctyp =
   | CTUInt
   | CTLInt
   | CTULInt
+  | CTLLInt
+  | CTULLInt
   (* | CTUIntBW of bitwidth *)
   (* | CTArray of ctyp *)
   | CTStruct of string
@@ -59,7 +61,7 @@ and cparam = ctyp * cvar
 
 and cdecl =
   | CDVar of ctyp * cvar * cexpr option
-  | CDStruct of string * (ctyp * string) list
+  | CDStruct of string * (ctyp * string * int option) list
   | CDUnion of string * (ctyp * string) list
   | CDEnum of string * string list
   | CDFunction of ctyp * string * cparam list * cblk
