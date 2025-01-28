@@ -1,0 +1,21 @@
+syntax signal = CONT | RET val? | TRANS | EXIT
+
+var sig : signal
+
+def $join_signal(signal, signal) : signal
+
+relation Eval_expr:
+  cursor context |- exprIL : context val
+
+relation Eval_stmt:
+  cursor context signal |- stmtIL : context signal
+
+rule Eval_stmt/if-true:
+  p C CONT |- IfS exprIL_c stmtIL_t stmtIL_f : C'' sig
+  -- Eval_expr: p C |- exprIL_c : C' (BoolV true)
+  -- Eval_stmt: p C' CONT |- stmtIL_t : C'' sig
+
+rule Eval_stmt/if-false:
+  p C CONT |- IfS exprIL_c stmtIL_t stmtIL_f : C'' sig
+  -- Eval_expr: p C |- exprIL_c : C' (BoolV false)
+  -- Eval_stmt: p C' CONT |- stmtIL_f : C'' sig
