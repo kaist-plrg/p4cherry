@@ -1,0 +1,9 @@
+;;
+;; L-values
+;;
+
+syntax lval =
+  | VarLV name                    hint(show LVAL %)
+  | BitAccLV lval val val         hint(show LVAL %`[% `: %])
+  | ArrAccLV lval val             hint(show LVAL %`[%])
+  | ExprAccLV lval member         hint(show LVAL %.%)

@@ -1,0 +1,29 @@
+;;
+;; Parser state
+;;
+
+syntax state = blockIL
+
+;;
+;; Functions
+;;
+
+syntax func =
+  | BuiltinMethodF paramIL* lval
+      hint(show BUILTIN_METHOD_F#(%)#%latex() %)
+  | ActionF paramIL* blockIL
+      hint(show ACTION_F#(%)#%latex() %)
+  | FuncF tparamIL* paramIL* blockIL
+      hint(show FUNC_F#%latex("\\langle")#%#%latex("\\rangle")#(%)#%latex() %)
+  | ExternFuncF tparamIL* paramIL*
+      hint(show EXTERN_FUNC_F#%latex("\\langle")#%#%latex("\\rangle")#(%)#%latex())
+  | ExternMethodF tparamIL* paramIL*
+      hint(show EXTERN_METHOD_F#%latex("\\langle")#%#%latex("\\rangle")#(%)#%latex())
+  | ExternAbstractMethodF tparamIL* paramIL*
+      hint(show EXTERN_ABSTRACT_METHOD_F#%latex("\\langle")#%#%latex("\\rangle")#(%)#%latex())
+  | ParserApplyMethodF paramIL* declIL* map(id, state)
+      hint(show PARSER_APPLY_METHOD_F#(%)#%latex() % %)
+  | ControlApplyMethodF paramIL* declIL* map(fid, func) blockIL
+      hint(show CONTROL_APPLY_METHOD_F#(%)#%latex() % % %)
+  | TableApplyMethodF table
+      hint(show TABLE_APPLY_METHOD_F %)

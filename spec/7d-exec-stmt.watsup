@@ -1,0 +1,27 @@
+;;
+;; Empty statement
+;;
+
+rule Eval_stmt/emptys:
+  p E |- EmptyS : E CONT
+
+;;
+;; (TODO) L597-820
+;;
+
+;;
+;; Statement sequence
+;;
+
+rule Eval_stmts/nil:
+  p E |- eps : E CONT
+
+rule Eval_stmts/cons-cont:
+  p E |- stmtIL_h stmtIL_t* : E'' ssig''
+  -- Eval_stmt: p E |- stmtIL_h : E' CONT
+  -- Eval_stmts: p E' |- stmtIL_t* : E'' ssig''
+
+rule Eval_stmts/cons-nocont:
+  p E |- stmtIL_h stmtIL_t* : E' ssig'
+  -- Eval_stmt: p E |- stmtIL_h : E' ssig'
+  -- if ssig' =/= CONT

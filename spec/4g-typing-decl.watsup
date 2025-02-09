@@ -65,7 +65,7 @@ rule Decl_ok/vard-some:
 ;; Instantiation declaration
 ;;
 
-relation Inst_init_decl_ok: cursor context frame fdenv |- decl : frame fdenv declIL
+relation Inst_init_decl_ok: cursor tcontext frame fdenv |- decl : frame fdenv declIL
 
 rule Inst_init_decl_ok/instd:
   p C frame fdenv |- (InstD id' name targ* arg* decl*) : frame' fdenv declIL
@@ -104,7 +104,7 @@ rule Inst_init_decl_ok/funcd:
   -- if fdenv' = $update_map(fid, funcdef, fdenv, fid, fd)
 
 
-relation Inst_init_decls_ok: context frame fdenv |- decl* : frame fdenv declIL*
+relation Inst_init_decls_ok: tcontext frame fdenv |- decl* : frame fdenv declIL*
 
 rule Inst_init_decls_ok/nil:
   C frame fdenv |- eps : frame fdenv eps
@@ -264,7 +264,7 @@ rule Decl_ok/enumd:
 ;;
 
 relation SEnum_field_ok:
-  context id typ (member, val)* |- member expr : context (member, val)*
+  tcontext id typ (member, val)* |- member expr : tcontext (member, val)*
 
 rule SEnum_field_ok:
   C id_s typ_s (member_s, val_s)* |- member expr : C' (member_s', val_s')*
@@ -283,7 +283,7 @@ rule SEnum_field_ok:
 
 
 relation SEnum_fields_ok:
-  context id typ (member, val)* |- (member, expr)* : context (member, val)*
+  tcontext id typ (member, val)* |- (member, expr)* : tcontext (member, val)*
 
 rule SEnum_fields_ok/nil:
   C id typ (member, val)* |- eps : C (member, val)*
@@ -429,7 +429,7 @@ def $split_methods(method*) : (method*, method*)
 
 
 relation Method_ok:
-  context id |- method : context methodIL
+  tcontext id |- method : tcontext methodIL
 
 rule Method_ok/externconsm:
   C id_e |- ExternConsM id_e cparam* : C' (ExternConsM id_e tparam_hidden* cparamIL*)
@@ -493,7 +493,7 @@ rule Method_ok/externm:
 
 
 relation Methods_ok:
-  context id |- method* : context methodIL*
+  tcontext id |- method* : tcontext methodIL*
 
 rule Methods_ok/nil:
   C id_e |- eps : C eps
@@ -564,7 +564,7 @@ rule Decl_ok/parsertyped:
 ;;
 
 relation ParserState_ok:
-  context |- parserstate : context parserstateIL
+  tcontext |- parserstate : tcontext parserstateIL
 
 rule ParserState_ok:
   C |- statelabel block : C' (statelabel blockIL)
@@ -572,7 +572,7 @@ rule ParserState_ok:
 
 
 relation ParserStates_ok:
-  context |- parserstate* : context parserstateIL*
+  tcontext |- parserstate* : tcontext parserstateIL*
 
 rule ParserStates_ok/nil:
   C |- eps : C eps
@@ -634,7 +634,7 @@ rule Decl_ok/parserd:
 ;; Table key check
 ;;
 
-relation Table_key_ok: cursor context tblctx |- tblkey : tblctx tblkeyIL
+relation Table_key_ok: cursor tcontext tblctx |- tblkey : tblctx tblkeyIL
 
 def $check_table_key(matchkind, typ) : bool   hint(show CHECK_TABLE_KEY(%1, %2))
 
@@ -678,7 +678,7 @@ rule Table_key_ok:
   -- if tblctx'' = $add_key((typ, matchkind), tblctx')
 
 
-relation Table_keys_ok: cursor context tblctx |- tblkeyprop : tblctx tblkeypropIL
+relation Table_keys_ok: cursor tcontext tblctx |- tblkeyprop : tblctx tblkeypropIL
 
 rule Table_keys_ok/nil:
   p C tblctx |- eps : tblctx eps
@@ -692,7 +692,7 @@ rule Table_keys_ok/cons:
 ;; Table action check
 ;;
 
-relation Call_action_partial_ok: cursor context |- name paramtyp* (argIL, typ)* : paramIL* paramIL* argIL*
+relation Call_action_partial_ok: cursor tcontext |- name paramtyp* (argIL, typ)* : paramIL* paramIL* argIL*
 
 def $split_directionless_params(paramIL*) : (paramIL*, paramIL*)   hint(show SPLIT_DIRECTIONLESS_PARAMS(%1))
 
@@ -706,7 +706,7 @@ rule Call_action_partial_ok:
   -- (Call_convention_arg_ok: p C ACT |- (id_d dir_d typ_d val_d?) ~~ (argIL, typ_a) : argIL')*
 
 
-relation Table_action_ok: cursor context tblctx |- tblaction : tblctx tblactionIL
+relation Table_action_ok: cursor tcontext tblctx |- tblaction : tblctx tblactionIL
 
 rule Table_action_ok:
   p C tblctx |- (name arg*) : tblctx' (name argIL'* paramIL_d* paramIL_c*)
@@ -719,7 +719,7 @@ rule Table_action_ok:
   -- if tblctx' = $add_action((name, pt*, argIL'*), tblctx)
 
 
-relation Table_actions_ok: cursor context tblctx |- tblactionprop : tblctx tblactionpropIL
+relation Table_actions_ok: cursor tcontext tblctx |- tblactionprop : tblctx tblactionpropIL
 
 rule Table_actions_ok/nil:
   p C tblctx |- eps : tblctx eps
@@ -737,17 +737,17 @@ rule Table_actions_ok/cons:
 ;; Table entry check
 ;;
 
-relation Table_entry_keyset_ok: cursor context tblctx |- key keyset : tblstate keysetIL
+relation Table_entry_keyset_ok: cursor tcontext tblctx |- key keyset : tblstate keysetIL
 
 rule Table_entry_keyset_ok/exprk-maske-lpm:
-  p C tblctx |- (typ_k, "lpm") (ExprK (MaskE expr_b expr_m)) : state_e (ExprK exprIL)
+  p C tblctx |- (typ_k, "lpm") (ExprK (MaskE expr_b expr_m)) : tblstate_e (ExprK exprIL)
   -- Expr_ok: p C |- (MaskE expr_b expr_m) : exprIL (SetT typ) ctk
   -- if tblctx.MODE = NOPRILPM i
   ----
   -- Eval_static: p C |- exprIL_m ~> val_m
   -- if m = $get_num(val_m)
   ----
-  -- if state_e = $get_lpm_prefix(FBitV i $of_two_complement(m, i))
+  -- if tblstate_e = $get_lpm_prefix(FBitV i $of_two_complement(m, i))
   -- Sub_impl: typ << typ_k
 
 rule Table_entry_keyset_ok/exprk-maske-ternary:
@@ -768,7 +768,7 @@ rule Table_entry_keyset_ok/exprk-else:
   -- Sub_impl: typ << typ_k
 
 
-relation Table_entry_keysets_state_ok: cursor context tblctx tblstate |- key* keyset* : tblstate keysetIL*
+relation Table_entry_keysets_state_ok: cursor tcontext tblctx tblstate |- key* keyset* : tblstate keysetIL*
 
 rule Table_entry_keysets_state_ok/nil:
   p C tblctx tblstate |- eps eps : tblstate
@@ -780,7 +780,7 @@ rule Table_entry_keysets_state_ok/cons:
   -- Table_entry_keysets_state_ok: p C tblctx tblstate_2 |- key_t* keyset_t* : tblstate_3 keysetIL_t*
 
 
-relation Table_entry_keysets_ok: cursor context tblctx |- keyset* : tblstate keysetIL*
+relation Table_entry_keysets_ok: cursor tcontext tblctx |- keyset* : tblstate keysetIL*
 
 rule Table_entry_keysets_ok/noprilpm-defaultk:
   p C tblctx |- DefaultK : (LPM i) DefaultK
@@ -802,7 +802,7 @@ rule Table_entry_keysets_ok/others:
   -- Table_entry_keysets_state_ok: p C tblctx NOLPM |- tblctx.KEYS keyset* : tblstate keysetIL*
 
 
-relation Call_default_action_ok: cursor context |- name paramtyp* (argIL, typ)* argIL* : argIL*
+relation Call_default_action_ok: cursor tcontext |- name paramtyp* (argIL, typ)* argIL* : argIL*
 
 def $filter_directionless_args(paramtyp*, argIL*) : argIL*    hint(show FILTER_DIRECTIONLESS_ARGS(%1, %2))
 
@@ -821,7 +821,7 @@ rule Call_default_action_ok:
   -- (Call_convention_arg_ok: p C ACT |- pt ~~ (argIL, typ) : argIL')*
 
 
-relation Table_entry_action_ok: cursor context tblctx |- tblaction : tblactionIL
+relation Table_entry_action_ok: cursor tcontext tblctx |- tblaction : tblactionIL
 
 rule Table_entry_action_ok:
   p C tblctx |- (name arg*) : tblactionIL
@@ -835,7 +835,7 @@ rule Table_entry_action_ok:
   -- if tblactionIL = name argIL'* (id_p dir_p typ_p val_p?)* eps
 
 
-relation Table_entry_priority_ok: cursor context tblctx tblstate |- expr? : tblctx val?
+relation Table_entry_priority_ok: cursor tcontext tblctx tblstate |- expr? : tblctx val?
 
 rule Table_entry_priority_ok/nopri:
   LOCAL C tblctx tblstate |- eps : tblctx eps
@@ -919,7 +919,7 @@ rule Table_entry_priority_ok/else-none-no-lw:
   -- if tblctx' = $add_priority(i', tblctx)
 
 
-relation Table_entry_ok: cursor context tblctx |- tblentry : tblctx tblentryIL
+relation Table_entry_ok: cursor tcontext tblctx |- tblentry : tblctx tblentryIL
 
 rule Table_entry_ok:
   p C tblctx |- (bool keyset* tblaction expr?) : tblctx' (bool keysetIL* tblactionIL val?)
@@ -930,7 +930,7 @@ rule Table_entry_ok:
   -- Table_entry_priority_ok: p C tblctx tblstate |- expr? : tblctx' val?
 
 
-relation Table_entries_fold_ok: cursor context tblctx |- tblentry* : tblctx tblentryIL*
+relation Table_entries_fold_ok: cursor tcontext tblctx |- tblentry* : tblctx tblentryIL*
 
 rule Table_entries_fold_ok/nil:
   p C tblctx |- eps : tblctx eps
@@ -941,7 +941,7 @@ rule Table_entries_fold_ok/cons:
   -- Table_entries_fold_ok: p C tblctx' |- tblentry_t* : tblctx'' tblentryIL_t*
 
 
-relation Table_entries_ok: cursor context tblctx |- tblentryprop : tblctx tblentrypropIL
+relation Table_entries_ok: cursor tcontext tblctx |- tblentryprop : tblctx tblentrypropIL
 
 rule Table_entries_ok:
   p C tblctx_0 |- (bool tblentry*) : tblctx_3 (bool tblentryIL*)
@@ -956,7 +956,7 @@ rule Table_entries_ok:
 ;; Table default action check
 ;;
 
-relation Table_default_ok: cursor context tblctx |- tbldefaultprop : tbldefaultpropIL
+relation Table_default_ok: cursor tcontext tblctx |- tbldefaultprop : tbldefaultpropIL
 
 rule Table_default_ok:
   p C tblctx |- bool (name arg*) : bool tblactionIL
@@ -973,7 +973,7 @@ rule Table_default_ok:
 ;; Table custom property check
 ;;
 
-relation Table_custom_ok: cursor context tblctx |- tblcustomprop : tblctx tblcustompropIL
+relation Table_custom_ok: cursor tcontext tblctx |- tblcustomprop : tblctx tblcustompropIL
 
 rule Table_custom_ok/size:
   p C tblctx |- (bool "size" expr) : tblctx (bool "size" exprIL)
@@ -999,7 +999,7 @@ rule Table_custom_ok/priority_delta:
   -- if tblctx' = $set_priority_delta(i, tblctx)
 
 
-relation Table_prop_ok: cursor context tblctx |- tblprop : tblctx tblpropIL
+relation Table_prop_ok: cursor tcontext tblctx |- tblprop : tblctx tblpropIL
 
 rule Table_prop_ok/keyp:
   p C tblctx |- (KeyP tblkeyprop) : tblctx' (KeyP tblkeypropIL)
@@ -1022,7 +1022,7 @@ rule Table_prop_ok/customp:
   -- Table_custom_ok: p C tblctx |- tblcustomprop : tblctx' tblcustompropIL
 
 
-relation Table_props_ok: cursor context tblctx |- tbl : tblctx tblIL
+relation Table_props_ok: cursor tcontext tblctx |- tbl : tblctx tblIL
 
 rule Table_props_ok/nil:
   p C tblctx |- eps : tblctx eps
@@ -1036,7 +1036,7 @@ rule Table_props_ok/cons:
 ;; Table synthesized type check
 ;;
 
-relation Table_type_decl_ok: cursor context tblctx |- id : context typ
+relation Table_type_decl_ok: cursor tcontext tblctx |- id : tcontext typ
 
 rule Table_type_decl_ok:
   BLOCK C tblctx |- id : C' typ_s

@@ -1,0 +1,12 @@
+;;
+;; Environments
+;;
+
+;; Map from variable identifiers to values
+syntax venv hint(show %latex("\\Sigma")) = map(id, val)
+;; Map from state identifiers to parser states
+syntax senv hint(show %latex("\\Sigma_\\texttt{s}")) = map(id, state)
+;; Map from function identifiers to functions
+syntax fenv hint(show %latex("\\Sigma_\\texttt{f}")) = map(fid, func)
+;; Map from object identifiers to objects
+syntax sto hint(show %latex("\\Pi")) = map(oid, obj)

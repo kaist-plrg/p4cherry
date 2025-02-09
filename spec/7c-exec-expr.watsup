@@ -1,0 +1,36 @@
+;;
+;; Value expression
+;;
+
+rule Eval_expr/valuee:
+  p E |- ValueE val : E (CONT val)
+
+;;
+;; (TODO) L307-593
+;;
+
+;;
+;; Expression sequence
+;;
+
+rule Eval_exprs/nil:
+  p E |- eps : E (CONT eps)
+
+rule Eval_exprs/cons-cont-cont:
+  p E |- exprIL_h exprIL_t* : E'' (CONT val' val''*)
+  -- Eval_expr: p E |- exprIL_h : E' (CONT val')
+  -- Eval_exprs: p E' |- exprIL_t* : E'' (CONT val''*)
+
+rule Eval_exprs/cons-nocont:
+  p E |- exprIL_h exprIL_t* : E'' sig''
+  -- Eval_expr: p E |- exprIL_h : E' (CONT val')
+  -- Eval_exprs: p E' |- exprIL_t* : E'' sig''
+  -- if sig'' = REJECT val' \/ sig'' = EXIT
+
+rule Eval_exprs/cons-nocont:
+  p E |- exprIL_h exprIL_t* : E' (REJECT val')
+  -- Eval_expr: p E |- exprIL_h : E' (REJECT val')
+
+rule Eval_exprs/cons-nocont:
+  p E |- exprIL_h exprIL_t* : E' EXIT
+  -- Eval_expr: p E |- exprIL_h : E' EXIT

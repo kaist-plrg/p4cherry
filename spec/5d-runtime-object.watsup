@@ -1,0 +1,11 @@
+syntax obj =
+  | ExternO id map(tid, typ) map(id, val) map(fid, func)
+      hint(show EXTERN_O % % % %)
+  | ParserO map(id, val) paramIL* declIL* map(fid, func) blockIL
+      hint(show PARSER_O % % % % %)
+  | ControlO map(id, val) paramIL* declIL* map(fid, func) blockIL
+      hint(show CONTROL_O % % % % %)
+  | PackageO map(tid, typ) map(id, val)
+      hint(show PACKAGE_O % %)
+  | TableO id map(id, val) tbl
+      hint(show TABLE_O % % %)

@@ -394,7 +394,7 @@ rule Expr_ok/rangee:
 ;; Select expression
 ;;
 
-relation Select_case_keyset_ok: cursor context typ |- keyset : keysetIL
+relation Select_case_keyset_ok: cursor tcontext typ |- keyset : keysetIL
 
 rule Select_case_keyset_ok/exprk-sett:
   LOCAL C typ_k |- ExprK expr : ExprK exprIL'
@@ -417,7 +417,7 @@ rule Select_case_keyset_ok/anyk:
   LOCAL C typ_k |- AnyK : AnyK
 
 
-relation Select_case_keysets_ok: cursor context |- typ* keyset* : keysetIL*
+relation Select_case_keysets_ok: cursor tcontext |- typ* keyset* : keysetIL*
 
 rule Select_case_keysets_ok/one-to-one:
   p C |- typ_k keyset : keysetIL
@@ -433,7 +433,7 @@ rule Select_case_keysets_ok/many-to-many:
   -- (Select_case_keyset_ok: p C typ_k |- keyset : keysetIL)*
 
 
-relation Select_case_ok: cursor context typ* |- selectcase : selectcaseIL
+relation Select_case_ok: cursor tcontext typ* |- selectcase : selectcaseIL
 
 rule Select_case_ok:
   LOCAL C typ_k* |- keyset* statelabel : keysetIL* statelabel

@@ -1,0 +1,28 @@
+;;
+;; Constant declaration
+;;
+
+rule Eval_decl/constd:
+  p E |- ConstD id typ val : E' (CONT ())
+  -- if E' = $add_val(p, E, id, val)
+
+;;
+;; (TODO) L824-867
+;;
+
+;;
+;; Declaration sequence
+;;
+
+rule Eval_decls/nil:
+  p E |- eps : E (CONT ())
+
+rule Eval_decls/cons-cont:
+  p E |- declIL_h declIL_t* : E'' sig''
+  -- Eval_decl: p E |- declIL_h : E' (CONT ())
+  -- Eval_decls: p E' |- declIL_t* : E'' sig''
+
+rule Eval_decls/cons-nocont:
+  p E |- declIL_h declIL_t* : E' sig'
+  -- Eval_decl: p E |- declIL_h : E' sig'
+  -- if sig' =/= CONT ()

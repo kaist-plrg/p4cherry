@@ -1,0 +1,16 @@
+;;
+;; Signal
+;;
+
+syntax signal(syntax V) =
+  | CONT V
+  | REJECT val
+  | EXIT
+
+syntax ssignal =
+  | CONT
+  | RET val?
+  | ACCEPT
+  | REJECT val
+  | STATE state_label
+  | EXIT

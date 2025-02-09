@@ -53,7 +53,7 @@ rule Stmt_ok/assigns:
 ;;
 
 relation Switch_tbl_label_ok:
-  cursor context id |- switchlabel : switchlabelIL
+  cursor tcontext id |- switchlabel : switchlabelIL
 
 rule Switch_tbl_label_ok/exprl:
   p C id_t |- ExprL (NameE (CURRENT id_a)) : ExprL (NameE (CURRENT id_a))
@@ -66,7 +66,7 @@ rule Switch_tbl_label_ok/defaultl:
 
 
 relation Switch_tbl_case_ok:
-  cursor context flow id |- switchcase : flow switchcaseIL
+  cursor tcontext flow id |- switchcase : flow switchcaseIL
 
 rule Switch_tbl_case_ok/matchc:
   p C f id_t |- MatchC switchlabel block : f' (MatchC switchlabelIL blockIL)
@@ -79,7 +79,7 @@ rule Switch_tbl_case_ok/fallc:
 
 
 relation Switch_tbl_cases_ok:
-  cursor context flow id |- switchcase* : flow switchcaseIL*
+  cursor tcontext flow id |- switchcase* : flow switchcaseIL*
 
 rule Switch_tbl_cases_ok/empty:
   p C f id_t |- eps : f eps
@@ -98,7 +98,7 @@ rule Stmt_ok/switchs-tbl:
 
 
 relation Switch_gen_label_ok:
-  cursor context typ |- switchlabel : switchlabelIL
+  cursor tcontext typ |- switchlabel : switchlabelIL
 
 rule Switch_gen_label_ok/exprl:
   p C typ_s |- ExprL expr : ExprL exprIL'
@@ -110,7 +110,7 @@ rule Switch_gen_label_ok/defaultl:
 
 
 relation Switch_gen_case_ok:
-  cursor context flow typ |- switchcase : flow switchcaseIL
+  cursor tcontext flow typ |- switchcase : flow switchcaseIL
 
 rule Switch_gen_case_ok/matchc:
   p C f typ_s |- MatchC switchlabel block : f' (MatchC switchlabelIL blockIL)
@@ -123,7 +123,7 @@ rule Switch_gen_case_ok/fallc:
 
 
 relation Switch_gen_cases_ok:
-  cursor context flow typ |- switchcase* : flow switchcaseIL*
+  cursor tcontext flow typ |- switchcase* : flow switchcaseIL*
 
 rule Switch_gen_cases_ok/empty:
   p C f typ_s |- eps : f eps

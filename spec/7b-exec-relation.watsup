@@ -1,0 +1,41 @@
+syntax unit = ()
+
+;;
+;; Expression, statement, and declaration evaluation
+;;
+
+;; Expression evaluation
+relation Eval_expr: cursor context |- exprIL : context signal(val)
+relation Eval_exprs: cursor context |- exprIL* : context signal(val*)
+
+;; Argument evaluation
+relation Eval_arg: cursor context |- argIL : context signal(val)
+
+;; L-value evaluation
+relation Eval_lvalue: cursor context |- lval : context val
+relation Lval_of_expr: cursor context |- exprIL : context signal(lval)
+relation Lval_of_arg: cursor context |- argIL : context signal(lval?)
+relation Write_lvalue: cursor context |- lval val : context
+
+;; Statement evaluation
+relation Eval_block: cursor context blkctxt |- blockIL : context ssignal
+relation Eval_stmt: cursor context |- stmtIL : context ssignal
+relation Eval_stmts: cursor context |- stmtIL* : context ssignal
+
+;; Declaration evaluation
+relation Eval_decl: cursor context |- declIL : context signal(unit)
+relation Eval_decls: cursor context |- declIL* : context signal(unit)
+
+;;
+;; Call evaluation
+;;
+
+syntax callkind =
+  | InterGlobal fid func targIL* argIL* id*
+  | InterBlock oid fid theta venv func targIL* argIL* id*
+  | IntraBlock oid fid venv func targIL* argIL* id*
+
+;; Call evaluation
+relation Eval_call: cursor context |- callkind : context ssignal
+relation Eval_func: cursor context |- name targIL* argIL* : context ssignal
+relation Eval_method: cursor context |- exprIL member targIL* argIL* : context ssignal

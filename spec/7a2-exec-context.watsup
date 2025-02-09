@@ -1,0 +1,46 @@
+;;
+;; Layered context
+;;
+
+;; Global layer
+
+syntax glayer =
+  { TDENV tdenv,
+    FENV fenv,
+    VENV venv }
+
+;; Block layer
+
+syntax blayer =
+  { THETA theta,
+    FENV fenv,
+    SENV senv,
+    VENV venv }
+
+;;
+;; Local layer
+;;
+
+syntax llayer =
+  { THETA theta,
+    VENVS venv* }
+
+;;
+;; Context
+;;
+
+syntax context =
+  { GLOBAL glayer,
+    BLOCK blayer,
+    LOCAL llayer }
+
+var E : context
+
+;;
+;; Adders
+;;
+
+;; Adder for values
+
+def $add_val(cursor, context, id, val) : context
+    hint(show %2.%1.VENV#(S)#%latex("\\{")#%3#%latex("\\mapsto")#%4#%latex("\\}"))

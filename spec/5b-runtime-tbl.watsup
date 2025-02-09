@@ -1,0 +1,8 @@
+;;
+;; Match-action table
+;;
+
+syntax table =
+  { KEYS tblkeyIL*,
+    ACTIONS tblactionIL*,
+    DEFAULT (bool, tblactionIL) }
