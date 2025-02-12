@@ -23,17 +23,17 @@ $ git submodule update
   ```
 
 * Create OCaml switch for version 4.14.0.
-  Install `dune` version 3.13.0 and `menhir` version 20231231, `core` version v0.15.0, and `bisect_ppx` version 2.8.3 via `opam`.
+  Install `dune` version 3.13.0 and `menhir` version 20231231, `core` version v0.15.0 and `bisect_ppx` version 2.8.3, and `lwt` version 5.9.0 via `opam`.
   ```shell
   $ opam switch create 4.14.0
   $ eval $(opam env)
-  $ opam install dune menhir core.v0.15.0 bisect_ppx
+  $ opam install dune menhir lwt core.v0.15.0 bisect_ppx
   ```
 
 * Install the project.
   ```shell
   $ cd p4
-  $ dune build p4cherry.opam 
+  $ dune build p4cherry.opam
   $ opam install .
   $ cd ..
   ```

@@ -29,6 +29,10 @@ build-spectec:
 	cd spectec/spectec && opam exec make
 	ln -f $(EXESPEC) ./$(SPEC)
 
+web:
+	opam switch 4.14.0
+	cd p4/web && opam exec -- dune build web.bc.js && cp ../_build/default/web/web.bc.js html_build/
+
 # Spec
 
 spec: build-spectec
@@ -46,7 +50,7 @@ fmt:
 
 # Tests
 
-.PHONY: test promote coverage 
+.PHONY: test promote coverage
 
 test:
 	echo "#### Running (dune runtest)"

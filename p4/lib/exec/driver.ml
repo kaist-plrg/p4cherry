@@ -96,6 +96,8 @@ end
 module type DRIVER = sig
   val run :
     CEnv.t -> TDEnv.t -> FEnv.t -> VEnv.t -> Sto.t -> Stf.Ast.stmt list -> bool
+  val run_packet :
+    CEnv.t -> TDEnv.t -> FEnv.t -> VEnv.t -> Sto.t -> Stf.Ast.stmt list -> port * packet
 end
 
 module Make
@@ -351,6 +353,27 @@ module Make
 
   (* STF interpreter *)
 
+  let run_single_packet (ctx : Ctx.t) (stmt_stf : Stf.Ast.stmt) :
+      port * packet =
+    match stmt_stf with
+      (* Packet I/O *)
+    | Stf.Ast.Packet (port_in, packet_in) -> (
+        let port_in = int_of_string port_in in
+        let packet_in = String.uppercase_ascii packet_in in
+        let result_out = Arch.drive_pipe ctx port_in packet_in in
+        match result_out with
+        | None ->
+            F.asprintf "(run_stf_stmt) unknown stf stmt: %a" Stf.Print.print_stmt
+            stmt_stf
+            |> error
+        | Some (port_out, packet_out) ->
+            F.printf "%s port: %d" packet_out port_out;
+            (port_out, packet_out))
+    | _ ->
+        F.asprintf "(run_stf_stmt) unknown stf stmt: %a" Stf.Print.print_stmt
+          stmt_stf
+        |> error
+
   let run_stf_stmt (ctx : Ctx.t) (pass : bool) (queue_packet : result list)
       (queue_expect : result list) (stmt_stf : Stf.Ast.stmt) :
       Ctx.t * bool * result list * result list =
@@ -422,6 +445,13 @@ module Make
         (fun idx (port, packet) -> F.printf "(%d) %d %s\n" idx port packet)
         queue_expect);
     pass
+
+  let run_packet (cenv : CEnv.t) (tdenv : TDEnv.t) (fenv : FEnv.t) (venv : VEnv.t)
+      (sto : Sto.t) (stmts_stf : Stf.Ast.stmt list) : port * packet =
+    let ctx = { Ctx.empty with global = { cenv; tdenv; fenv; venv } } in
+    let ctx, sto = Arch.init ctx sto in
+    Interp.init sto;
+    run_single_packet ctx (List.hd stmts_stf)
 
   let run (cenv : CEnv.t) (tdenv : TDEnv.t) (fenv : FEnv.t) (venv : VEnv.t)
       (sto : Sto.t) (stmts_stf : Stf.Ast.stmt list) : bool =

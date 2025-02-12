@@ -1,0 +1,13 @@
+(menhir
+ (modules parser)
+ (flags --no-stdlib --explain))
+
+(ocamllex
+ (modules lexer))
+
+(executable
+  (name web)
+  (modes js)
+  (preprocess (pps ppx_let js_of_ocaml-ppx))
+  (modules web)
+  (libraries p4cherry frontend_web stf_web promise_jsoo_lwt js_of_ocaml js_of_ocaml-lwt))
