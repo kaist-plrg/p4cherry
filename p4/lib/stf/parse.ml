@@ -11,17 +11,12 @@ let parse (lexbuf : Lexing.lexbuf) =
 
 module Make (Reader : READER) = struct
   let read_all (filename : string) =
-    try Reader.read_all filename
-    with _ -> "read error" |> error
+    try Reader.read_all filename with _ -> "read error" |> error
 
   let lex (file : string) =
-    try
-      read_all file >>= fun file ->
-      Lwt.return (Lexing.from_string file)
+    try read_all file >>= fun file -> Lwt.return (Lexing.from_string file)
     with Lexer.Error s -> Format.asprintf "lexer error: %s" s |> error
 
   let parse_file (filename : string) =
-    lex filename >>= fun tokens ->
-    Lwt.return (parse tokens)
+    lex filename >>= fun tokens -> Lwt.return (parse tokens)
 end
-

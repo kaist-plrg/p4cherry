@@ -1,4 +1,4 @@
 (library
-  (name stf_web)
-  (libraries core util yojson js_of_ocaml-lwt)
-  (modules reader))
+ (name stf_web)
+ (libraries core util yojson js_of_ocaml-lwt)
+ (modules reader))
