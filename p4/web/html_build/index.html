@@ -33,15 +33,18 @@
   <label>P4 Program:</label><br>
   <textarea id="p4_code" rows="30" placeholder="Enter P4 program"></textarea><br>
 
+  <label>Input Port:</label><br>
+  <textarea id="port" rows="1" placeholder="Enter input port"></textarea><br>
+
   <label>Input Packet:</label><br>
-  <textarea id="packet" rows="3" placeholder="Enter input packet"></textarea><br>
+  <textarea id="packet" rows="2" placeholder="Enter input packet"></textarea><br>
 
   <label>Architecture:</label><br>
   <input id="arch" type="text" placeholder="Enter architecture (e.g., v1model)"><br>
 
   <button onclick="runP4()">Run P4</button>
 
-  <h2>Output:</h2>
+  <h2>Output Port and Packet:</h2>
   <pre id="output"></pre>
 
   <script src="web.bc.js"></script>
@@ -66,6 +69,7 @@
       }
 
       let p4_code = document.getElementById("p4_code").value;
+      let port = document.getElementById("port").value;
       let packet = document.getElementById("packet").value;
       let arch = document.getElementById("arch").value;
       let includes = [await getIncludesPath()];
@@ -79,15 +83,14 @@
         let saveResponse = await fetch("/save_files", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ p4_code: p4_code, packet: packet })
+          body: JSON.stringify({ p4_code: p4_code })
         });
         if (!saveResponse.ok) throw new Error("Failed to save files");
         let saveResult = await saveResponse.json();
 
         let filename = saveResult.filename;
-        let stfname = saveResult.stfname;
 
-        let output = await P4cherry.eval(includes, arch, filename, stfname);
+        let output = await P4cherry.eval(includes, arch, filename, port, packet);
         console.log(output);
         document.getElementById("output").innerText = output;
       } catch (error) {

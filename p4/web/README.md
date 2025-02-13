@@ -1,5 +1,5 @@
 # P4-Sandbox
-A playground for P4 programs.
+A web-based playground for P4
 
 ## Building
 

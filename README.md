@@ -122,6 +122,10 @@ $ make spec
 
 This creates a PDF spec in spec/spec.pdf.
 
+## P4-Sandbox: A web-based playground for P4
+
+Check the [P4-Sandbox](p4/web/README.md).
+
 ### Contributing
 
 p4cherry is an open-source project. Please feel free to contribute by opening issues or pull requests.

@@ -74,4 +74,5 @@ coverage:
 clean:
 	rm -f ./$(MAIN) ./$(SPEC)
 	cd p4 && dune clean
+	cd p4/web && rm -f html_build/web.bc.js
 	cd spectec/spectec && dune clean

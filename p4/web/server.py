@@ -49,19 +49,15 @@ def read_stf():
 def save_files():
     data = request.get_json()
     p4_code = data.get("p4_code")
-    packet = data.get("packet")
-    if not p4_code or not packet:
-        return jsonify({"error": "Missing p4_code or packet"}), 400
+    if not p4_code:
+        return jsonify({"error": "Missing p4_code"}), 400
 
     p4_filename = f"/tmp/program.p4"
-    stf_filename = f"/tmp/program.stf"
 
     try:
         with open(p4_filename, "w", encoding="utf-8") as f:
             f.write(p4_code)
-        with open(stf_filename, "w", encoding="utf-8") as f:
-            f.write(packet)
-        return jsonify({"filename": p4_filename, "stfname": stf_filename})
+        return jsonify({"filename": p4_filename})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
