@@ -96,6 +96,16 @@ end
 module type DRIVER = sig
   val run :
     CEnv.t -> TDEnv.t -> FEnv.t -> VEnv.t -> Sto.t -> Stf.Ast.stmt list -> bool
+
+  val run_packet :
+    CEnv.t ->
+    TDEnv.t ->
+    FEnv.t ->
+    VEnv.t ->
+    Sto.t ->
+    string ->
+    string ->
+    result option
 end
 
 module Make
@@ -422,6 +432,16 @@ module Make
         (fun idx (port, packet) -> F.printf "(%d) %d %s\n" idx port packet)
         queue_expect);
     pass
+
+  let run_packet (cenv : CEnv.t) (tdenv : TDEnv.t) (fenv : FEnv.t)
+      (venv : VEnv.t) (sto : Sto.t) (port_in : string) (packet_in : string) :
+      result option =
+    let ctx = { Ctx.empty with global = { cenv; tdenv; fenv; venv } } in
+    let ctx, sto = Arch.init ctx sto in
+    Interp.init sto;
+    let port_in = int_of_string port_in in
+    let packet_in = String.uppercase_ascii packet_in in
+    Arch.drive_pipe ctx port_in packet_in
 
   let run (cenv : CEnv.t) (tdenv : TDEnv.t) (fenv : FEnv.t) (venv : VEnv.t)
       (sto : Sto.t) (stmts_stf : Stf.Ast.stmt list) : bool =

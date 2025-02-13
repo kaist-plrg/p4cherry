@@ -7,5 +7,5 @@
 
 (library
  (name frontend)
- (libraries core core_kernel core_unix surface lang el)
+ (libraries core core_kernel yojson js_of_ocaml-lwt surface lang el)
  (modules lexer parser preprocessor context parse transform))
