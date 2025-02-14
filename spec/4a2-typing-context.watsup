@@ -193,12 +193,12 @@ def $find_styp(cursor, tcontext, name) : styp                              hint(
 def $find_styp(p, C, TOP id) = $find_map(id, styp, C.GLOBAL.FRAME, id)
 def $find_styp(GLOBAL, C, CURRENT id) = $find_map(id, styp, C.GLOBAL.FRAME, id)
 def $find_styp(BLOCK, C, CURRENT id) = styp
-  -- if styp? = $find_map_opt(id, styp, C.GLOBAL.FRAME, id)
+  -- if styp? = $find_map_opt(id, styp, C.BLOCK.FRAME, id)
 def $find_styp(BLOCK, C, CURRENT id) = $find_styp(GLOBAL, C, CURRENT id)
-  -- if eps = $find_map_opt(id, styp, C.GLOBAL.FRAME, id)
+  -- if eps = $find_map_opt(id, styp, C.BLOCK.FRAME, id)
 def $find_styp(LOCAL, C, CURRENT id) = styp
   -- if styp? = $find_maps_opt(id, styp, C.LOCAL.FRAMES, id)
-def $find_styp(BLOCK, C, CURRENT id) = $find_styp(BLOCK, C, CURRENT id)
+def $find_styp(LOCAL, C, CURRENT id) = $find_styp(BLOCK, C, CURRENT id)
   -- if eps = $find_maps_opt(id, styp, C.LOCAL.FRAMES, id)
 
 ;; Finder for values
@@ -215,12 +215,12 @@ def $find_typdef(cursor, tcontext, name) : typdef                          hint(
 def $find_typdef(p, C, TOP id) = $find_map(tid, typdef, C.GLOBAL.TDENV, id)
 def $find_typdef(GLOBAL, C, CURRENT id) = $find_map(tid, typdef, C.GLOBAL.TDENV, id)
 def $find_typdef(BLOCK, C, CURRENT id) = td
-  -- if td? = $find_map_opt(tid, typdef, C.GLOBAL.TDENV, id)
+  -- if td? = $find_map_opt(tid, typdef, C.BLOCK.TDENV, id)
 def $find_typdef(BLOCK, C, CURRENT id) = $find_typdef(GLOBAL, C, CURRENT id)
-  -- if eps = $find_map_opt(tid, typdef, C.GLOBAL.TDENV, id)
+  -- if eps = $find_map_opt(tid, typdef, C.BLOCK.TDENV, id)
 def $find_typdef(LOCAL, C, CURRENT id) = td
   -- if td? = $find_map_opt(tid, typdef, C.LOCAL.TDENV, id)
-def $find_typdef(BLOCK, C, CURRENT id) = $find_typdef(BLOCK, C, CURRENT id)
+def $find_typdef(LOCAL, C, CURRENT id) = $find_typdef(BLOCK, C, CURRENT id)
   -- if eps = $find_map_opt(tid, typdef, C.LOCAL.TDENV, id)
 
 ;; Finder for function definitions
