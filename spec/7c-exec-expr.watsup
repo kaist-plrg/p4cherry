@@ -9,6 +9,121 @@ rule Eval_expr/valuee:
 ;; (TODO) L307-593
 ;;
 
+
+
+;;rule Eval_expr/vare:
+;;  p E |- NameE var : E (CONT val)
+;;  -- if val = 
+
+rule Eval_expr/seqe-cont:
+  p E |- SeqE exprs* : E' (CONT val)
+  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
+  -- if val = SeqV values*
+
+rule Eval_expr/seqe-reject:
+  p E |- SeqE exprs* : E' (REJECT val)
+  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
+
+rule Eval_expr/seqe-exit:
+  p E |- SeqE exprs* : E' EXIT
+  -- Eval_exprs: p E |- exprs* : E' EXIT
+
+
+
+rule Eval_expr/seqdefaulte-cont:
+  p E |- SeqDefaultE exprs* : E' (CONT val)
+  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
+  -- if val = SeqDefaultV values*
+
+rule Eval_expr/seqdefaulte-reject:
+  p E |- SeqDefaultE exprs* : E' (REJECT val)
+  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
+
+rule Eval_expr/seqdefaulte-exit:
+  p E |- SeqDefaultE exprs* : E' EXIT
+  -- Eval_exprs: p E |- exprs* : E' EXIT
+
+
+
+rule Eval_expr/recorde-cont:
+  p E |- RecordE (member, exprs)* : E' (CONT val)
+  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
+  -- if val = RecordV (member, values)*
+
+rule Eval_expr/recorde-reject:
+  p E |- RecordE (member, exprs)* : E' (REJECT val)
+  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
+
+rule Eval_expr/recorde-exit:
+  p E |- RecordE (member, exprs)* : E' EXIT
+  -- Eval_exprs: p E |- exprs* : E' EXIT
+
+
+
+rule Eval_expr/recorddefaulte-cont:
+  p E |- RecordDefaultE (member, exprs)* : E' (CONT val)
+  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
+  -- if val = RecordDefaultV (member, values)*
+
+rule Eval_expr/recorddefaulte-reject:
+  p E |- RecordDefaultE (member, exprs)* : E' (REJECT val)
+  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
+
+rule Eval_expr/recorddefaulte-exit:
+  p E |- RecordDefaultE (member, exprs)* : E' EXIT
+  -- Eval_exprs: p E |- exprs* : E' EXIT
+
+
+
+rule Eval_expr/defaulte:
+  p E |- DefaultE : E (CONT DefaultV)
+
+
+
+rule Eval_expr/une-cont:
+  p E |- UnE unop exprIL : E' (CONT val')
+  -- Eval_expr: p E |- exprIL : E' (CONT val)
+  -- if val' = $un_op(unop, val)
+
+rule Eval_expr/une-reject:
+  p E |- UnE unop exprIL : E' (REJECT val)
+  -- Eval_expr: p E |- exprIL : E' (REJECT val)
+
+rule Eval_expr/une-exit:
+  p E |- UnE unop exprIL : E' EXIT
+  -- Eval_expr: p E |- exprIL : E' EXIT
+
+
+
+rule Eval_expr/bine-land-early:
+  p E |- BinE LAND exprIL_l exprIL_r : E' (CONT (BoolV false))
+  -- Eval_expr: p E |- exprIL_l : E' (CONT (BoolV false))
+
+rule Eval_expr/bine-lor-early:
+  p E |- BinE LOR exprIL_l exprIL_r : E' (CONT (BoolV true))
+  -- Eval_expr: p E |- exprIL_l : E' (CONT (BoolV true))
+
+rule Eval_expr/bine:
+  p E |- BinE binop exprIL_l exprIL_r : E'' (CONT val)
+  -- if ~(binop = LAND) /\ ~(binop = LOR)
+  -- Eval_expr: p E |- exprIL_l : E' (CONT val_l)
+  -- Eval_expr: p E' |- exprIL_r : E'' (CONT val_r)
+  -- if val = $bin_op(binop, val_l, val_r)
+
+
+
+rule Eval_expr/terne-true:
+  p E |- TernE exprIL_c exprIL_t exprIL_f : E'' (CONT val)
+  -- Eval_expr: p E |- exprIL_c : E' (CONT (BoolV true))
+  -- Eval_expr: p E' |- exprIL_t : E'' (CONT val)
+
+rule Eval_expr/terne-false:
+  p E |- TernE exprIL_c exprIL_t exprIL_f : E'' (CONT val)
+  -- Eval_expr: p E |- exprIL_c : E' (CONT (BoolV false))
+  -- Eval_expr: p E' |- exprIL_f : E'' (CONT val)
+
+
+
 ;;
 ;; Expression sequence
 ;;
