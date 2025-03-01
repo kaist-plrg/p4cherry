@@ -1,4 +1,4 @@
-# 1 "p4/web/test.p4"
+# 1 "p4/testdata/p4c/program/well-typed/arith-bmv2.p4"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 
@@ -8,11 +8,10 @@
 
 # 1 "<command line>" 1
 # 1 "<built-in>" 2
-# 1 "p4/web/test.p4" 2
-
-
-
-
+# 1 "p4/testdata/p4c/program/well-typed/arith-bmv2.p4" 2
+# 17 "p4/testdata/p4c/program/well-typed/arith-bmv2.p4"
+# 1 "p4/testdata/arch/core.p4" 1
+# 23 "p4/testdata/arch/core.p4"
 error {
     NoError,
     PacketTooShort,
@@ -84,7 +83,9 @@ extern bool static_assert(bool check, string message);
 
 
 extern bool static_assert(bool check);
-# 87 "p4/web/test.p4"
+# 18 "p4/testdata/p4c/program/well-typed/arith-bmv2.p4" 2
+# 1 "p4/testdata/arch/v1model.p4" 1
+# 49 "p4/testdata/arch/v1model.p4"
 match_kind {
     range,
 
@@ -112,7 +113,7 @@ struct standard_metadata_t {
 
     bit<32> instance_type;
     bit<32> packet_length;
-# 123 "p4/web/test.p4"
+# 85 "p4/testdata/arch/v1model.p4"
     @alias("queueing_metadata.enq_timestamp")
     bit<32> enq_timestamp;
     @alias("queueing_metadata.enq_qdepth")
@@ -160,17 +161,17 @@ extern counter
 
 
 {
-# 185 "p4/web/test.p4"
+# 147 "p4/testdata/arch/v1model.p4"
     counter(bit<32> size, CounterType type);
-# 203 "p4/web/test.p4"
+# 165 "p4/testdata/arch/v1model.p4"
     void count(in bit<32> index);
 
 }
 
 extern direct_counter {
-# 224 "p4/web/test.p4"
+# 186 "p4/testdata/arch/v1model.p4"
     direct_counter(CounterType type);
-# 236 "p4/web/test.p4"
+# 198 "p4/testdata/arch/v1model.p4"
     void count();
 }
 
@@ -183,17 +184,17 @@ extern meter
 
 
 {
-# 262 "p4/web/test.p4"
+# 224 "p4/testdata/arch/v1model.p4"
     meter(bit<32> size, MeterType type);
-# 287 "p4/web/test.p4"
+# 249 "p4/testdata/arch/v1model.p4"
     void execute_meter<T>(in bit<32> index, out T result);
 
 }
 
 extern direct_meter<T> {
-# 303 "p4/web/test.p4"
+# 265 "p4/testdata/arch/v1model.p4"
     direct_meter(MeterType type);
-# 324 "p4/web/test.p4"
+# 286 "p4/testdata/arch/v1model.p4"
     void read(out T result);
 }
 
@@ -203,15 +204,15 @@ extern direct_meter<T> {
 extern register<T>
 
 {
-# 343 "p4/web/test.p4"
+# 305 "p4/testdata/arch/v1model.p4"
     register(bit<32> size);
-# 358 "p4/web/test.p4"
+# 320 "p4/testdata/arch/v1model.p4"
     @noSideEffects
 
 
 
     void read(out T result, in bit<32> index);
-# 389 "p4/web/test.p4"
+# 351 "p4/testdata/arch/v1model.p4"
     void write(in bit<32> index, in T value);
 
 }
@@ -220,9 +221,9 @@ extern register<T>
 extern action_profile {
     action_profile(bit<32> size);
 }
-# 405 "p4/web/test.p4"
+# 367 "p4/testdata/arch/v1model.p4"
 extern void random<T>(out T result, in T lo, in T hi);
-# 430 "p4/web/test.p4"
+# 392 "p4/testdata/arch/v1model.p4"
 extern void digest<T>(in bit<32> receiver, in T data);
 
 enum HashAlgorithm {
@@ -238,10 +239,10 @@ enum HashAlgorithm {
 
 @deprecated("Please use mark_to_drop(standard_metadata) instead.")
 extern void mark_to_drop();
-# 463 "p4/web/test.p4"
+# 425 "p4/testdata/arch/v1model.p4"
 @pure
 extern void mark_to_drop(inout standard_metadata_t standard_metadata);
-# 481 "p4/web/test.p4"
+# 443 "p4/testdata/arch/v1model.p4"
 @pure
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
 
@@ -259,38 +260,38 @@ extern Checksum16 {
     Checksum16();
     bit<16> get<D>(in D data);
 }
-# 521 "p4/web/test.p4"
+# 483 "p4/testdata/arch/v1model.p4"
 extern void verify_checksum<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
-# 542 "p4/web/test.p4"
+# 504 "p4/testdata/arch/v1model.p4"
 @pure
 extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
-# 554 "p4/web/test.p4"
+# 516 "p4/testdata/arch/v1model.p4"
 extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
-# 565 "p4/web/test.p4"
+# 527 "p4/testdata/arch/v1model.p4"
 @noSideEffects
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
-# 575 "p4/web/test.p4"
+# 537 "p4/testdata/arch/v1model.p4"
 extern void clone(in CloneType type, in bit<32> session);
 
 @deprecated("Please use 'resubmit_preserving_field_list' instead")
 extern void resubmit<T>(in T data);
-# 613 "p4/web/test.p4"
+# 575 "p4/testdata/arch/v1model.p4"
 extern void resubmit_preserving_field_list(bit<8> index);
 
 @deprecated("Please use 'recirculate_preserving_field_list' instead")
 extern void recirculate<T>(in T data);
-# 639 "p4/web/test.p4"
+# 601 "p4/testdata/arch/v1model.p4"
 extern void recirculate_preserving_field_list(bit<8> index);
 
 @deprecated("Please use 'clone_preserving_field_list' instead")
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
-# 678 "p4/web/test.p4"
+# 640 "p4/testdata/arch/v1model.p4"
 extern void clone_preserving_field_list(in CloneType type, in bit<32> session, bit<8> index);
 
 extern void truncate(in bit<32> length);
-# 706 "p4/web/test.p4"
+# 668 "p4/testdata/arch/v1model.p4"
 extern void assert(in bool check);
-# 741 "p4/web/test.p4"
+# 703 "p4/testdata/arch/v1model.p4"
 extern void assume(in bool check);
 
 
@@ -300,7 +301,7 @@ extern void assume(in bool check);
 
 extern void log_msg(string msg);
 extern void log_msg<T>(string msg, in T data);
-# 762 "p4/web/test.p4"
+# 724 "p4/testdata/arch/v1model.p4"
 parser Parser<H, M>(packet_in b,
                     out H parsedHdr,
                     inout M meta,
@@ -344,8 +345,7 @@ package V1Switch<H, M>(Parser<H, M> p,
                        ComputeChecksum<H, M> ck,
                        Deparser<H> dep
                        );
-
-
+# 19 "p4/testdata/p4c/program/well-typed/arith-bmv2.p4" 2
 
 header hdr {
     bit<32> a;
@@ -353,8 +353,8 @@ header hdr {
     bit<64> c;
 }
 
-
-
+# 1 "p4/testdata/p4c/program/well-typed/arith-skeleton.p4" 1
+# 22 "p4/testdata/p4c/program/well-typed/arith-skeleton.p4"
 struct Headers {
     hdr h;
 }
@@ -376,8 +376,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { ap
 control deparser(packet_out b, in Headers h) {
     apply { b.emit(h.h); }
 }
-
-
+# 27 "p4/testdata/p4c/program/well-typed/arith-bmv2.p4" 2
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action add()
