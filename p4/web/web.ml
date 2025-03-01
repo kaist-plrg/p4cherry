@@ -1,19 +1,18 @@
-open Core
 open Util.Error
 open Js_of_ocaml
 open Lwt.Infix
 module P4Parser = Frontend.Parse.Make (Frontend_web.Preprocessor)
 
-let parse_p4 includes filename : El.Ast.program Lwt.t =
-  P4Parser.parse_file includes filename
+let parse_p4 preprocessed_code : El.Ast.program Lwt.t =
+  P4Parser.parse_string "" preprocessed_code
 
-let typecheck includes filename : Il.Ast.program Lwt.t =
-  parse_p4 includes filename >>= fun program ->
+let typecheck preprocessed_code : Il.Ast.program Lwt.t =
+  parse_p4 preprocessed_code >>= fun program ->
   Lwt.return (Typing.Typecheck.type_program program)
 
-let eval (includes : string list) (arch : string) (filename : string)
+let eval (arch : string) (preprocessed_code : string)
     (port : string) (packet : string) : string Lwt.t =
-  typecheck includes filename >>= fun program ->
+  typecheck preprocessed_code >>= fun program ->
   Lwt.catch
     (fun () ->
       let cenv, tdenv, fenv, venv, sto =
@@ -44,12 +43,7 @@ let eval (includes : string list) (arch : string) (filename : string)
 let _ =
   Js.export "P4cherry"
     (object%js
-       method eval (includes : Js.js_string Js.t Js.js_array Js.t) arch filename
-           port packet =
-         let includes =
-           includes |> Js.to_array |> Array.map ~f:Js.to_string |> Array.to_list
-         in
-         Promise_lwt.to_promise
-           (eval includes (Js.to_string arch) (Js.to_string filename) (Js.to_string port)
-              (Js.to_string packet))
+       method eval arch p4_code port packet =
+           eval (Js.to_string arch) (Js.to_string p4_code) (Js.to_string port)
+              (Js.to_string packet)
     end)

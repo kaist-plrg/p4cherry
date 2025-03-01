@@ -5,11 +5,11 @@ open Preprocessor
 let error_info = error_parser_info
 let error_no_info = error_parser_no_info
 
-let lex (filename : string) (file : string) =
+let lex (filename : string) (str : string) =
   try
     let () = Lexer.reset () in
     let () = Lexer.set_filename filename in
-    Lexing.from_string file
+    Lexing.from_string str
   with Lexer.Error s -> Format.asprintf "lexer error: %s" s |> error_no_info
 
 let parse (lexbuf : Lexing.lexbuf) =
