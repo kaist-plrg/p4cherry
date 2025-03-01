@@ -4,14 +4,14 @@ open Lwt.Infix
 module P4Parser = Frontend.Parse.Make (Frontend_web.Preprocessor)
 
 let parse_p4 preprocessed_code : El.Ast.program Lwt.t =
-  P4Parser.parse_string "" preprocessed_code
+  P4Parser.parse_string "empty_file" preprocessed_code
 
 let typecheck preprocessed_code : Il.Ast.program Lwt.t =
   parse_p4 preprocessed_code >>= fun program ->
   Lwt.return (Typing.Typecheck.type_program program)
 
-let eval (arch : string) (preprocessed_code : string)
-    (port : string) (packet : string) : string Lwt.t =
+let eval (arch : string) (preprocessed_code : string) (port : string)
+    (packet : string) : string Lwt.t =
   typecheck preprocessed_code >>= fun program ->
   Lwt.catch
     (fun () ->
@@ -19,12 +19,10 @@ let eval (arch : string) (preprocessed_code : string)
         Instance.Instantiate.instantiate_program program
       in
       let (module Driver) = Exec.Gen.gen arch in
-      let result =
-        Driver.run_packet cenv tdenv fenv venv sto port packet
-      in
+      let result = Driver.run_packet cenv tdenv fenv venv sto port packet in
       match result with
       | Some (port_out, packet_out) ->
-        Lwt.return (Format.sprintf "(%d) %s" port_out packet_out)
+          Lwt.return (Format.sprintf "(%d) %s" port_out packet_out)
       | None -> Lwt.return "packet dropped")
     (function
       | ParseErr (msg, info)
@@ -44,6 +42,6 @@ let _ =
   Js.export "P4cherry"
     (object%js
        method eval arch p4_code port packet =
-           eval (Js.to_string arch) (Js.to_string p4_code) (Js.to_string port)
-              (Js.to_string packet)
+         eval (Js.to_string arch) (Js.to_string p4_code) (Js.to_string port)
+           (Js.to_string packet)
     end)
