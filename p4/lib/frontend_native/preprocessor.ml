@@ -15,7 +15,7 @@
 
 open Core
 
-let preprocess includes filename =
+let preprocess includes filename _ =
   let cmd =
     String.concat ~sep:" "
       ([ "cc" ]

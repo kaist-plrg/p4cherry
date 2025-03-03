@@ -16,21 +16,23 @@ $ git submodule update
 
 ### Prerequisites for p4cherry
 
-* Install `opam` version 2.0.5 or higher.
+- Install `opam` version 2.0.5 or higher.
+
   ```shell
   $ apt-get install opam
   $ opam init
   ```
 
-* Create OCaml switch for version 4.14.0.
+- Create OCaml switch for version 4.14.0.
   Install `dune` version 3.13.0 and `menhir` version 20231231, `core` version v0.15.0 and `bisect_ppx` version 2.8.3, and `lwt` version 5.9.0 via `opam`.
+
   ```shell
   $ opam switch create 4.14.0
   $ eval $(opam env)
   $ opam install dune menhir lwt core.v0.15.0 bisect_ppx
   ```
 
-* Install the project.
+- Install the project.
   ```shell
   $ cd p4
   $ dune build p4cherry.opam
@@ -40,8 +42,9 @@ $ git submodule update
 
 ### Prerequisites for SpecTec
 
-* Create OCaml switch for version 5.0.0.
+- Create OCaml switch for version 5.0.0.
   Install `dune` version 3.11.0, `menhir` version 20230608, `mdx` version 2.3.1, and `zarith` version 1.13, via `opam` (default versions).
+
   ```shell
   $ opam switch create 5.0.0
   $ eval $(opam env)
@@ -95,10 +98,10 @@ Parsing, pretty-printing, and roundtripping ([p4c](p4/test/parse_p4c.expected) /
 
 #### Type checker
 
-* Positive type checker tests (well-typed programs should be accepted) ([p4c](p4/test/typecheck_pos_p4c.expected) / [petr4](p4/status/petr4/typecheck_pos_petr4.expected))
-* Excluded positive type checker tests ([p4c](p4/test/typecheck_pos_p4c_excluded.expected))
-* Negative type checker tests (ill-typed programs should be rejected) ([p4c](p4/test/typecheck_neg_p4c.expected) / [petr4](p4/test/typecheck_neg_petr4.expected))
-* Excluded negative type checker tests ([p4c](p4/test/typecheck_neg_p4c_excluded.expected))
+- Positive type checker tests (well-typed programs should be accepted) ([p4c](p4/test/typecheck_pos_p4c.expected) / [petr4](p4/status/petr4/typecheck_pos_petr4.expected))
+- Excluded positive type checker tests ([p4c](p4/test/typecheck_pos_p4c_excluded.expected))
+- Negative type checker tests (ill-typed programs should be rejected) ([p4c](p4/test/typecheck_neg_p4c.expected) / [petr4](p4/test/typecheck_neg_petr4.expected))
+- Excluded negative type checker tests ([p4c](p4/test/typecheck_neg_p4c_excluded.expected))
 
 Analysis of test failures: [p4c-pos](p4/status/p4c/typecheck-pos.analysis.md) / [p4c-neg](p4/status/p4c/typecheck-neg.analysis.md) / [petr4-pos](p4/status/petr4/typecheck-pos.analysis.md)
 

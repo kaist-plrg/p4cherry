@@ -5,11 +5,11 @@ open Preprocessor
 let error_info = error_parser_info
 let error_no_info = error_parser_no_info
 
-let lex (filename : string) (str : string) =
+let lex (filename : string) (p4_code : string) =
   try
     let () = Lexer.reset () in
     let () = Lexer.set_filename filename in
-    Lexing.from_string str
+    Lexing.from_string p4_code
   with Lexer.Error s -> Format.asprintf "lexer error: %s" s |> error_no_info
 
 let parse (lexbuf : Lexing.lexbuf) =
@@ -20,13 +20,14 @@ let parse (lexbuf : Lexing.lexbuf) =
   | _ -> "transform error" |> error_no_info
 
 module Make (Preprocessor : PREPROCESSOR) = struct
-  let preprocess (includes : string list) (filename : string) : string Lwt.t =
-    try Preprocessor.preprocess includes filename
+  let preprocess (includes : string list) (filename : string) (p4_code : string)
+      : string Lwt.t =
+    try Preprocessor.preprocess includes filename p4_code
     with _ -> "preprocessor error" |> error_no_info
 
   let parse_file (includes : string list) (filename : string) :
       El.Ast.program Lwt.t =
-    preprocess includes filename >>= fun file ->
+    preprocess includes filename "" >>= fun file ->
     let tokens = lex filename file in
     Lwt.return (parse tokens)
 
