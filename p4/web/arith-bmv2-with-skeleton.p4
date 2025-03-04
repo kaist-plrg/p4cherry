@@ -1,6 +1,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
+header hdr {
+    bit<32> a;
+    bit<32> b;
+    bit<64> c;
+}
+
 #ifdef _CORE_P4_
 
 struct Headers {
@@ -26,12 +32,6 @@ control deparser(packet_out b, in Headers h) {
 }
 
 #endif
-
-header hdr {
-    bit<32> a;
-    bit<32> b;
-    bit<64> c;
-}
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action add()

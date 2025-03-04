@@ -3,11 +3,10 @@ open Js_of_ocaml
 open Lwt.Infix
 module P4Parser = Frontend.Parse.Make (Frontend_web.Preprocessor)
 
-let parse_p4 preprocessed_code : El.Ast.program Lwt.t =
-  P4Parser.parse_string "empty_file" preprocessed_code
+let input_name = "input_code.p4"
 
-let typecheck preprocessed_code : Il.Ast.program Lwt.t =
-  parse_p4 preprocessed_code >>= fun program ->
+let typecheck p4_code : Il.Ast.program Lwt.t =
+  P4Parser.parse_string input_name p4_code >>= fun program ->
   Lwt.return (Typing.Typecheck.type_program program)
 
 let eval (arch : string) (preprocessed_code : string) (port : string)

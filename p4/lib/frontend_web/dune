@@ -1,4 +1,4 @@
 (library
  (name frontend_web)
- (libraries core yojson js_of_ocaml-lwt)
+ (libraries p4pp lwt)
  (modules preprocessor))

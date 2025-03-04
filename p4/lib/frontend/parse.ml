@@ -31,9 +31,10 @@ module Make (Preprocessor : PREPROCESSOR) = struct
     let tokens = lex filename file in
     Lwt.return (parse tokens)
 
-  let parse_string (filename : string) (str : string) : El.Ast.program Lwt.t =
-    (* assume str is preprocessed *)
-    let tokens = lex filename str in
+  let parse_string (filename : string) (p4_code : string) : El.Ast.program Lwt.t
+      =
+    preprocess [ "/" ] filename p4_code >>= fun preprocessed_code ->
+    let tokens = lex filename preprocessed_code in
     Lwt.return (parse tokens)
 
   let roundtrip_file (includes : string list) (filename : string) :

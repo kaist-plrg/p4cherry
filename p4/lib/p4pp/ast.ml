@@ -1,4 +1,4 @@
-type bop = 
+type bop =
   | Add
   | Sub
   | Mult
@@ -17,18 +17,16 @@ type bop =
   | BShl
   | BShr
 
-type uop = 
-  | Not
-  | BNot
+type uop = Not | BNot
 
-type test = 
+type test =
   | Int of Int64.t
   | Ident of string
   | Defined of string
   | BinOp of test * bop * test
   | UnOp of uop * test
 
-type term = 
+type term =
   | String of string
   | Text of string
   | Include of int * bool * string

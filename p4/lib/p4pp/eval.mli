@@ -1,4 +1,3 @@
-
 type env
 
 val empty : string -> string list -> (string * string) list -> env
@@ -10,11 +9,10 @@ end
 
 module type S = sig
   include F
-  val preprocess: env -> string -> string -> string * env
+
+  val preprocess : env -> string -> string -> string * env
 end
 
-module Make(F:F) : S 
-
+module Make (_ : F) : S
 module FileSystem : S
-
 module Web : S

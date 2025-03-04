@@ -13,20 +13,7 @@
  * under the License.
  *)
 
- open Core
- open Js_of_ocaml_lwt
- open Yojson.Basic.Util
- open Lwt.Infix
- 
- let preprocess (includes : string list) (filename : string) _ : string Lwt.t =
-   let url = "http://localhost:8080/preprocess" in
-   let params =
-     String.concat ~sep:"&"
-       ([ "filename=" ^ filename ]
-       @ List.map ~f:(fun inc -> "includes=" ^ inc) includes)
-   in
-   let full_url = url ^ "?" ^ params in
-   XmlHttpRequest.get full_url >|= fun response ->
-   let json_str = response.XmlHttpRequest.content in
-   let json = Yojson.Basic.from_string json_str in
-   json |> member "output" |> to_string
+let preprocess includes filename p4_code =
+  let env = P4pp.Eval.empty filename includes [] in
+  let program, _ = P4pp.Eval.Web.preprocess env filename p4_code in
+  Lwt.return program
