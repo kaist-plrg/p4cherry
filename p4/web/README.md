@@ -1,4 +1,5 @@
 # P4-Sandbox
+
 A web-based playground for P4
 
 ## Building
@@ -6,6 +7,7 @@ A web-based playground for P4
 ### Prerequisites for P4 Sandbox
 
 Install required libraries for compilation.
+
 ```shell
 $ opam switch 4.14.0
 $ eval $(opam env)
@@ -20,35 +22,4 @@ $ make web
 
 This creates `web.bc.js` in `p4cherry/p4/web/html_build`.
 
-### Local server setup
-
-Install `flask` in a python virtual environment.
-```shell
-cd p4/web
-$ python3 -m venv .venv
-$ source .venv/bin/activate
-$ pip install flask
-```
-
-## Running
-
-```shell
-$ python3 server.py
-```
-
-This opens a local server at `http://localhost:8080/`.
-
-## Cleanup
-
-Deactivate the virtual environment.
-```shell
-$ deactivate
-```
-
-Note that the server internally saves the input p4 program and packet in a /tmp directory. This is a temporary solution and will be changed in the future.
-
-To remove the saved files,
-```shell
-$ rm /tmp/program.p4
-$ rm /tmp/program.stf
-```
+Then open [`p4cherry/p4/web/html_build/index.html`](./html_build/index.html) in a web browser.
