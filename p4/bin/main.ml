@@ -5,16 +5,6 @@ let version = "0.1"
 
 module P4Parser = Frontend.Parse.Make (Frontend_native.Preprocessor)
 
-let user_input () = In_channel.input_all In_channel.stdin
-
-let parse_with_p4pp _ _ : El.Ast.program =
-  let program = user_input () in
-  let preprocessed_code =
-    Frontend_web.Preprocessor.preprocess [ "/includes" ] "input.p4" program
-  in
-  Format.printf "program:%s" preprocessed_code;
-  Lwt_main.run (P4Parser.parse_string "input_string" preprocessed_code)
-
 let parse_p4 includes filename : El.Ast.program =
   Lwt_main.run (P4Parser.parse_file includes filename)
 
@@ -35,14 +25,12 @@ let parse_command =
      let%map includes = flag "-i" (listed string) ~doc:"include paths"
      and roundtrip_flag =
        flag "-r" no_arg ~doc:"parse, stringify, and parse the program"
-     and p4pp_flag = flag "-pp" no_arg ~doc:"switch preprocessor to p4pp"
      and filename = anon ("file.p4" %: string) in
      fun () ->
        try
          let program =
            let func =
              if roundtrip_flag then roundtrip_p4
-             else if p4pp_flag then parse_with_p4pp
              else parse_p4
            in
            func includes filename
