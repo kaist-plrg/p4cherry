@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
+      /* text-align: center; */
       margin: 20px;
     }
     textarea, input {
@@ -26,13 +26,25 @@
       white-space: pre-wrap;
     }
   </style>
+
+  <script src="web.bc.js"></script>
+
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"></link>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/mdn-like.min.css"></link>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/neo.min.css"></link>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/3024-day.min.css"/>
+
 </head>
 <body>
   <h1>P4 Sandbox</h1>
 
   <label>P4 Program:</label><br>
-  <textarea id="p4_code" rows="30" placeholder="Enter P4 program">
-    #include <core.p4>
+    
+    
+  <textarea id="p4_code" rows="50" placeholder="Enter P4 program" style="text-align:left">
+      #include <core.p4>
       #include <v1model.p4>
       
       header hdr {
@@ -94,9 +106,13 @@
   <h2>Output Port and Packet:</h2>
   <pre id="output"></pre>
 
-  <script src="web.bc.js"></script>
 
-  <script>
+ <script>
+    var editor = CodeMirror.fromTextArea(document.getElementById('p4_code'), {
+      lineNumbers: true,
+      mode: 'text/x-c++src',
+      theme: '3024-day',
+    });
       async function getIncludesPath() {
       try {
         let response = await fetch("/get-includes-path");
