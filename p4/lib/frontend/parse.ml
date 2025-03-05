@@ -23,7 +23,8 @@ module Make (Preprocessor : PREPROCESSOR) = struct
   let preprocess (includes : string list) (filename : string) (p4_code : string)
       : string Lwt.t =
     try Preprocessor.preprocess includes filename p4_code
-    with _ -> "preprocessor error" |> error_no_info
+    with ParseErr (s, info) ->
+      Format.asprintf "preprocessor error: %s" s |> error_info info
 
   let parse_file (includes : string list) (filename : string) :
       El.Ast.program Lwt.t =
@@ -31,9 +32,9 @@ module Make (Preprocessor : PREPROCESSOR) = struct
     let tokens = lex filename file in
     Lwt.return (parse tokens)
 
-  let parse_string (filename : string) (p4_code : string) : El.Ast.program Lwt.t
-      =
-    preprocess [ "/" ] filename p4_code >>= fun preprocessed_code ->
+  let parse_string (includes : string list) (filename : string)
+      (p4_code : string) : El.Ast.program Lwt.t =
+    preprocess includes filename p4_code >>= fun preprocessed_code ->
     let tokens = lex filename preprocessed_code in
     Lwt.return (parse tokens)
 
@@ -41,7 +42,7 @@ module Make (Preprocessor : PREPROCESSOR) = struct
       El.Ast.program Lwt.t =
     parse_file includes filename >>= fun program ->
     let program_str = Format.asprintf "%a\n" El.Pp.pp_program program in
-    parse_string filename program_str >>= fun program' ->
+    parse_string includes filename program_str >>= fun program' ->
     if not (El.Eq.eq_program program program') then
       "roundtrip error" |> error_no_info
     else Lwt.return program

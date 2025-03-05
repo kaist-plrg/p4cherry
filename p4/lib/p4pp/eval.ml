@@ -201,9 +201,8 @@ module Make (F : F) = struct
     let terms =
       try Parser.program tok lexbuf
       with _ ->
-        failwith
-          ("Error parsing " ^ filename ^ " : "
-          ^ string_of_int !Lexer.current_line)
+              let info = Util.Source.I {filename= filename; line_start= (!Lexer.current_line); line_end=None; col_start=0; col_end=0;} in
+        Util.Error.error_parser_info info "preprocessor parsing err"
     in
     let env = set_file env filename in
     let env =

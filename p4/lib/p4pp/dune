@@ -7,4 +7,4 @@
 
 (library
  (name p4pp)
- (libraries core core_unix.sys_unix))
+ (libraries core core_unix.sys_unix util))

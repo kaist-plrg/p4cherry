@@ -15,5 +15,5 @@
 
 let preprocess includes filename p4_code =
   let env = P4pp.Eval.empty filename includes [] in
-  let program, _ = P4pp.Eval.Web.preprocess env filename p4_code in
+  let program, _ = P4pp.Eval.FileSystem.preprocess env filename p4_code in
   Lwt.return program

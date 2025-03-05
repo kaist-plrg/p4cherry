@@ -6,7 +6,7 @@ module P4Parser = Frontend.Parse.Make (Frontend_web.Preprocessor)
 let input_name = "input_code.p4"
 
 let typecheck p4_code : Il.Ast.program Lwt.t =
-  P4Parser.parse_string input_name p4_code >>= fun program ->
+  P4Parser.parse_string [ "/" ] input_name p4_code >>= fun program ->
   Lwt.return (Typing.Typecheck.type_program program)
 
 let eval (arch : string) (preprocessed_code : string) (port : string)
