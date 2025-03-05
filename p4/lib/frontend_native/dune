@@ -1,4 +1,4 @@
 (library
  (name frontend_native)
- (libraries core core_unix lwt p4pp)
+ (libraries lwt p4pp)
  (modules preprocessor))
