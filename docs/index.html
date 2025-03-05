@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P4 Web Interface</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    textarea, input {
+      width: 80%;
+      margin: 5px 0;
+      padding: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>P4 Sandbox</h1>
+
+  <label>P4 Program:</label><br>
+  <textarea id="p4_code" rows="30" placeholder="Enter P4 program"></textarea><br>
+
+  <label>Input Port:</label><br>
+  <textarea id="port" rows="1" placeholder="Enter input port">0</textarea><br>
+
+  <label>Input Packet:</label><br>
+  <textarea id="packet" rows="2" placeholder="Enter input packet">00000001 00000002 00000000 00000000</textarea><br>
+
+  <label>Architecture:</label><br>
+  <input id="arch" type="text" placeholder="Enter architecture (e.g., v1model)"><br>
+
+  <button onclick="runP4()">Run P4</button>
+
+  <h2>Output Port and Packet:</h2>
+  <pre id="output"></pre>
+
+  <script src="web.bc.js"></script>
+
+  <script>
+      async function getIncludesPath() {
+      try {
+        let response = await fetch("/get-includes-path");
+        let data = await response.json();
+        return data.path;
+      } catch (error) {
+        console.error("Failed to fetch includes path:", error);
+        return null;
+      }
+    }
+
+    async function runP4() {
+      if (typeof P4cherry === "undefined") {
+        console.error("P4cherry is not defined. Make sure web.bc.js is loaded correctly.");
+        document.getElementById("output").innerText = "Error: P4cherry is not loaded.";
+        return;
+      }
+
+      let p4_code = document.getElementById("p4_code").value;
+      let port = document.getElementById("port").value;
+      let packet = document.getElementById("packet").value.replace(/\s+/g, '');
+      let arch = document.getElementById("arch").value;
+
+      try {
+        let output = P4cherry.eval(arch, p4_code, port, packet);
+        console.log(output);
+        document.getElementById("output").innerText = output;
+      } catch (error) {
+        console.error("Error executing P4cherry.eval:", error);
+        document.getElementById("output").innerText = "Error executing P4cherry.";
+      }
+    }
+  </script>
+</body>
+</html>

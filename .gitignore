@@ -15,7 +15,6 @@ p4cherry-test
 *.opam
 doc/_sphinx
 doc/spectec
-p4/web/html_build/*bc.js
 .venv
 
 # p4cherry-test logs
