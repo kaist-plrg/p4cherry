@@ -1,7 +1,7 @@
 open Core
 open Ast
 
-(* let string_of_token (t: Parser.token) =
+let string_of_token (t: Parser.token) =
   match t with
   | UNDEF _ -> "UNDEF"
   | TEXT s -> Printf.sprintf "TEXT(%s)" s
@@ -37,7 +37,7 @@ open Ast
   | BNOT -> "BNOT"
   | BAND -> "BAND"
   | AND -> "AND"
-  | ADD -> "ADD" *)
+  | ADD -> "ADD"
 
 (* let print_token t =
   Printf.printf "%s " (string_of_token t) *)
@@ -193,9 +193,10 @@ module Make (F : F) = struct
     let () = Prelexer.reset filename in
     let prelex_contents = 
       try Prelexer.lex lexbuf
-      with _ ->
-          Util.Error.error_parser_no_info "prelexer err"
+      with Prelexer.Error s->
+          Format.asprintf "prelexer error: %s" s |>Util.Error.error_parser_no_info
     in
+    Printf.printf "%s\n" prelex_contents;
     let lexbuf = Lexing.from_string prelex_contents in
     let tok buf =
       let t = Lexer.token buf in
@@ -204,9 +205,14 @@ module Make (F : F) = struct
     in
     let terms =
       try Parser.program tok lexbuf
-      with _ ->
+      with 
+      | Parser.Error ->
         let info = Util.Source.I {filename= filename; line_start= (!Lexer.current_line); line_end=None; col_start=0; col_end=0;} in
-        Util.Error.error_parser_info info "preprocessor parsing err"
+        Format.asprintf "preprocessor parsing error: %s" (string_of_token (tok lexbuf)) |> Util.Error.error_parser_info info 
+      | Lexer.Error s ->
+        let info = Util.Source.I {filename= filename; line_start= (!Lexer.current_line); line_end=None; col_start=0; col_end=0;} in
+        Format.asprintf "lexer error: %s" s |> Util.Error.error_parser_info info 
+
     in
     let env = set_file env filename in
     let env =

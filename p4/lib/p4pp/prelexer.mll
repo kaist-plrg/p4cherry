@@ -71,7 +71,7 @@ and string = parse
   | eof
     { raise (Error "EOF in string literal" ) }
   | "\n"
-    { raise (Error "newline in string literal") } 
+    { emit (lexeme lexbuf); lex lexbuf }
   | "\\\""
     { emit (lexeme lexbuf); string lexbuf }
   | '"'
