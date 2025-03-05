@@ -191,7 +191,11 @@ module Make (F : F) = struct
     in
     let lexbuf = Lexing.from_string contents in
     let () = Prelexer.reset filename in
-    let prelex_contents = Prelexer.lex lexbuf in
+    let prelex_contents = 
+      try Prelexer.lex lexbuf
+      with _ ->
+          Util.Error.error_parser_no_info "prelexer err"
+    in
     let lexbuf = Lexing.from_string prelex_contents in
     let tok buf =
       let t = Lexer.token buf in
@@ -201,7 +205,7 @@ module Make (F : F) = struct
     let terms =
       try Parser.program tok lexbuf
       with _ ->
-              let info = Util.Source.I {filename= filename; line_start= (!Lexer.current_line); line_end=None; col_start=0; col_end=0;} in
+        let info = Util.Source.I {filename= filename; line_start= (!Lexer.current_line); line_end=None; col_start=0; col_end=0;} in
         Util.Error.error_parser_info info "preprocessor parsing err"
     in
     let env = set_file env filename in

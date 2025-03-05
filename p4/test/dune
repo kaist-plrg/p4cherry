@@ -3,7 +3,8 @@
  (preprocess
   (pps ppx_let bisect_ppx))
  (modules test)
- (libraries p4cherry core core_kernel core_unix core_unix.command_unix)
+ (libraries p4cherry core core_kernel core_unix core_unix.command_unix lwt.unix)
+
  (instrumentation
   (backend bisect_ppx))
  (action

@@ -5,6 +5,7 @@
   (re_export util)
   (re_export surface)
   (re_export frontend)
+  (re_export frontend_native)
   (re_export lang)
   (re_export el)
   (re_export il)
@@ -15,6 +16,7 @@
   (re_export instance)
   (re_export exec)
   (re_export stf)
+  (re_export stf_native)
   (re_export p4pp))
  (instrumentation
   (backend bisect_ppx)))

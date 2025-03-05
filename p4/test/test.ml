@@ -65,14 +65,16 @@ let rec collect_files ~(suffix : string) dir =
 (* Parser roundtrip test *)
 
 let parse_file stat includes filename =
+  let module P4Parser = Frontend.Parse.Make (Frontend_native.Preprocessor) in
   try
-    let program = Frontend.Parse.parse_file includes filename in
+    let program = Lwt_main.run (P4Parser.parse_file includes filename) in
     (stat, program)
   with ParseErr (msg, info) -> raise (TestParseFileErr (msg, info, stat))
 
 let parse_string stat filename file =
+  let module P4Parser = Frontend.Parse.Make (Frontend_native.Preprocessor) in
   try
-    let program = Frontend.Parse.parse_string filename file in
+    let program = Lwt_main.run (P4Parser.parse_string filename file) in
     (stat, program)
   with ParseErr (msg, info) -> raise (TestParseStringErr (msg, info, stat))
 
@@ -259,11 +261,12 @@ let instantiate_command =
 (* Run test *)
 
 let run stat (module Driver : Exec.Driver.DRIVER) includes filename stfname =
+  let module StfParser = Stf.Parse.Make (Stf_native.Reader) in
   try
     let stat, cenv, tdenv, fenv, venv, sto =
       instantiate stat includes filename
     in
-    let stmts_stf = Stf.Parse.parse_file stfname in
+    let stmts_stf = Lwt_main.run (StfParser.parse_file stfname) in
     let pass = Driver.run cenv tdenv fenv venv sto stmts_stf in
     if not pass then raise (TestStfErr stat);
     stat

@@ -3,11 +3,10 @@ open Util.Error
 
 let version = "0.1"
 
-module P4Parser = Frontend.Parse.Make (Frontend_web.Preprocessor)
+module P4Parser = Frontend.Parse.Make (Frontend_native.Preprocessor)
 
 let parse_p4 includes filename : El.Ast.program =
-  let p4_code = In_channel.(with_file filename ~f:input_all) in
-  Lwt_main.run (P4Parser.parse_string includes filename p4_code)
+  Lwt_main.run (P4Parser.parse_file includes filename)
 
 let roundtrip_p4 includes filename : El.Ast.program =
   Lwt_main.run (P4Parser.roundtrip_file includes filename)

@@ -1,6 +1,7 @@
 open Util.Error
 open Lwt.Infix
 open Preprocessor
+open Core
 
 let error_info = error_parser_info
 let error_no_info = error_parser_no_info
@@ -28,13 +29,14 @@ module Make (Preprocessor : PREPROCESSOR) = struct
 
   let parse_file (includes : string list) (filename : string) :
       El.Ast.program Lwt.t =
-    preprocess includes filename "" >>= fun file ->
-    let tokens = lex filename file in
+    let p4_code = In_channel.(with_file filename ~f:input_all) in
+    preprocess includes filename p4_code >>= fun preprocessed_code ->
+    let tokens = lex filename preprocessed_code in
     Lwt.return (parse tokens)
 
-  let parse_string (includes : string list) (filename : string)
-      (p4_code : string) : El.Ast.program Lwt.t =
-    preprocess includes filename p4_code >>= fun preprocessed_code ->
+  let parse_string (filename : string)
+      (file : string) : El.Ast.program Lwt.t =
+              preprocess ["/"] filename file >>= fun preprocessed_code ->
     let tokens = lex filename preprocessed_code in
     Lwt.return (parse tokens)
 
@@ -42,7 +44,7 @@ module Make (Preprocessor : PREPROCESSOR) = struct
       El.Ast.program Lwt.t =
     parse_file includes filename >>= fun program ->
     let program_str = Format.asprintf "%a\n" El.Pp.pp_program program in
-    parse_string includes filename program_str >>= fun program' ->
+    parse_string filename program_str >>= fun program' ->
     if not (El.Eq.eq_program program program') then
       "roundtrip error" |> error_no_info
     else Lwt.return program
