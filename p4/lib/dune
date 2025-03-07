@@ -16,7 +16,6 @@
   (re_export instance)
   (re_export exec)
   (re_export stf)
-  (re_export stf_native)
   (re_export p4pp))
  (instrumentation
   (backend bisect_ppx)))

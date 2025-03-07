@@ -261,12 +261,11 @@ let instantiate_command =
 (* Run test *)
 
 let run stat (module Driver : Exec.Driver.DRIVER) includes filename stfname =
-  let module StfParser = Stf.Parse.Make (Stf_native.Reader) in
   try
     let stat, cenv, tdenv, fenv, venv, sto =
       instantiate stat includes filename
     in
-    let stmts_stf = Lwt_main.run (StfParser.parse_file stfname) in
+    let stmts_stf = Lwt_main.run (Stf.Parse.parse_file stfname) in
     let pass = Driver.run cenv tdenv fenv venv sto stmts_stf in
     if not pass then raise (TestStfErr stat);
     stat

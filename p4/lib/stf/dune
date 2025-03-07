@@ -8,4 +8,4 @@
 (library
  (name stf)
  (libraries core str util lwt yojson)
- (modules ast lexer parser parse print compare reader))
+ (modules ast lexer parser parse print compare))

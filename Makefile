@@ -31,7 +31,8 @@ build-spectec:
 
 web:
 	opam switch 4.14.0
-	cd p4/web && opam exec -- dune build web.bc.js && cp ../_build/default/web/web.bc.js html_build/
+	cd p4/web && opam exec -- dune build web.bc.js && cd ..
+	rm -f docs/web.bc.js && cp p4/_build/default/web/web.bc.js docs/
 
 # Spec
 
