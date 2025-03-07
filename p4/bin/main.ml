@@ -14,9 +14,7 @@ let roundtrip_p4 includes filename : El.Ast.program =
 let typecheck includes filename : Il.Ast.program =
   parse_p4 includes filename |> Typing.Typecheck.type_program
 
-module StfParser = Stf.Parse.Make (Stf_native.Reader)
-
-let parse_stf filename = Lwt_main.run (StfParser.parse_file filename)
+let parse_stf filename = Lwt_main.run (Stf.Parse.parse_file filename)
 
 let parse_command =
   Command.basic ~summary:"parse a p4_16 program"
