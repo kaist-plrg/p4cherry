@@ -165,7 +165,6 @@
         let packet = document.getElementById("packet").value.replace(/\s+/g, '');
         try {
           let output = P4cherry.eval(arch, p4_code, port, packet)[1][1];
-          console.log(output);
           document.getElementById("output").innerText = output;
         } catch (error) {
           console.error("Error executing P4cherry.eval:", error);
@@ -177,7 +176,6 @@
         let stf = document.getElementById("stf").value;
         try {
           let output = P4cherry.evalStf(arch, p4_code, stf)[1][1];
-          console.log(output);
           document.getElementById("output").innerText = output;
         } catch (error) {
           console.error("Error executing P4cherry.eval:", error);

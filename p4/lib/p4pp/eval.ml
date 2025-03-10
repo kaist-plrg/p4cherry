@@ -196,7 +196,6 @@ module Make (F : F) = struct
       with Prelexer.Error s->
           Format.asprintf "prelexer error: %s" s |>Util.Error.error_parser_no_info
     in
-    Printf.printf "%s\n" prelex_contents;
     let lexbuf = Lexing.from_string prelex_contents in
     let tok buf =
       let t = Lexer.token buf in

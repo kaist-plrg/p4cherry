@@ -48,7 +48,7 @@ let eval_stf (arch : string) (preprocessed_code : string) (stf : string) : strin
       Stf.Parse.parse stf >>= fun stmts_stf -> (
       let pass, result = Driver.run_web cenv tdenv fenv venv sto stmts_stf in
         if pass then Lwt.return (Format.sprintf "[PASS]")
-        else Lwt.return (Format.sprintf "[FAIL] %s" result)
+        else Lwt.return (Format.sprintf "%s" result)
     ))
     (function
       | ParseErr (msg, info)
