@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,16 +11,20 @@
       /* text-align: center; */
       margin: 20px;
     }
-    textarea, input {
+
+    textarea,
+    input {
       width: 80%;
       margin: 5px 0;
       padding: 8px;
     }
+
     button {
       padding: 10px 20px;
       margin-top: 10px;
       cursor: pointer;
     }
+
     pre {
       background-color: #f4f4f4;
       padding: 10px;
@@ -29,20 +34,28 @@
 
   <script src="web.bc.js"></script>
 
-  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
-  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"></link>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/mdn-like.min.css"></link>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/neo.min.css"></link>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/3024-day.min.css"/>
+  <script language="javascript" type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+  <script language="javascript" type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+  </link>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/mdn-like.min.css">
+  </link>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/neo.min.css">
+  </link>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/3024-day.min.css" />
 
 </head>
+
 <body>
   <h1>P4 Sandbox</h1>
 
   <label>P4 Program:</label><br>
-    
-    
+
   <textarea id="p4_code" rows="50" placeholder="Enter P4 program" style="text-align:left">
       #include <core.p4>
       #include <v1model.p4>
@@ -92,40 +105,40 @@
       V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;      
   </textarea><br>
   <select id="input_type" name="input_type" onChange=render() default="packet">
-      <option value="packet">Single Port and Packet</option>
-      <option value="stf">STF file</option>
+    <option value="packet">Single Port and Packet</option>
+    <option value="stf">STF file</option>
   </select>
   <div id="input_container"></div>
-  <br/>
+  <br />
   <script>
   </script>
   <label>Architecture:</label><br>
   <select id="arch" name="arch">
-      <option value="v1model">V1model</option>
-      <option value="ebpf">EBPF</option>
+    <option value="v1model">V1model</option>
+    <option value="ebpf">EBPF</option>
   </select>
-  <br/>
+  <br />
   <button onclick="runP4()">Run P4</button>
 
   <h2>Output Port and Packet:</h2>
   <pre id="output"></pre>
 
 
- <script>
+  <script>
     var editor = CodeMirror.fromTextArea(document.getElementById('p4_code'), {
       lineNumbers: true,
       mode: 'text/x-c++src',
       theme: '3024-day',
     });
     function render() {
-        var input_container = document.getElementById('input_container');
-      var input_type = document.getElementById('input_type').value;
-      input_container.innerHTML = (input_type == "packet") ? 
-          '<label>Input Port:</label><br><textarea id="port" rows="1" placeholder="Enter input port">0</textarea><br><label>Input Packet:</label><br><textarea id="packet" rows="2" placeholder="Enter input packet">00000001 00000002 00000000 00000000</textarea>'
-          : '<label>STF file:</label><br><textarea id="stf"></textarea>'
+      let input_container = document.getElementById('input_container');
+      let input_type = document.getElementById('input_type').value;
+      input_container.innerHTML = (input_type == "packet") ?
+        '<label>Input Port:</label><br><textarea id="port" rows="1" placeholder="Enter input port">0</textarea><br><label>Input Packet:</label><br><textarea id="packet" rows="2" placeholder="Enter input packet">00000001 00000002 00000000 00000000</textarea>'
+        : '<label>STF file:</label><br><textarea id="stf"></textarea>'
     }
     render()
-      async function getIncludesPath() {
+    async function getIncludesPath() {
       try {
         let response = await fetch("/get-includes-path");
         let data = await response.json();
@@ -142,21 +155,37 @@
         document.getElementById("output").innerText = "Error: P4cherry is not loaded.";
         return;
       }
-
-    let p4_code = editor.getValue();
-      let port = document.getElementById("port").value;
-      let packet = document.getElementById("packet").value.replace(/\s+/g, '');
+      let input_type = document.getElementById('input_type').value;
+      let p4_code = editor.getValue();
       let arch = document.getElementById("arch").value;
 
-      try {
-        let output = P4cherry.eval(arch, p4_code, port, packet)[1][1];
-        console.log(output);
-        document.getElementById("output").innerText = output;
-      } catch (error) {
-        console.error("Error executing P4cherry.eval:", error);
-        document.getElementById("output").innerText = "Error executing P4cherry.";
+      if (input_type == "packet") {
+        document.getElementById("output").innerText = "executing.."
+        let port = document.getElementById("port").value;
+        let packet = document.getElementById("packet").value.replace(/\s+/g, '');
+        try {
+          let output = P4cherry.eval(arch, p4_code, port, packet)[1][1];
+          console.log(output);
+          document.getElementById("output").innerText = output;
+        } catch (error) {
+          console.error("Error executing P4cherry.eval:", error);
+          document.getElementById("output").innerText = "Error executing P4cherry.";
+        }
+      }
+      else {
+        document.getElementById("output").innerText = "executing.."
+        let stf = document.getElementById("stf").value;
+        try {
+          let output = P4cherry.eval_stf(arch, p4_code, stf);
+          console.log(output);
+          document.getElementById("output").innerText = output;
+        } catch (error) {
+          console.error("Error executing P4cherry.eval:", error);
+          document.getElementById("output").innerText = "Error executing P4cherry.";
+        }
       }
     }
   </script>
 </body>
+
 </html>
