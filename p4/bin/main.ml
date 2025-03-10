@@ -79,7 +79,7 @@ let run_command =
            Instance.Instantiate.instantiate_program program
          in
          let (module Driver) = Exec.Gen.gen arch in
-         let stmts_stf = parse_stf stfname in
+         let stmts_stf = Lwt_main.run (parse_stf stfname) in
          Driver.run cenv tdenv fenv venv sto stmts_stf |> ignore
        with
        | ParseErr (msg, info)

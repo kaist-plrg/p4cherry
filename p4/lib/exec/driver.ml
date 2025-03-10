@@ -96,6 +96,8 @@ end
 module type DRIVER = sig
   val run :
     CEnv.t -> TDEnv.t -> FEnv.t -> VEnv.t -> Sto.t -> Stf.Ast.stmt list -> bool
+  val run_web :
+    CEnv.t -> TDEnv.t -> FEnv.t -> VEnv.t -> Sto.t -> Stf.Ast.stmt list -> bool * string
 
   val run_packet :
     CEnv.t ->
@@ -413,6 +415,27 @@ module Make
           stmt_stf
         |> error
 
+  let run_stf_stmts_and_return (ctx: Ctx.t) (stmts_stf : Stf.Ast.stmt list) : bool * string =
+    let _, pass, queue_packet, queue_expect = 
+    List.fold_left
+      (fun (ctx, pass, queue_packet, queue_expect) stmt_stf ->
+        run_stf_stmt ctx pass queue_packet queue_expect stmt_stf)
+      (ctx, true, [], []) stmts_stf
+    in
+    let pass = pass && queue_packet = [] && queue_expect = [] in
+    let buf = Buffer.create 100 in 
+    if queue_packet <> [] then (
+      Printf.sprintf "[FAIL] Remaining packets to be matched:\n" |> Buffer.add_string buf;
+      List.iteri
+        (fun idx (port, packet) -> Printf.sprintf "(%d) %d %s\n" idx port packet |> Buffer.add_string buf)
+        queue_packet);
+    if queue_expect <> [] then (
+      Printf.sprintf "[FAIL] Expected packets to be output:\n" |> Buffer.add_string buf;
+      List.iteri
+        (fun idx (port, packet) -> Printf.sprintf "(%d) %d %s\n" idx port packet |> Buffer.add_string buf)
+        queue_expect);
+    pass, (Buffer.contents buf)
+
   let run_stf_stmts (ctx : Ctx.t) (stmts_stf : Stf.Ast.stmt list) : bool =
     let _, pass, queue_packet, queue_expect =
       List.fold_left
@@ -442,6 +465,14 @@ module Make
     let port_in = int_of_string port_in in
     let packet_in = String.uppercase_ascii packet_in in
     Arch.drive_pipe ctx port_in packet_in
+
+  
+  let run_web (cenv : CEnv.t) (tdenv : TDEnv.t) (fenv : FEnv.t) (venv : VEnv.t)
+      (sto : Sto.t) (stmts_stf : Stf.Ast.stmt list) : bool * string =
+    let ctx = { Ctx.empty with global = { cenv; tdenv; fenv; venv } } in
+    let ctx, sto = Arch.init ctx sto in
+    Interp.init sto;
+    run_stf_stmts_and_return ctx stmts_stf
 
   let run (cenv : CEnv.t) (tdenv : TDEnv.t) (fenv : FEnv.t) (venv : VEnv.t)
       (sto : Sto.t) (stmts_stf : Stf.Ast.stmt list) : bool =

@@ -46,11 +46,10 @@ let eval_stf (arch : string) (preprocessed_code : string) (stf : string) : strin
       in
       let (module Driver) = Exec.Gen.gen arch in
       Stf.Parse.parse stf >>= fun stmts_stf -> (
-      let result = Driver.run cenv tdenv fenv venv sto stmts_stf in
-      match result with
-      | Some (port_out, packet_out) ->
-          Lwt.return (Format.sprintf "(%d) %s" port_out packet_out)
-      | None -> Lwt.return "packet dropped"))
+      let pass, result = Driver.run_web cenv tdenv fenv venv sto stmts_stf in
+        if pass then Lwt.return (Format.sprintf "[PASS]")
+        else Lwt.return (Format.sprintf "[FAIL] %s" result)
+    ))
     (function
       | ParseErr (msg, info)
       | CheckErr (msg, info)
@@ -71,6 +70,6 @@ let _ =
        method eval arch p4_code port packet =
          eval (Js.to_string arch) (Js.to_string p4_code) (Js.to_string port)
            (Js.to_string packet)
-        method eval_stf arch p4_code stf =
+        method evalStf arch p4_code stf =
             eval_stf (Js.to_string arch) (Js.to_string p4_code) (Js.to_string stf)
     end)
