@@ -14,7 +14,7 @@ let roundtrip_p4 includes filename : El.Ast.program =
 let typecheck includes filename : Il.Ast.program =
   parse_p4 includes filename |> Typing.Typecheck.type_program
 
-let parse_stf filename = Lwt_main.run (Stf.Parse.parse_file filename)
+let parse_stf filename = Stf.Parse.parse_file filename
 
 let parse_command =
   Command.basic ~summary:"parse a p4_16 program"
@@ -79,7 +79,7 @@ let run_command =
            Instance.Instantiate.instantiate_program program
          in
          let (module Driver) = Exec.Gen.gen arch in
-         let stmts_stf = Lwt_main.run (parse_stf stfname) in
+         let stmts_stf = parse_stf stfname in
          Driver.run cenv tdenv fenv venv sto stmts_stf |> ignore
        with
        | ParseErr (msg, info)

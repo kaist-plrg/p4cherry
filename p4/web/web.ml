@@ -45,9 +45,9 @@ let eval_stf (arch : string) (preprocessed_code : string) (stf : string) : strin
         Instance.Instantiate.instantiate_program program
       in
       let (module Driver) = Exec.Gen.gen arch in
-      Stf.Parse.parse stf >>= fun stmts_stf -> (
+      let stmts_stf = Stf.Parse.parse stf in 
       let _, result = Driver.run_web cenv tdenv fenv venv sto stmts_stf in Lwt.return (Format.sprintf "%s" result)
-    ))
+    )
     (function
       | ParseErr (msg, info)
       | CheckErr (msg, info)
