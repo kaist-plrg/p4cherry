@@ -3,14 +3,20 @@ open Util.Error
 
 let version = "0.1"
 
-let parse includes filename : El.Ast.program =
-  Frontend.Parse.parse_file includes filename
+module P4Parser = Frontend.Parse.Make (Frontend_native.Preprocessor)
 
-let roundtrip includes filename : El.Ast.program =
-  Frontend.Parse.roundtrip_file includes filename
+let parse_p4 includes filename : El.Ast.program =
+  Lwt_main.run (P4Parser.parse_file includes filename)
+
+let roundtrip_p4 includes filename : El.Ast.program =
+  Lwt_main.run (P4Parser.roundtrip_file includes filename)
 
 let typecheck includes filename : Il.Ast.program =
-  parse includes filename |> Typing.Typecheck.type_program
+  parse_p4 includes filename |> Typing.Typecheck.type_program
+
+module StfParser = Stf.Parse.Make (Stf_native.Reader)
+
+let parse_stf filename = Lwt_main.run (StfParser.parse_file filename)
 
 let parse_command =
   Command.basic ~summary:"parse a p4_16 program"
@@ -23,7 +29,7 @@ let parse_command =
      fun () ->
        try
          let program =
-           let func = if roundtrip_flag then roundtrip else parse in
+           let func = if roundtrip_flag then roundtrip_p4 else parse_p4 in
            func includes filename
          in
          Format.printf "%a\n" El.Pp.pp_program program
@@ -75,8 +81,35 @@ let run_command =
            Instance.Instantiate.instantiate_program program
          in
          let (module Driver) = Exec.Gen.gen arch in
-         let stmts_stf = Stf.Parse.parse_file stfname in
+         let stmts_stf = parse_stf stfname in
          Driver.run cenv tdenv fenv venv sto stmts_stf |> ignore
+       with
+       | ParseErr (msg, info)
+       | CheckErr (msg, info)
+       | InstErr (msg, info)
+       | InterpErr (msg, info) ->
+           if Util.Source.is_no_info info then Format.printf "Error: %s\n" msg
+           else Format.printf "Error: %a\n%s\n" Util.Source.pp info msg
+       | DriverErr msg -> Format.printf "Error: %s\n" msg
+       | StfErr msg -> Format.printf "Error: %s\n" msg)
+
+let run_packet_command =
+  Command.basic ~summary:"run a p4_16 program with a single packet input"
+    (let open Command.Let_syntax in
+     let open Command.Param in
+     let%map includes = flag "-i" (listed string) ~doc:"include paths"
+     and arch = flag "-a" (required string) ~doc:"target architecture"
+     and port = flag "--port" (required string) ~doc:"port_in"
+     and packet = flag "--packet" (required string) ~doc:"packet_in"
+     and filename = anon ("file.p4" %: string) in
+     fun () ->
+       try
+         let program = typecheck includes filename in
+         let cenv, tdenv, fenv, venv, sto =
+           Instance.Instantiate.instantiate_program program
+         in
+         let (module Driver) = Exec.Gen.gen arch in
+         Driver.run_packet cenv tdenv fenv venv sto port packet |> ignore
        with
        | ParseErr (msg, info)
        | CheckErr (msg, info)
@@ -94,6 +127,7 @@ let command =
       ("typecheck", typecheck_command);
       ("instantiate", instantiate_command);
       ("run", run_command);
+      ("run-packet", run_packet_command);
     ]
 
 let () = Command_unix.run ~version command

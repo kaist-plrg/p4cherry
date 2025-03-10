@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P4 Web Interface</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    textarea, input {
+      width: 80%;
+      margin: 5px 0;
+      padding: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>P4 Sandbox</h1>
+
+  <label>P4 Program:</label><br>
+  <textarea id="p4_code" rows="30" placeholder="Enter P4 program"></textarea><br>
+
+  <label>Input Port:</label><br>
+  <textarea id="port" rows="1" placeholder="Enter input port"></textarea><br>
+
+  <label>Input Packet:</label><br>
+  <textarea id="packet" rows="2" placeholder="Enter input packet"></textarea><br>
+
+  <label>Architecture:</label><br>
+  <input id="arch" type="text" placeholder="Enter architecture (e.g., v1model)"><br>
+
+  <button onclick="runP4()">Run P4</button>
+
+  <h2>Output Port and Packet:</h2>
+  <pre id="output"></pre>
+
+  <script src="web.bc.js"></script>
+
+  <script>
+      async function getIncludesPath() {
+      try {
+        let response = await fetch("/get-includes-path");
+        let data = await response.json();
+        return data.path;
+      } catch (error) {
+        console.error("Failed to fetch includes path:", error);
+        return null;
+      }
+    }
+
+    async function runP4() {
+      if (typeof P4cherry === "undefined") {
+        console.error("P4cherry is not defined. Make sure web.bc.js is loaded correctly.");
+        document.getElementById("output").innerText = "Error: P4cherry is not loaded.";
+        return;
+      }
+
+      let p4_code = document.getElementById("p4_code").value;
+      let port = document.getElementById("port").value;
+      let packet = document.getElementById("packet").value;
+      let arch = document.getElementById("arch").value;
+      let includes = [await getIncludesPath()];
+
+      if (!includes) {
+        document.getElementById("output").innerText = "Error: Failed to get includes path.";
+        return;
+      }
+
+      try {
+        let saveResponse = await fetch("/save_files", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ p4_code: p4_code })
+        });
+        if (!saveResponse.ok) throw new Error("Failed to save files");
+        let saveResult = await saveResponse.json();
+
+        let filename = saveResult.filename;
+
+        let output = await P4cherry.eval(includes, arch, filename, port, packet);
+        console.log(output);
+        document.getElementById("output").innerText = output;
+      } catch (error) {
+        console.error("Error executing P4cherry.eval:", error);
+        document.getElementById("output").innerText = "Error executing P4cherry.";
+      }
+    }
+  </script>
+</body>
+</html>
