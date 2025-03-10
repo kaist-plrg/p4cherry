@@ -35,17 +35,17 @@ let compare_packet packet_out packet_expect : bool =
        (fun same o e -> same && (e = '*' || o = e))
        true packet_out packet_expect
 
-let compare_result (port_out, packet_out) (port_expect, packet_expect) : bool =
+let compare_result (port_out, packet_out) (port_expect, packet_expect) buf : bool * Buffer.t =
   let pass =
     port_out = port_expect && compare_packet packet_out packet_expect
   in
   if pass then
-    F.printf "[PASS] Expected: %d %s / Got: %d %s\n" port_expect packet_expect
+    Printf.bprintf buf "[PASS] Expected: %d %s / Got: %d %s\n" port_expect packet_expect
       port_out packet_out
   else
-    F.printf "[FAIL] Expected: %d %s / Got: %d %s\n" port_expect packet_expect
+    Printf.bprintf buf "[FAIL] Expected: %d %s / Got: %d %s\n" port_expect packet_expect
       port_out packet_out;
-  pass
+  pass, buf
 
 (* Helpers *)
 
@@ -364,8 +364,8 @@ module Make
   (* STF interpreter *)
 
   let run_stf_stmt (ctx : Ctx.t) (pass : bool) (queue_packet : result list)
-      (queue_expect : result list) (stmt_stf : Stf.Ast.stmt) :
-      Ctx.t * bool * result list * result list =
+      (queue_expect : result list) (stmt_stf : Stf.Ast.stmt) (buf: Buffer.t) :
+      Ctx.t * bool * result list * result list * Buffer.t=
     match stmt_stf with
     (* Packet I/O *)
     | Stf.Ast.Packet (port_in, packet_in) -> (
@@ -373,19 +373,18 @@ module Make
         let packet_in = String.uppercase_ascii packet_in in
         let result_out = Arch.drive_pipe ctx port_in packet_in in
         match result_out with
-        | None -> (ctx, pass, queue_packet, queue_expect)
+        | None -> (ctx, pass, queue_packet, queue_expect, buf)
         | Some (port_out, packet_out) -> (
             match queue_expect with
             | [] ->
                 let queue_packet = queue_packet @ [ (port_out, packet_out) ] in
-                (ctx, pass, queue_packet, queue_expect)
+                (ctx, pass, queue_packet, queue_expect, buf)
             | (port_expect, packet_expect) :: queue_expect ->
-                let pass =
+                let pass_cmp, buf =
                   compare_result (port_out, packet_out)
-                    (port_expect, packet_expect)
-                  && pass
+                    (port_expect, packet_expect) buf
                 in
-                (ctx, pass, queue_packet, queue_expect)))
+                (ctx, pass_cmp && pass, queue_packet, queue_expect, buf)))
     | Stf.Ast.Expect (port_expect, Some packet_expect) -> (
         let port_expect = int_of_string port_expect in
         let packet_expect = String.uppercase_ascii packet_expect in
@@ -394,56 +393,58 @@ module Make
             ( ctx,
               pass,
               queue_packet,
-              queue_expect @ [ (port_expect, packet_expect) ] )
+              queue_expect @ [ (port_expect, packet_expect) ],
+                buf )
         | (port_out, packet_out) :: queue_packet ->
-            let pass =
-              compare_result (port_out, packet_out) (port_expect, packet_expect)
-              && pass
+            let pass_cmp, buf =
+              compare_result (port_out, packet_out) (port_expect, packet_expect) buf
             in
-            (ctx, pass, queue_packet, queue_expect))
+            (ctx, pass_cmp && pass, queue_packet, queue_expect, buf))
     (* Table operations *)
     | Stf.Ast.Add (id_table, priority, keys, action, _) ->
         add_table_entry id_table keys action priority;
-        (ctx, pass, queue_packet, queue_expect)
+        (ctx, pass, queue_packet, queue_expect, buf)
     | Stf.Ast.SetDefault (id_table, action) ->
         add_table_default id_table action;
-        (ctx, pass, queue_packet, queue_expect)
+        (ctx, pass, queue_packet, queue_expect, buf)
     (* Timing *)
-    | Stf.Ast.Wait -> (ctx, pass, queue_packet, queue_expect)
+    | Stf.Ast.Wait -> (ctx, pass, queue_packet, queue_expect, buf)
     | _ ->
         F.asprintf "(run_stf_stmt) unknown stf stmt: %a" Stf.Print.print_stmt
           stmt_stf
         |> error
 
   let run_stf_stmts_and_return (ctx: Ctx.t) (stmts_stf : Stf.Ast.stmt list) : bool * string =
-    let _, pass, queue_packet, queue_expect = 
+    let buf = Buffer.create 100 in 
+    let _, pass, queue_packet, queue_expect, buf = 
     List.fold_left
-      (fun (ctx, pass, queue_packet, queue_expect) stmt_stf ->
-        run_stf_stmt ctx pass queue_packet queue_expect stmt_stf)
-      (ctx, true, [], []) stmts_stf
+      (fun (ctx, pass, queue_packet, queue_expect, buf) stmt_stf ->
+        run_stf_stmt ctx pass queue_packet queue_expect stmt_stf buf)
+      (ctx, true, [], [], buf) stmts_stf
     in
     let pass = pass && queue_packet = [] && queue_expect = [] in
-    let buf = Buffer.create 100 in 
     if queue_packet <> [] then (
-      Printf.sprintf "[FAIL] Remaining packets to be matched:\n" |> Buffer.add_string buf;
+      Printf.bprintf buf "[FAIL] Remaining packets to be matched:\n";
       List.iteri
         (fun idx (port, packet) -> Printf.sprintf "(%d) %d %s\n" idx port packet |> Buffer.add_string buf)
         queue_packet);
     if queue_expect <> [] then (
-      Printf.sprintf "[FAIL] Expected packets to be output:\n" |> Buffer.add_string buf;
+      Printf.bprintf buf "[FAIL] Expected packets to be output:\n";
       List.iteri
         (fun idx (port, packet) -> Printf.sprintf "(%d) %d %s\n" idx port packet |> Buffer.add_string buf)
         queue_expect);
     pass, (Buffer.contents buf)
 
   let run_stf_stmts (ctx : Ctx.t) (stmts_stf : Stf.Ast.stmt list) : bool =
-    let _, pass, queue_packet, queue_expect =
+    let buf = Buffer.create 100 in 
+    let _, pass, queue_packet, queue_expect, buf =
       List.fold_left
-        (fun (ctx, pass, queue_packet, queue_expect) stmt_stf ->
-          run_stf_stmt ctx pass queue_packet queue_expect stmt_stf)
-        (ctx, true, [], []) stmts_stf
+        (fun (ctx, pass, queue_packet, queue_expect, buf) stmt_stf ->
+          run_stf_stmt ctx pass queue_packet queue_expect stmt_stf buf)
+        (ctx, true, [], [], buf) stmts_stf
     in
     let pass = pass && queue_packet = [] && queue_expect = [] in
+    F.printf "%s" (Buffer.contents buf);
     if queue_packet <> [] then (
       F.printf "[FAIL] Remaining packets to be matched:\n";
       List.iteri
