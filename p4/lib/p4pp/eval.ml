@@ -230,10 +230,11 @@ module FileSystem = Make (struct
 end)
 
 module Web = Make (struct
-  let exists = function "/core.p4" | "/v1model.p4" -> true | _ -> false
+  let exists = function "/core.p4" | "/v1model.p4" | "/ebpf_model.p4" -> true | _ -> false
 
   let load = function
     | "/core.p4" -> Bake.core_p4_str
     | "/v1model.p4" -> Bake.v1model_p4_str
+    | "/ebpf_model.p4" -> Bake.ebpf_model_p4_str
     | fn -> failwith (fn ^ ": not found")
 end)
