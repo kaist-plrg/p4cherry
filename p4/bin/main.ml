@@ -6,10 +6,10 @@ let version = "0.1"
 module P4Parser = Frontend.Parse.Make (Frontend_native.Preprocessor)
 
 let parse_p4 includes filename : El.Ast.program =
-  Lwt_main.run (P4Parser.parse_file includes filename)
+  P4Parser.parse_file includes filename
 
 let roundtrip_p4 includes filename : El.Ast.program =
-  Lwt_main.run (P4Parser.roundtrip_file includes filename)
+  P4Parser.roundtrip_file includes filename
 
 let typecheck includes filename : Il.Ast.program =
   parse_p4 includes filename |> Typing.Typecheck.type_program

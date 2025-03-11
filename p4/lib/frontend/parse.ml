@@ -1,5 +1,4 @@
 open Util.Error
-open Lwt.Infix
 open Preprocessor
 open Core
 
@@ -22,30 +21,27 @@ let parse (lexbuf : Lexing.lexbuf) =
 
 module Make (Preprocessor : PREPROCESSOR) = struct
   let preprocess (includes : string list) (filename : string) (p4_code : string)
-      : string Lwt.t =
-    try Preprocessor.preprocess includes filename p4_code
-    with ParseErr (s, info) ->
-      Format.asprintf "preprocessor error: %s" s |> error_info info
+      : string =
+    Preprocessor.preprocess includes filename p4_code
 
   let parse_file (includes : string list) (filename : string) :
-      El.Ast.program Lwt.t =
+      El.Ast.program =
     let p4_code = In_channel.(with_file filename ~f:input_all) in
-    preprocess includes filename p4_code >>= fun preprocessed_code ->
+    let preprocessed_code = preprocess includes filename p4_code in
     let tokens = lex filename preprocessed_code in
-    Lwt.return (parse tokens)
+    parse tokens
 
   let parse_string (filename : string)
-      (file : string) : El.Ast.program Lwt.t =
-              preprocess ["/"] filename file >>= fun preprocessed_code ->
+      (file : string) : El.Ast.program =
+    let preprocessed_code = preprocess ["/"] filename file in
     let tokens = lex filename preprocessed_code in
-    Lwt.return (parse tokens)
+    parse tokens
 
-  let roundtrip_file (includes : string list) (filename : string) :
-      El.Ast.program Lwt.t =
-    parse_file includes filename >>= fun program ->
+  let roundtrip_file (includes : string list) (filename : string) =
+    let program = parse_file includes filename in
     let program_str = Format.asprintf "%a\n" El.Pp.pp_program program in
-    parse_string filename program_str >>= fun program' ->
+    let program' = parse_string filename program_str in
     if not (El.Eq.eq_program program program') then
-      "roundtrip error" |> error_no_info
-    else Lwt.return program
+      "roundtrip error" |> error_no_info;
+    program
 end

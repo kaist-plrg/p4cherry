@@ -1,19 +1,18 @@
 open Util.Error
 open Js_of_ocaml
-open Lwt.Infix
 module P4Parser = Frontend.Parse.Make (Frontend_web.Preprocessor)
 
 let input_name = "input_code.p4"
 
-let typecheck p4_code : Il.Ast.program Lwt.t =
-  P4Parser.parse_string input_name p4_code >>= fun program ->
-  Lwt.return (Typing.Typecheck.type_program program)
+let typecheck p4_code : Il.Ast.program =
+  let program = P4Parser.parse_string input_name p4_code in
+  Typing.Typecheck.type_program program
 
 let eval (arch : string) (preprocessed_code : string) (port : string)
     (packet : string) : string Lwt.t =
-  typecheck preprocessed_code >>= fun program ->
   Lwt.catch
     (fun () ->
+      let program = typecheck preprocessed_code in
       let cenv, tdenv, fenv, venv, sto =
         Instance.Instantiate.instantiate_program program
       in
@@ -38,9 +37,9 @@ let eval (arch : string) (preprocessed_code : string) (port : string)
       | exn -> Lwt.fail exn)
 
 let eval_stf (arch : string) (preprocessed_code : string) (stf : string) : string Lwt.t =
-  typecheck preprocessed_code >>= fun program ->
   Lwt.catch
     (fun () ->
+      let program = typecheck preprocessed_code in
       let cenv, tdenv, fenv, venv, sto =
         Instance.Instantiate.instantiate_program program
       in
