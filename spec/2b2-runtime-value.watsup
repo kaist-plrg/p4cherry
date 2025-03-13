@@ -33,6 +33,7 @@ syntax val =
   | DefaultV                        hint(show DEFAULT#_#V)
   | InvalidV                        hint(show INVALID#_#V)
   | SetV setval                     hint(show SET#_#V %)
+  | StateV id
 
 syntax setval =
   | SingletonSet val                hint(show %latex("\\{") % %latex("\\}"))

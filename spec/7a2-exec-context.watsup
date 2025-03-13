@@ -44,3 +44,9 @@ var E : context
 
 def $add_val(cursor, context, id, val) : context
     hint(show %2.%1.VENV#(S)#%latex("\\{")#%3#%latex("\\mapsto")#%4#%latex("\\}"))
+
+;;
+;; Finders
+;;
+
+def $find_val_exec(cursor, context, nameIL) : val

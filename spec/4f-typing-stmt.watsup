@@ -31,7 +31,7 @@ rule Lval_ok/arracce:
   -- Lval_ok: p C |- exprIL_b
 
 rule Lval_ok/bitacce:
-  p C |- BitAccE exprIL_b exprIL_l exprIL_h
+  p C |- BitAccE exprIL_b val_l val_h
   -- Lval_ok: p C |- exprIL_b
 
 rule Lval_ok/expracce:

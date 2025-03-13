@@ -130,7 +130,7 @@ syntax exprIL =
   | RangeE exprIL exprIL                              hint(show % ... %)
   | SelectE exprIL* selectcaseIL*                     hint(show SELECT (%) %latex("\\{")#%#%latex("\\}"))
   | ArrAccE exprIL exprIL                             hint(show %`[%])
-  | BitAccE exprIL exprIL exprIL                      hint(show %`[% `: %])
+  | BitAccE exprIL val val                            hint(show %`[% `: %])
   | ExprAccE exprIL memberIL                          hint(show %.%)
   | CallFuncE nameIL targIL* argIL*                   hint(show %#%latex("\\langle")#%#%latex("\\rangle")#(%)#%latex())
   | CallMethodE exprIL memberIL targIL* argIL*        hint(show %.%#%latex("\\langle")#%#%latex("\\rangle")#(%)#%latex())

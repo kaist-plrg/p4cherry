@@ -5,73 +5,55 @@
 rule Eval_expr/valuee:
   p E |- ValueE val : E (CONT val)
 
-;;
-;; (TODO) L307-593
-;;
 
 
+rule Eval_expr/namee:
+  p E |- NameE nameIL : E (CONT val)
+  -- if val = $find_val_exec(p, E, nameIL)
 
-;;rule Eval_expr/vare:
-;;  p E |- NameE var : E (CONT val)
-;;  -- if val = 
+
 
 rule Eval_expr/seqe-cont:
-  p E |- SeqE exprs* : E' (CONT val)
-  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
-  -- if val = SeqV values*
+  p E |- SeqE exprIL* : E' (CONT val')
+  -- Eval_exprs: p E |- exprIL* : E' (CONT val*)
+  -- if val' = SeqV val*
 
-rule Eval_expr/seqe-reject:
-  p E |- SeqE exprs* : E' (REJECT val)
-  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
-
-rule Eval_expr/seqe-exit:
-  p E |- SeqE exprs* : E' EXIT
-  -- Eval_exprs: p E |- exprs* : E' EXIT
+rule Eval_expr/seqe-nocont:
+  p E |- SeqE exprIL* : E' xsignal
+  -- Eval_exprs: p E |- exprIL* : E' xsignal
 
 
 
 rule Eval_expr/seqdefaulte-cont:
-  p E |- SeqDefaultE exprs* : E' (CONT val)
-  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
-  -- if val = SeqDefaultV values*
+  p E |- SeqDefaultE exprIL* : E' (CONT val')
+  -- Eval_exprs: p E |- exprIL* : E' (CONT val*)
+  -- if val' = SeqDefaultV val*
 
-rule Eval_expr/seqdefaulte-reject:
-  p E |- SeqDefaultE exprs* : E' (REJECT val)
-  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
-
-rule Eval_expr/seqdefaulte-exit:
-  p E |- SeqDefaultE exprs* : E' EXIT
-  -- Eval_exprs: p E |- exprs* : E' EXIT
+rule Eval_expr/seqdefaulte-nocont:
+  p E |- SeqDefaultE exprIL* : E' xsignal
+  -- Eval_exprs: p E |- exprIL* : E' xsignal
 
 
 
 rule Eval_expr/recorde-cont:
-  p E |- RecordE (member, exprs)* : E' (CONT val)
-  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
-  -- if val = RecordV (member, values)*
+  p E |- RecordE (member, exprIL)* : E' (CONT val')
+  -- Eval_exprs: p E |- exprIL* : E' (CONT val*)
+  -- if val' = RecordV (member, val)*
 
-rule Eval_expr/recorde-reject:
-  p E |- RecordE (member, exprs)* : E' (REJECT val)
-  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
-
-rule Eval_expr/recorde-exit:
-  p E |- RecordE (member, exprs)* : E' EXIT
-  -- Eval_exprs: p E |- exprs* : E' EXIT
+rule Eval_expr/recorde-nocont:
+  p E |- RecordE (member, exprIL)* : E' xsignal
+  -- Eval_exprs: p E |- exprIL* : E' xsignal
 
 
 
 rule Eval_expr/recorddefaulte-cont:
-  p E |- RecordDefaultE (member, exprs)* : E' (CONT val)
-  -- Eval_exprs: p E |- exprs* : E' (CONT values*)
-  -- if val = RecordDefaultV (member, values)*
+  p E |- RecordDefaultE (member, exprIL)* : E' (CONT val')
+  -- Eval_exprs: p E |- exprIL* : E' (CONT val*)
+  -- if val' = RecordDefaultV (member, val)*
 
-rule Eval_expr/recorddefaulte-reject:
-  p E |- RecordDefaultE (member, exprs)* : E' (REJECT val)
-  -- Eval_exprs: p E |- exprs* : E' (REJECT val)
-
-rule Eval_expr/recorddefaulte-exit:
-  p E |- RecordDefaultE (member, exprs)* : E' EXIT
-  -- Eval_exprs: p E |- exprs* : E' EXIT
+rule Eval_expr/recorddefaulte-nocont:
+  p E |- RecordDefaultE (member, exprIL)* : E' xsignal
+  -- Eval_exprs: p E |- exprIL* : E' xsignal
 
 
 
@@ -86,12 +68,8 @@ rule Eval_expr/une-cont:
   -- if val' = $un_op(unop, val)
 
 rule Eval_expr/une-reject:
-  p E |- UnE unop exprIL : E' (REJECT val)
-  -- Eval_expr: p E |- exprIL : E' (REJECT val)
-
-rule Eval_expr/une-exit:
-  p E |- UnE unop exprIL : E' EXIT
-  -- Eval_expr: p E |- exprIL : E' EXIT
+  p E |- UnE unop exprIL : E' xsignal
+  -- Eval_expr: p E |- exprIL : E' xsignal
 
 
 
@@ -99,9 +77,19 @@ rule Eval_expr/bine-land-early:
   p E |- BinE LAND exprIL_l exprIL_r : E' (CONT (BoolV false))
   -- Eval_expr: p E |- exprIL_l : E' (CONT (BoolV false))
 
+rule Eval_expr/bine-land-whole:
+  p E |- BinE LAND exprIL_l exprIL_r : E'' signal
+  -- Eval_expr: p E |- exprIL_l : E' (CONT (BoolV true))
+  -- Eval_expr: p E' |- exprIL_r : E'' signal
+
 rule Eval_expr/bine-lor-early:
   p E |- BinE LOR exprIL_l exprIL_r : E' (CONT (BoolV true))
   -- Eval_expr: p E |- exprIL_l : E' (CONT (BoolV true))
+
+rule Eval_expr/bine-lor-whole:
+  p E |- BinE LOR exprIL_l exprIL_r : E'' signal
+  -- Eval_expr: p E |- exprIL_l : E' (CONT (BoolV false))
+  -- Eval_expr: p E' |- exprIL_r : E'' signal
 
 rule Eval_expr/bine:
   p E |- BinE binop exprIL_l exprIL_r : E'' (CONT val)
@@ -110,19 +98,342 @@ rule Eval_expr/bine:
   -- Eval_expr: p E' |- exprIL_r : E'' (CONT val_r)
   -- if val = $bin_op(binop, val_l, val_r)
 
+rule Eval_expr/bine-left-nocont:
+  p E |- BinE binop exprIL_l exprIL_r : E' xsignal
+  -- Eval_expr: p E |- exprIL_l : E' xsignal
+
+rule Eval_expr/bine-right-nocont:
+  p E |- BinE binop exprIL_l exprIL_r : E'' xsignal
+  -- Eval_expr: p E |- exprIL_l : E' (CONT val_l)
+  -- Eval_expr: p E |- exprIL_r : E'' xsignal
+
 
 
 rule Eval_expr/terne-true:
-  p E |- TernE exprIL_c exprIL_t exprIL_f : E'' (CONT val)
+  p E |- TernE exprIL_c exprIL_t exprIL_f : E'' signal
   -- Eval_expr: p E |- exprIL_c : E' (CONT (BoolV true))
-  -- Eval_expr: p E' |- exprIL_t : E'' (CONT val)
+  -- Eval_expr: p E' |- exprIL_t : E'' signal
 
 rule Eval_expr/terne-false:
-  p E |- TernE exprIL_c exprIL_t exprIL_f : E'' (CONT val)
+  p E |- TernE exprIL_c exprIL_t exprIL_f : E'' signal
   -- Eval_expr: p E |- exprIL_c : E' (CONT (BoolV false))
-  -- Eval_expr: p E' |- exprIL_f : E'' (CONT val)
+  -- Eval_expr: p E' |- exprIL_f : E'' signal
+
+rule Eval_expr/terne-nocont:
+  p E |- TernE exprIL_c exprIL_t exprIL_f : E' xsignal
+  -- Eval_expr: p E |- exprIL_c : E' xsignal
 
 
+
+rule Eval_expr/caste-cont:
+  p E |- CastE typ exprIL : E' (CONT val')
+  -- Eval_expr: p E |- exprIL : E' (CONT val)
+  -- if val' = $cast_op(typ, val)
+
+rule Eval_expr/caste-nocont:
+  p E |- CastE typ exprIL : E' xsignal
+  -- Eval_expr: p E |- exprIL : E' xsignal
+
+
+
+rule Eval_expr/maske-cont:
+  p E |- MaskE exprIL_base exprIL_mask : E'' (CONT val) 
+  -- Eval_expr: p E |- exprIL_base : E' (CONT val_base)
+  -- Eval_expr: p E' |- exprIL_mask : E'' (CONT val_mask)
+  -- if val = SetV (MaskSet val_base val_mask)
+
+rule Eval_expr/maske-nocont:
+  p E |- MaskE exprIL_base exprIL_mask : E' xsignal
+  -- Eval_expr: p E |- exprIL_base : E' xsignal
+
+rule Eval_expr/maske-nocont:
+  p E |- MaskE exprIL_base exprIL_mask : E'' xsignal
+  -- Eval_expr: p E |- exprIL_base : E' (CONT val_base)
+  -- Eval_expr: p E' |- exprIL_mask : E'' xsignal
+
+
+
+rule Eval_expr/rangee-cont:
+  p E |- RangeE exprIL_lb exprIL_ub : E'' (CONT val)
+  -- Eval_expr: p E |- exprIL_lb : E' (CONT val_lb)
+  -- Eval_expr: p E' |- exprIL_ub : E'' (CONT val_ub)
+  -- if val = SetV (RangeSet val_lb val_ub)
+
+rule Eval_expr/rangee-nocont:
+  p E |- RangeE exprIL_lb exprIL_ub : E' xsignal
+  -- Eval_expr: p E |- exprIL_lb : E' xsignal
+
+rule Eval_expr/rangee-nocont:
+  p E |- RangeE exprIL_lb exprIL_ub : E'' xsignal
+  -- Eval_expr: p E |- exprIL_lb : E' (CONT val_lb)
+  -- Eval_expr: p E' |- exporIL_ub : E'' (CONT val_ub)
+
+
+
+def $bitwise_and(val, val): val
+def $int_le(val, val): bool
+def $bool_and(bool, bool): bool
+
+;; TODO: complete the functions
+
+relation Eval_keyset_match:
+  val val : bool
+
+relation Eval_select_match_keyset:
+  cursor context |- val keysetIL : context signal(bool)
+
+relation Eval_select_match_keysets:
+  cursor context |- val* keysetIL* : context signal(bool)
+
+relation Eval_select_cases:
+  cursor context |- val* selectcaseIL* : context signal(statelabelIL?)
+
+rule Eval_keyset_match/singleton:
+  val_key (SetV (SingletonSet val)): bool
+  -- if bool = (val_key = val)
+
+rule Eval_keyset_match/mask:
+  val_key (SetV (MaskSet val_base val_mask)): bool
+  -- if val_base' = $bitwise_and(val_base, val_mask)
+  -- if val_key = $bitwise_and(val_key, val_mask)
+  -- if bool = (val_base' = val_key)
+
+rule Eval_keyset_match/range:
+  val_key (SetV (RangeSet val_lb val_ub)): bool
+  -- if lb = $int_le(val_lb, val_key)
+  -- if ub = $int_le(val_key, val_ub)
+  -- if bool = $bool_and(lb, ub)
+
+rule Eval_select_match_keyset/exprk-cont:
+  p E |- val_key (ExprK exprIL) : E' (CONT matched)
+  -- Eval_expr: p E |- exprIL : E' (CONT val)
+  -- Eval_keyset_match: val_key val : matched
+
+rule Eval_select_match_keyset/exprk-nocont:
+  p E |- val_key (ExprK exprIL) : E' xsignal
+  -- Eval_expr: p E |- exprIL : E' xsignal
+
+rule Eval_select_match_keyset/defaultk:
+  p E |- val_key DefaultK : E (CONT true)
+
+rule Eval_select_match_keyset/anyk:
+  p E |- val_key AnyK : E (CONT true)
+
+rule Eval_select_match_keysets/nil-to-nil:
+  p E |- eps eps : E (CONT true)
+
+rule Eval_select_match_keysets/many-to-one-cont:
+  p E |- val_key* keysetIL : E' (CONT bool)
+  -- if | val_key* | =/= 1
+  -- Eval_select_match_keyset: p E |- (SeqV val_key*) keysetIL : E' (CONT bool)
+
+rule Eval_select_match_keysets/many-to-one-nocont:
+  p E |- val_key* keysetIL : E' xsignal
+  -- if | val_key* | =/= 1
+  -- Eval_select_match_keyset: p E |- (SeqV val_key*) keysetIL : E' xsignal
+
+rule Eval_select_match_keysets/many-to-many-matched:
+  p E |- (val_key_h val_key_t*) (keysetIL_h keysetIL_t*) : E'' (CONT bool)
+  -- if | val_key_t* | = | keysetIL_t* |
+  -- Eval_select_match_keyset: p E |- val_key_h keysetIL_h : E' (CONT true)
+  -- Eval_select_match_keysets: p E' |- val_key_t* keysetIL_t* : E'' (CONT bool)
+
+rule Eval_select_match_keysets/many-to-many-nomatched:
+  p E |- (val_key_h val_key_t*) (keysetIL_h keysetIL_t*) : E' (CONT false)
+  -- if | val_key_t* | = | keysetIL_t* |
+  -- Eval_select_match_keyset: p E |- val_key_h keysetIL_h : E' (CONT false)
+
+rule Eval_select_match_keysets/many-to-many-nocont:
+  p E |- (val_key_h val_key_t*) (keysetIL_h keysetIL_t*) : E' xsignal
+  -- if | val_key_t* | = | keysetIL_t* |
+  -- Eval_select_match_keyset: p E |- val_key_h keysetIL_h : E' xsignal
+
+rule Eval_select_match_keysets/many-to-many-nocont:
+  p E |- (val_key_h val_key_t*) (keysetIL_h keysetIL_t*) : E'' xsignal
+  -- if | val_key_t* | = | keysetIL_t* |
+  -- Eval_select_match_keyset: p E |- val_key_h keysetIL_h : E' (CONT true)
+  -- Eval_select_match_keysets: p E' |- val_key_t* keysetIL_t* : E'' xsignal
+
+rule Eval_select_cases/matched:
+  p E |- val_key* ((keysetIL* statelabelIL) selectcaseIL_t*) : E' (CONT statelabelIL)
+  -- Eval_select_match_keysets: p E |- val_key* keysetIL* : E' (CONT true)
+
+rule Eval_select_cases/nomatched:
+  p E |- val_key* ((keysetIL* statelabelIL) selectcaseIL_t*) : E'' sig
+  -- Eval_select_match_keysets: p E |- val_key* keysetIL* : E' (CONT false)
+  -- Eval_select_cases: p E' |- val_key* selectcaseIL_t* : E'' sig
+
+rule Eval_select_cases/nocont:
+  p E |- val_key* ((keysetIL* statelabelIL) selectcaseIL_t*) : E' xsignal
+  -- Eval_select_match_keysets: p E |- val_key* keysetIL* : E' xsignal
+
+rule Eval_expr/selecte-cont:
+  p E |- SelectE exprIL* selectcaseIL* : E'' (CONT val)
+  -- Eval_exprs: p E |- exprIL* : E' (CONT val_key*)
+  -- Eval_select_cases: p E' |- val_key* selectcaseIL* : E'' (CONT statelabelIL)
+  -- if val = StateV statelabelIL
+
+rule Eval_expr/selecte-nocont:
+  p E |- SelectE exprIL* selectcaseIL* : E'' xsignal
+  -- Eval_exprs: p E |- exprIL* : E' (CONT val_key*)
+  -- Eval_select_cases: p E' |- val_key* selectcaseIL* : E'' xsignal
+
+rule Eval_expr/selecte-nocont:
+  p E |- SelectE exprIL* selectcaseIL* : E' xsignal
+  -- Eval_exprs: p E |- exprIL* : E' xsignal
+
+
+
+;;relation Set_invalid:
+;;  val: val
+
+;;rule Set-invalid/headerv:
+;;  HeaderV id (member, val)* : HeaderV id 
+
+
+rule Eval_expr/arracce-tuplev:
+  p E |- ArrAccE exprIL_b exprIL_i : E'' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- Eval_expr: p E' |- exprIL_i : E'' (CONT val_i)
+  ----
+  -- if val_b = (TupleV val_b'*)
+  -- if i = $get_num(val_i)
+  -- if val = val_b'*[i]
+
+rule Eval_expr/arracce-stackv:
+  p E |- ArrAccE exprIL_b exprIL_i : E'' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- Eval_expr: p E' |- exprIL_i : E'' (CONT val_i)
+  ----
+  -- if val_b = (StackV val_b'* int1 int2)
+  -- if $get_num(val_i) >= int2
+  -- if val_b'* = val_b_h val_b_t*
+;; (TODO) implement set_invalid
+;;  -- if val = $set_invalid(val_b_h)
+  -- if val = val_b_h
+
+rule Eval_expr/arracce-stackv:
+  p E |- ArrAccE exprIL_b exprIL_i : E'' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- Eval_expr: p E' |- exprIL_i : E'' (CONT val_i)
+  ----
+  -- if val_b = (StackV val_b'* int1 int2)
+  -- if $get_num(val_i) < int2
+  -- if val = val_b'*[$get_num(val_i)]
+
+rule Eval_expr/arracce-nocont:
+  p E |- ArrAccE exprIL_b exprIL_i : E'' xsignal
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- Eval_expr: p E' |- exprIL_i : E'' xsignal
+
+rule Eval_expr/arracce-nocont:
+  p E |- ArrAccE exprIL_b exprIL_i : E' xsignal
+  -- Eval_expr: p E |- exprIL_b : E' xsignal
+
+
+
+;; (TODO) define raw_int_of_value
+;; (TODO) define slice_bitstring
+
+def $slicebitstring(int, int, int) : int
+
+def $rawint(val): int
+
+rule Eval_expr/bitacce-cont:
+  p E |- BitAccE exprIL_b val_l val_h : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  ----
+  -- if $rawint(val_l) = int_l
+  -- if $rawint(val_h) = int_h
+  -- if $rawint(val_b) = int_b
+  ----
+  -- if width = $(int_h - int_l + 1)
+  -- if sliced = $slicebitstring(int_b, int_h, int_l)
+  -- if val = FBitV width sliced
+
+rule Eval_expr/bitacce-nocont:
+  p E |- BitAccE exprIL_b val_l val_h : E' xsignal
+  -- Eval_expr: p E |- exprIL_b : E' xsignal
+
+
+
+rule Eval_expr/expracce-stackv-size:
+  p E |- ExprAccE exprIL_b "size" : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = StackV val_s* idx size
+  -- if val = FBitV 32 size
+
+rule Eval_expr/expracce-stackv-next:
+  p E |- ExprAccE exprIL_b "next" : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = StackV val_s* idx size
+  -- if val = val_s*[idx]
+
+rule Eval_expr/expracce-stackv-last:
+  p E |- ExprAccE exprIL_b "last" : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = StackV val_s* idx size
+  -- if val = val_s*[idx-1]
+
+rule Eval_expr/expracce-stackv-lastindex:
+  p E |- ExprAccE exprIL_b "lastIndex" : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = StackV val_s* idx size
+  -- if val = FBitV 32 $(idx-1)
+
+rule Eval_expr/expracce-structv:
+  p E |- ExprAccE exprIL_b memberIL : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = StructV id field*
+  -- if (memberIL, val) <- field*
+
+rule Eval_expr/expracce-headerv:
+  p E |- ExprAccE exprIL_b memberIL : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = HeaderV id field*
+  -- if (memberIL, val) <- field*
+
+rule Eval_expr/expracce-unionv:
+  p E |- ExprAccE exprIL_b memberIL : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = UnionV id field*
+  -- if (memberIL, val) <- field*
+
+rule Eval_expr/expracce-tablestructv:
+  p E |- ExprAccE exprIL_b memberIL : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = TableStructV id field*
+  -- if (memberIL, val) <- field*
+
+rule Eval_expr/expracce-refv:
+  p E |- ExprAccE exprIL_b memberIL : E' (CONT val)
+  -- Eval_expr: p E |- exprIL_b : E' (CONT val_b)
+  -- if val_b = RefV path
+  -- if val = RefV (path ++ [memberIL])
+
+rule Eval_expr/expracce-nocont:
+  p E |- ExprAccE exprIL_b memberIL : E' xsignal
+  -- Eval_expr: p E |- exprIL_b : E' xsignal
+
+
+
+rule Eval_expr/callfunce-ret:
+  p E |- CallFuncE nameIL_f targIL* argIL* : E' (CONT val)
+  -- Eval_func: p E |- nameIL_f targIL* argIL* : E' (RET val)
+
+rule Eval_expr/callfunce-noret:
+  p E |- CallFuncE nameIL_f targIL* argIL* : E' xsignal
+  -- Eval_func: p E |- nameIL_f targIL* argIL* : E' xsignal
+
+
+
+rule Eval_expr/callmethode-ret:
+  p E |- CallMethodE exprIL_b memberIL targIL* argIL* : E' (CONT val)
+  -- Eval_method: p E |- exprIL_b memberIL targIL* argIL* : E' (RET val)
+
+rule Eval_expr/callmethode-noret:
+  p E |- CallMethodE exprIL_b memberIL targIL* argIL* : E' xsignal
+  -- Eval_method: p E |- exprIL_b memberIL targIL* argIL* : E' xsignal
 
 ;;
 ;; Expression sequence
@@ -137,15 +448,10 @@ rule Eval_exprs/cons-cont-cont:
   -- Eval_exprs: p E' |- exprIL_t* : E'' (CONT val''*)
 
 rule Eval_exprs/cons-nocont:
-  p E |- exprIL_h exprIL_t* : E'' sig''
+  p E |- exprIL_h exprIL_t* : E' xsignal
+  -- Eval_expr: p E |- exprIL_h : E' xsignal
+
+rule Eval_exprs/cons-nocont:
+  p E |- exprIL_h exprIL_t* : E'' xsignal
   -- Eval_expr: p E |- exprIL_h : E' (CONT val')
-  -- Eval_exprs: p E' |- exprIL_t* : E'' sig''
-  -- if sig'' = REJECT val' \/ sig'' = EXIT
-
-rule Eval_exprs/cons-nocont:
-  p E |- exprIL_h exprIL_t* : E' (REJECT val')
-  -- Eval_expr: p E |- exprIL_h : E' (REJECT val')
-
-rule Eval_exprs/cons-nocont:
-  p E |- exprIL_h exprIL_t* : E' EXIT
-  -- Eval_expr: p E |- exprIL_h : E' EXIT
+  -- Eval_exprs: p E' |- exprIL_t* : E'' xsignal

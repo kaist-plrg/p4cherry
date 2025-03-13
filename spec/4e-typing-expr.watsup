@@ -502,7 +502,7 @@ def $compatible_bitstringindex(typ) = false
 
 ;; (TODO-Jaehyun) check bitstring slice range
 rule Expr_ok/bitacce:
-  p C |- BitAccE expr_b expr_l expr_h : (BitAccE exprIL_b' (ValueE val_l) (ValueE val_r)) typ ctk_b
+  p C |- BitAccE expr_b expr_l expr_h : (BitAccE exprIL_b' val_l val_r) typ ctk_b
   -- Expr_ok: p C |- expr_b : exprIL_b typ_b ctk_b
   ----
   -- if (exprIL_b', typ_b') = $reduce_senum_unary((exprIL_b, typ_b), $compatible_bitstringbase)

@@ -2,10 +2,13 @@
 ;; Signal
 ;;
 
-syntax signal(syntax V) =
-  | CONT V
+syntax xsignal =
   | REJECT val
   | EXIT
+
+syntax signal(syntax V) =
+  | xsignal
+  | CONT V
 
 syntax ssignal =
   | CONT
