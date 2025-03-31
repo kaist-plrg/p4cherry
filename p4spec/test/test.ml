@@ -62,11 +62,9 @@ let run_typing negative spec_il includes_p4 filename_p4 =
     let _ = Sys.set_signal Sys.sigalrm handler in
     let _ = Unix.alarm 30 in
     (* Run test *)
-    let program_p4 =
-      P4frontend.Parse.parse_file includes_p4 filename_p4
-      |> Interpret.Program.In.in_program
-    in
-    Interpret.Interp.run_typing false false spec_il program_p4 |> ignore;
+    let program_p4 = P4frontend.Parse.parse_file includes_p4 filename_p4 in
+    Interpret.Interp.run_typing ~debug:false ~profile:false spec_il program_p4
+    |> ignore;
     if negative then raise (TestCheckNegErr time_start);
     (* Reset timer *)
     let _ = Unix.alarm 0 in

@@ -61,7 +61,8 @@ and typcase = nottyp
 
 (* Values *)
 
-and value =
+and value = (value', int * bool) note
+and value' =
   | BoolV of bool
   | NumV of Num.t
   | TextV of string

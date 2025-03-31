@@ -7,7 +7,7 @@ open Util.Source
 let rev_ (at : region) (targs : targ list) (values_input : value list) : value =
   let _typ = Extract.one at targs in
   let values = Extract.one at values_input |> Value.get_list in
-  ListV (List.rev values)
+  ListV (List.rev values) $$$ Ctx.note_plain ()
 
 (* dec $concat_<X>((X* )* ) : X* *)
 
@@ -19,7 +19,7 @@ let concat_ (at : region) (targs : targ list) (values_input : value list) :
     |> Value.get_list
     |> List.concat_map Value.get_list
   in
-  ListV values
+  ListV values $$$ Ctx.note_plain ()
 
 (* dec $distinct_<K>(K* ) : bool *)
 
@@ -28,4 +28,4 @@ let distinct_ (at : region) (targs : targ list) (values_input : value list) :
   let _typ = Extract.one at targs in
   let values = Extract.one at values_input |> Value.get_list in
   let set = Sets.VSet.of_list values in
-  BoolV (Sets.VSet.cardinal set = List.length values)
+  BoolV (Sets.VSet.cardinal set = List.length values) $$$ Ctx.note_plain ()

@@ -13,7 +13,7 @@ type set = VSet.t
 (* Conversion between meta-sets and OCaml lists *)
 
 let set_of_value (value : value) : set =
-  match value with
+  match value.it with
   | CaseV ([ [ { it = Atom "SET"; _ } ]; [] ], [ value_elements ]) ->
       let values_element = Value.get_list value_elements in
       VSet.of_list values_element
@@ -23,8 +23,9 @@ let set_of_value (value : value) : set =
 
 let value_of_set (set : set) : value =
   let values_element = VSet.elements set in
-  let value_elements = ListV values_element in
+  let value_elements = ListV values_element $$$ Ctx.note_plain () in
   CaseV ([ [ Atom.Atom "SET" $ no_region ]; [] ], [ value_elements ])
+  $$$ Ctx.note_plain ()
 
 (* dec $intersect_set<K>(set<K>, set<K>) : set<K> *)
 
@@ -73,7 +74,7 @@ let is_subset (at : region) (targs : targ list) (values_input : value list) :
   let value_set_a, value_set_b = Extract.two at values_input in
   let set_a = set_of_value value_set_a in
   let set_b = set_of_value value_set_b in
-  BoolV (VSet.subset set_a set_b)
+  BoolV (VSet.subset set_a set_b) $$$ Ctx.note_plain ()
 
 (* dec $eq_set<K>(set<K>, set<K>) : bool *)
 
@@ -83,4 +84,4 @@ let eq_set (at : region) (targs : targ list) (values_input : value list) : value
   let value_set_a, value_set_b = Extract.two at values_input in
   let set_a = set_of_value value_set_a in
   let set_b = set_of_value value_set_b in
-  BoolV (VSet.equal set_a set_b)
+  BoolV (VSet.equal set_a set_b) $$$ Ctx.note_plain ()

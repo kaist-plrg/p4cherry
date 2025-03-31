@@ -1,5 +1,6 @@
 open Domain.Lib
 open Xl
+module P4 = P4el.Ast
 open Il.Ast
 module Hint = Runtime_static.Rel.Hint
 module Typ = Runtime_dynamic.Typ
@@ -28,7 +29,7 @@ open Util.Source
 let rec downcast (ctx : Ctx.t) (typ : typ) (value : value) : value attempt =
   match typ.it with
   | NumT `NatT -> (
-      match value with
+      match value.it with
       | NumV (`Nat _) -> Ok value
       | NumV (`Int i) ->
           let* _ =
@@ -36,12 +37,12 @@ let rec downcast (ctx : Ctx.t) (typ : typ) (value : value) : value attempt =
               Bigint.(i >= zero)
               typ.at "cannot downcast a negative integer to natural number"
           in
-          Ok (NumV (`Nat i))
+          Ok (NumV (`Nat i) $$$ Ctx.note_plain ())
       | _ -> assert false)
   | VarT (tid, targs) -> (
       let tparams, deftyp = Ctx.find_typdef Local ctx tid in
       let theta = List.combine tparams targs |> TIdMap.of_list in
-      match (deftyp.it, value) with
+      match (deftyp.it, value.it) with
       | PlainT typ, _ ->
           let typ = Typ.subst_typ theta typ in
           downcast ctx typ value
@@ -61,10 +62,10 @@ let rec downcast (ctx : Ctx.t) (typ : typ) (value : value) : value attempt =
           Ok value
       | _ -> Ok value)
   | TupleT typs -> (
-      match value with
+      match value.it with
       | TupleV values ->
           let* values = downcasts ctx typs values in
-          Ok (TupleV values)
+          Ok (TupleV values $$$ Ctx.note_plain ())
       | _ -> assert false)
   | _ -> Ok value
 
@@ -80,7 +81,7 @@ and downcasts (ctx : Ctx.t) (typs : typ list) (values : value list) :
 (* Assigning a value to an expression *)
 
 let rec assign_exp (ctx : Ctx.t) (exp : exp) (value : value) : Ctx.t attempt =
-  match (exp.it, value) with
+  match (exp.it, value.it) with
   | VarE id, _ ->
       let ctx = Ctx.add_value Local ctx (id, []) value in
       Ok ctx
@@ -114,14 +115,14 @@ let rec assign_exp (ctx : Ctx.t) (exp : exp) (value : value) : Ctx.t attempt =
         fail exp.at "cannot assign an empty list into a cons expression"
       else
         let value_h = List.hd values in
-        let value_t = ListV (List.tl values) in
+        let value_t = ListV (List.tl values) $$$ Ctx.note_plain () in
         let* ctx = assign_exp ctx exp_h value_h in
         assign_exp ctx exp_t value_t
   | IterE (_, (Opt, vars)), OptV None ->
       let ctx =
         List.fold_left
           (fun ctx (id, iters) ->
-            let value = OptV None in
+            let value = OptV None $$$ Ctx.note_plain () in
             Ctx.add_value Local ctx (id, iters @ [ Opt ]) value)
           ctx vars
       in
@@ -135,7 +136,7 @@ let rec assign_exp (ctx : Ctx.t) (exp : exp) (value : value) : Ctx.t attempt =
           (fun ctx (id, iters) ->
             let value =
               let value = Ctx.find_value Local ctx (id, iters) in
-              OptV (Some value)
+              OptV (Some value) $$$ Ctx.note_plain ()
             in
             Ctx.add_value Local ctx (id, iters @ [ Opt ]) value)
           ctx vars
@@ -163,7 +164,7 @@ let rec assign_exp (ctx : Ctx.t) (exp : exp) (value : value) : Ctx.t attempt =
             let values =
               List.map (fun ctx -> Ctx.find_value Local ctx (id, iters)) ctxs
             in
-            let value = ListV values in
+            let value = ListV values $$$ Ctx.note_plain () in
             Ctx.add_value Local ctx (id, iters @ [ List ]) value)
           ctx vars
       in
@@ -225,7 +226,7 @@ and assign_arg_exp (ctx : Ctx.t) (exp : exp) (value : value) : Ctx.t attempt =
 
 and assign_arg_def (ctx_caller : Ctx.t) (ctx_callee : Ctx.t) (id : id)
     (value : value) : Ctx.t attempt =
-  match value with
+  match value.it with
   | FuncV id_f ->
       let func = Ctx.find_func Local ctx_caller id_f in
       let ctx_callee = Ctx.add_func Local ctx_callee id func in
@@ -277,15 +278,15 @@ and eval_exps (ctx : Ctx.t) (exps : exp list) : Ctx.t * value list =
 
 (* Boolean expression evaluation *)
 
-and eval_bool_exp (b : bool) : value = BoolV b
+and eval_bool_exp (b : bool) : value = BoolV b $$$ Ctx.note_plain ()
 
 (* Numeric expression evaluation *)
 
-and eval_num_exp (n : Num.t) : value = NumV n
+and eval_num_exp (n : Num.t) : value = NumV n $$$ Ctx.note_plain ()
 
 (* Text expression evaluation *)
 
-and eval_text_exp (s : string) : value = TextV s
+and eval_text_exp (s : string) : value = TextV s $$$ Ctx.note_plain ()
 
 (* Variable expression evaluation *)
 
@@ -295,12 +296,13 @@ and eval_var_exp (ctx : Ctx.t) (id : id) : value =
 (* Unary expression evaluation *)
 
 and eval_un_bool (unop : Bool.unop) (value : value) : value =
-  match unop with `NotOp -> BoolV (not (Value.get_bool value))
+  match unop with
+  | `NotOp -> BoolV (not (Value.get_bool value)) $$$ Ctx.note_plain ()
 
 and eval_un_num (unop : Num.unop) (value : value) : value =
   let num = Value.get_num value in
   let num = Num.un unop num in
-  NumV num
+  NumV num $$$ Ctx.note_plain ()
 
 and eval_un_exp (ctx : Ctx.t) (unop : unop) (_optyp : optyp) (exp : exp) :
     Ctx.t * value =
@@ -316,7 +318,7 @@ and eval_un_exp (ctx : Ctx.t) (unop : unop) (_optyp : optyp) (exp : exp) :
 (* Binary expression evaluation *)
 
 and eval_bin_bool (binop : Bool.binop) (value_l : value) (value_r : value) :
-    value =
+    value' =
   let bool_l = Value.get_bool value_l in
   let bool_r = Value.get_bool value_r in
   match binop with
@@ -325,8 +327,8 @@ and eval_bin_bool (binop : Bool.binop) (value_l : value) (value_r : value) :
   | `ImplOp -> BoolV ((not bool_l) || bool_r)
   | `EquivOp -> BoolV (bool_l = bool_r)
 
-and eval_bin_num (binop : Num.binop) (value_l : value) (value_r : value) : value
-    =
+and eval_bin_num (binop : Num.binop) (value_l : value) (value_r : value) :
+    value' =
   let num_l = Value.get_num value_l in
   let num_r = Value.get_num value_r in
   let num = Num.bin binop num_l num_r in
@@ -341,17 +343,18 @@ and eval_bin_exp (ctx : Ctx.t) (binop : binop) (_optyp : optyp) (exp_l : exp)
     | #Bool.binop as binop -> eval_bin_bool binop value_l value_r
     | #Num.binop as binop -> eval_bin_num binop value_l value_r
   in
+  let value = value $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Comparison expression evaluation *)
 
 and eval_cmp_bool (cmpop : Bool.cmpop) (value_l : value) (value_r : value) :
-    value =
+    value' =
   let eq = Value.eq value_l value_r in
   match cmpop with `EqOp -> BoolV eq | `NeOp -> BoolV (not eq)
 
-and eval_cmp_num (cmpop : Num.cmpop) (value_l : value) (value_r : value) : value
-    =
+and eval_cmp_num (cmpop : Num.cmpop) (value_l : value) (value_r : value) :
+    value' =
   let num_l = Value.get_num value_l in
   let num_r = Value.get_num value_r in
   BoolV (Num.cmp cmpop num_l num_r)
@@ -365,13 +368,14 @@ and eval_cmp_exp (ctx : Ctx.t) (cmpop : cmpop) (_optyp : optyp) (exp_l : exp)
     | #Bool.cmpop as cmpop -> eval_cmp_bool cmpop value_l value_r
     | #Num.cmpop as cmpop -> eval_cmp_num cmpop value_l value_r
   in
+  let value = value $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Tuple expression evaluation *)
 
 and eval_tuple_exp (ctx : Ctx.t) (exps : exp list) : Ctx.t * value =
   let ctx, values = eval_exps ctx exps in
-  let value = TupleV values in
+  let value = TupleV values $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Case expression evaluation *)
@@ -379,7 +383,7 @@ and eval_tuple_exp (ctx : Ctx.t) (exps : exp list) : Ctx.t * value =
 and eval_case_exp (ctx : Ctx.t) (notexp : notexp) : Ctx.t * value =
   let mixop, exps = notexp in
   let ctx, values = eval_exps ctx exps in
-  let value = CaseV (mixop, values) in
+  let value = CaseV (mixop, values) $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Option expression evaluation *)
@@ -388,10 +392,10 @@ and eval_opt_exp (ctx : Ctx.t) (exp_opt : exp option) : Ctx.t * value =
   match exp_opt with
   | Some exp ->
       let ctx, value = eval_exp ctx exp in
-      let value = OptV (Some value) in
+      let value = OptV (Some value) $$$ Ctx.note_plain () in
       (ctx, value)
   | None ->
-      let value = OptV None in
+      let value = OptV None $$$ Ctx.note_plain () in
       (ctx, value)
 
 (* Struct expression evaluation *)
@@ -400,7 +404,7 @@ and eval_str_exp (ctx : Ctx.t) (fields : (atom * exp) list) : Ctx.t * value =
   let atoms, exps = List.split fields in
   let ctx, values = eval_exps ctx exps in
   let fields = List.combine atoms values in
-  let value = StructV fields in
+  let value = StructV fields $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Dot expression evaluation *)
@@ -419,7 +423,7 @@ and eval_dot_exp (ctx : Ctx.t) (exp_b : exp) (atom : atom) : Ctx.t * value =
 
 and eval_list_exp (ctx : Ctx.t) (exps : exp list) : Ctx.t * value =
   let ctx, values = eval_exps ctx exps in
-  let value = ListV values in
+  let value = ListV values $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Cons expression evaluation *)
@@ -428,7 +432,7 @@ and eval_cons_exp (ctx : Ctx.t) (exp_h : exp) (exp_t : exp) : Ctx.t * value =
   let ctx, value_h = eval_exp ctx exp_h in
   let ctx, value_t = eval_exp ctx exp_t in
   let values_t = Value.get_list value_t in
-  let value = ListV (value_h :: values_t) in
+  let value = ListV (value_h :: values_t) $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Concatenation expression evaluation *)
@@ -438,11 +442,12 @@ and eval_cat_exp (ctx : Ctx.t) (at : region) (exp_l : exp) (exp_r : exp) :
   let ctx, value_l = eval_exp ctx exp_l in
   let ctx, value_r = eval_exp ctx exp_r in
   let value =
-    match (value_l, value_r) with
+    match (value_l.it, value_r.it) with
     | TextV s_l, TextV s_r -> TextV (s_l ^ s_r)
     | ListV values_l, ListV values_r -> ListV (values_l @ values_r)
     | _ -> error at "concatenation expects either two texts or two lists"
   in
+  let value = value $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Membership expression evaluation *)
@@ -451,7 +456,9 @@ and eval_mem_exp (ctx : Ctx.t) (exp_e : exp) (exp_s : exp) : Ctx.t * value =
   let ctx, value_e = eval_exp ctx exp_e in
   let ctx, value_s = eval_exp ctx exp_s in
   let values_s = Value.get_list value_s in
-  let value = BoolV (List.exists (Value.eq value_e) values_s) in
+  let value =
+    BoolV (List.exists (Value.eq value_e) values_s) $$$ Ctx.note_plain ()
+  in
   (ctx, value)
 
 (* Length expression evaluation *)
@@ -459,7 +466,7 @@ and eval_mem_exp (ctx : Ctx.t) (exp_e : exp) (exp_s : exp) : Ctx.t * value =
 and eval_len_exp (ctx : Ctx.t) (exp : exp) : Ctx.t * value =
   let ctx, value = eval_exp ctx exp in
   let len = value |> Value.get_list |> List.length |> Bigint.of_int in
-  let value = NumV (`Nat len) in
+  let value = NumV (`Nat len) $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Index expression evaluation *)
@@ -490,7 +497,7 @@ and eval_slice_exp (ctx : Ctx.t) (exp_b : exp) (exp_i : exp) (exp_n : exp) :
       values
     |> List.filter_map Fun.id
   in
-  let value = ListV values_slice in
+  let value = ListV values_slice $$$ Ctx.note_plain () in
   (ctx, value)
 
 (* Update expression evaluation *)
@@ -518,7 +525,7 @@ and eval_update_path (value_b : value) (path : path) (value_n : value) : value =
             if atom_f.it = atom.it then (atom_f, value_n) else (atom_f, value_f))
           fields
       in
-      let value = StructV fields in
+      let value = StructV fields $$$ Ctx.note_plain () in
       eval_update_path value_b path value
   | _ -> failwith "(TODO) update"
 
@@ -547,10 +554,10 @@ and eval_iter_exp_opt (ctx : Ctx.t) (exp : exp) (vars : var list) :
       let ctx_sub, value = eval_exp ctx_sub exp in
       let ctx_sub = Ctx.trace_close ctx_sub in
       let ctx = Ctx.trace_commit ctx ctx_sub.trace in
-      let value = OptV (Some value) in
+      let value = OptV (Some value) $$$ Ctx.note_plain () in
       (ctx, value)
   | None ->
-      let value = OptV None in
+      let value = OptV None $$$ Ctx.note_plain () in
       (ctx, value)
 
 and eval_iter_exp_list (ctx : Ctx.t) (exp : exp) (vars : var list) :
@@ -568,7 +575,7 @@ and eval_iter_exp_list (ctx : Ctx.t) (exp : exp) (vars : var list) :
         (ctx, values @ [ value ]))
       (ctx, []) ctxs_sub
   in
-  let value = ListV values in
+  let value = ListV values $$$ Ctx.note_plain () in
   (ctx, value)
 
 and eval_iter_exp (ctx : Ctx.t) (exp : exp) (iterexp : iterexp) : Ctx.t * value
@@ -583,23 +590,23 @@ and eval_iter_exp (ctx : Ctx.t) (exp : exp) (iterexp : iterexp) : Ctx.t * value
 and cast (ctx : Ctx.t) (typ : typ) (value : value) : value =
   match typ.it with
   | NumT `IntT -> (
-      match value with
-      | NumV (`Nat n) -> NumV (`Int n)
+      match value.it with
+      | NumV (`Nat n) -> NumV (`Int n) $$$ Ctx.note_plain ()
       | NumV (`Int _) -> value
       | _ -> assert false)
   | VarT (tid, targs) -> (
       let tparams, deftyp = Ctx.find_typdef Local ctx tid in
       let theta = List.combine tparams targs |> TIdMap.of_list in
-      match (deftyp.it, value) with
-      | PlainT typ, _ ->
+      match deftyp.it with
+      | PlainT typ ->
           let typ = Typ.subst_typ theta typ in
           cast ctx typ value
       | _ -> value)
   | TupleT typs -> (
-      match value with
+      match value.it with
       | TupleV values ->
           let values = List.map2 (cast ctx) typs values in
-          TupleV values
+          TupleV values $$$ Ctx.note_plain ()
       | _ -> assert false)
   | _ -> value
 
@@ -614,7 +621,7 @@ and eval_arg (ctx : Ctx.t) (arg : arg) : Ctx.t * value =
   match arg.it with
   | ExpA exp -> eval_exp ctx exp
   | DefA id ->
-      let value = FuncV id in
+      let value = FuncV id $$$ Ctx.note_plain () in
       (ctx, value)
 
 and eval_args (ctx : Ctx.t) (args : arg list) : Ctx.t * value list =
@@ -725,7 +732,7 @@ and eval_iter_prem_list (ctx : Ctx.t) (prem : prem) (vars : var list) :
   let ctx =
     List.fold_left2
       (fun ctx (id, iters) values_binding ->
-        let value_binding = ListV values_binding in
+        let value_binding = ListV values_binding $$$ Ctx.note_plain () in
         Ctx.add_value Local ctx (id, iters @ [ List ]) value_binding)
       ctx vars_binding values_binding
   in
@@ -915,11 +922,15 @@ let load_spec (ctx : Ctx.t) (spec : spec) : Ctx.t =
 
 (* Entry point: run typing rule from `Prog_ok` relation *)
 
-let run_typing (debug : bool) (profile : bool) (spec : spec) (program : value) :
-    value list =
+let run_typing ~(debug : bool) ~(profile : bool) (spec : spec)
+    (program : P4.program) : value list =
   Builtin.init ();
+  Ctx.refresh ();
+  let program = Program.In.in_program program in
+  Format.printf "Program itself has %d values\n" !Ctx.tick;
   let ctx = Ctx.empty debug profile in
   let ctx = load_spec ctx spec in
   let+ ctx, values = invoke_rel ctx ("Prog_ok" $ no_region) [ program ] in
+  Format.printf "Has produced %d values\n" !Ctx.tick;
   Ctx.profile ctx;
   values

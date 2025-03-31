@@ -14,6 +14,19 @@ let error_undef (at : region) (kind : string) (id : string) =
 let error_dup (at : region) (kind : string) (id : string) =
   error at (Format.asprintf "%s `%s` was already defined" kind id)
 
+(* Ticker for value tracking *)
+
+let tick = ref 0
+let refresh () = tick := 0
+
+let fresh () =
+  let id = !tick in
+  tick := id + 1;
+  id
+
+let note_source () = (fresh (), true)
+let note_plain () = (fresh (), false)
+
 (* Cursor *)
 
 type cursor = Global | Local

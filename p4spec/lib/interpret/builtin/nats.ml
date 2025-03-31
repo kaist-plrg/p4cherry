@@ -8,7 +8,7 @@ open Util.Source
 let bigint_of_value (value : value) : Bigint.t =
   value |> Value.get_num |> Num.to_int
 
-let value_of_bigint (i : Bigint.t) : value = NumV (`Nat i)
+let value_of_bigint (i : Bigint.t) : value = NumV (`Nat i) $$$ Ctx.note_plain ()
 
 (* dec $sum(nat* ) : nat *)
 

@@ -14,7 +14,7 @@ type map = Value.t VMap.t
 
 let map_of_value (value : value) : map =
   let tuple_of_value (value : value) : value * value =
-    match value with
+    match value.it with
     | CaseV ([ [ { it = Atom "PAIR"; _ } ]; []; [] ], [ value_key; value_value ])
       ->
         (value_key, value_value)
@@ -22,7 +22,7 @@ let map_of_value (value : value) : map =
         error no_region
           (Format.asprintf "expected a pair, but got %s" (Value.to_string value))
   in
-  match value with
+  match value.it with
   | CaseV ([ [ { it = Atom "MAP"; _ } ]; [] ], [ value_pairs ]) ->
       Value.get_list value_pairs |> List.map tuple_of_value
       |> List.fold_left
@@ -37,9 +37,13 @@ let value_of_map (map : map) : value =
   let value_of_tuple ((value_key, value_value) : value * value) : value =
     CaseV
       ([ [ Atom.Atom "PAIR" $ no_region ]; []; [] ], [ value_key; value_value ])
+    $$$ Ctx.note_plain ()
   in
-  let value_pairs = ListV (VMap.bindings map |> List.map value_of_tuple) in
+  let value_pairs =
+    ListV (VMap.bindings map |> List.map value_of_tuple) $$$ Ctx.note_plain ()
+  in
   CaseV ([ [ Atom.Atom "MAP" $ no_region ]; [] ], [ value_pairs ])
+  $$$ Ctx.note_plain ()
 
 (* Built-in implementations *)
 
@@ -51,7 +55,9 @@ let find_map_opt (at : region) (targs : targ list) (values_input : value list) :
   let value_map, value_key = Extract.two at values_input in
   let map = map_of_value value_map in
   let value_opt = VMap.find_opt value_key map in
-  match value_opt with Some value -> OptV (Some value) | None -> OptV None
+  match value_opt with
+  | Some value -> OptV (Some value) $$$ Ctx.note_plain ()
+  | None -> OptV None $$$ Ctx.note_plain ()
 
 (* dec $find_maps_opt<K, V>(map<K, V>*, K) : V? *)
 
@@ -68,7 +74,9 @@ let find_maps_opt (at : region) (targs : targ list) (values_input : value list)
         | None -> VMap.find_opt value_key map)
       None maps
   in
-  match value_opt with Some value -> OptV (Some value) | None -> OptV None
+  match value_opt with
+  | Some value -> OptV (Some value) $$$ Ctx.note_plain ()
+  | None -> OptV None $$$ Ctx.note_plain ()
 
 (* dec $add_map<K, V>(map<K, V>, K, V) : map<K, V> *)
 
