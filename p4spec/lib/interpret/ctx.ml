@@ -14,19 +14,6 @@ let error_undef (at : region) (kind : string) (id : string) =
 let error_dup (at : region) (kind : string) (id : string) =
   error at (Format.asprintf "%s `%s` was already defined" kind id)
 
-(* Ticker for value tracking *)
-
-let tick = ref 0
-let refresh () = tick := 0
-
-let fresh () =
-  let id = !tick in
-  tick := id + 1;
-  id
-
-let note_source () = (fresh (), true)
-let note_plain () = (fresh (), false)
-
 (* Cursor *)
 
 type cursor = Global | Local
@@ -62,6 +49,8 @@ type local = {
 type t = {
   (* Config *)
   config : config;
+  (* Value dependency graph *)
+  graph : Dep.Graph.t;
   (* Execution trace *)
   trace : Trace.t;
   (* Global layer *)
@@ -127,6 +116,15 @@ let trace_extend (ctx : t) (prem : prem) : t =
 let trace_commit (ctx : t) (trace : Trace.t) : t =
   let trace = Trace.commit ctx.trace trace in
   { ctx with trace }
+
+(* Value dependencies *)
+
+let add_node (ctx : t) (value : value) : unit =
+  Dep.Graph.add_node ctx.graph value
+
+let add_edge (ctx : t) (value_from : value) (value_to : value)
+    (label : Dep.Edges.label) : unit =
+  Dep.Graph.add_edge ctx.graph value_from value_to label
 
 (* Finders *)
 
@@ -253,12 +251,12 @@ let empty_global () : global =
 let empty_local () : local =
   { tdenv = TDEnv.empty; fenv = FEnv.empty; venv = VEnv.empty }
 
-let empty (debug : bool) (profile : bool) : t =
+let empty (debug : bool) (profile : bool) (graph : Dep.Graph.t) : t =
   let config = { debug; profile } in
   let trace = Trace.Empty in
   let global = empty_global () in
   let local = empty_local () in
-  { config; trace; global; local }
+  { config; graph; trace; global; local }
 
 (* Constructing a local context *)
 

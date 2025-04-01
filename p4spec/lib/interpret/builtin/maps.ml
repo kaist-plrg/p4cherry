@@ -33,36 +33,50 @@ let map_of_value (value : value) : map =
       error no_region
         (Format.asprintf "expected a map, but got %s" (Value.to_string value))
 
-let value_of_map (map : map) : value =
+let value_of_map (ctx : Ctx.t) (map : map) : value =
   let value_of_tuple ((value_key, value_value) : value * value) : value =
-    CaseV
-      ([ [ Atom.Atom "PAIR" $ no_region ]; []; [] ], [ value_key; value_value ])
-    $$$ Ctx.note_plain ()
+    let value =
+      CaseV
+        ( [ [ Atom.Atom "PAIR" $ no_region ]; []; [] ],
+          [ value_key; value_value ] )
+      $$$ Dep.Node.fresh ()
+    in
+    Ctx.add_node ctx value;
+    value
   in
   let value_pairs =
-    ListV (VMap.bindings map |> List.map value_of_tuple) $$$ Ctx.note_plain ()
+    ListV (VMap.bindings map |> List.map value_of_tuple) $$$ Dep.Node.fresh ()
   in
-  CaseV ([ [ Atom.Atom "MAP" $ no_region ]; [] ], [ value_pairs ])
-  $$$ Ctx.note_plain ()
+  Ctx.add_node ctx value_pairs;
+  let value =
+    CaseV ([ [ Atom.Atom "MAP" $ no_region ]; [] ], [ value_pairs ])
+    $$$ Dep.Node.fresh ()
+  in
+  Ctx.add_node ctx value;
+  value
 
 (* Built-in implementations *)
 
 (* dec $find_map_opt<K, V>(map<K, V>, K) : V? *)
 
-let find_map_opt (at : region) (targs : targ list) (values_input : value list) :
-    value =
+let find_map_opt (ctx : Ctx.t) (at : region) (targs : targ list)
+    (values_input : value list) : value =
   let _typ_key, _typ_value = Extract.two at targs in
   let value_map, value_key = Extract.two at values_input in
   let map = map_of_value value_map in
   let value_opt = VMap.find_opt value_key map in
-  match value_opt with
-  | Some value -> OptV (Some value) $$$ Ctx.note_plain ()
-  | None -> OptV None $$$ Ctx.note_plain ()
+  let value =
+    match value_opt with
+    | Some value -> OptV (Some value) $$$ Dep.Node.fresh ()
+    | None -> OptV None $$$ Dep.Node.fresh ()
+  in
+  Ctx.add_node ctx value;
+  value
 
 (* dec $find_maps_opt<K, V>(map<K, V>*, K) : V? *)
 
-let find_maps_opt (at : region) (targs : targ list) (values_input : value list)
-    : value =
+let find_maps_opt (ctx : Ctx.t) (at : region) (targs : targ list)
+    (values_input : value list) : value =
   let _typ_key, _typ_value = Extract.two at targs in
   let value_maps, value_key = Extract.two at values_input in
   let maps = value_maps |> Value.get_list |> List.map map_of_value in
@@ -74,22 +88,26 @@ let find_maps_opt (at : region) (targs : targ list) (values_input : value list)
         | None -> VMap.find_opt value_key map)
       None maps
   in
-  match value_opt with
-  | Some value -> OptV (Some value) $$$ Ctx.note_plain ()
-  | None -> OptV None $$$ Ctx.note_plain ()
+  let value =
+    match value_opt with
+    | Some value -> OptV (Some value) $$$ Dep.Node.fresh ()
+    | None -> OptV None $$$ Dep.Node.fresh ()
+  in
+  Ctx.add_node ctx value;
+  value
 
 (* dec $add_map<K, V>(map<K, V>, K, V) : map<K, V> *)
 
-let add_map (at : region) (targs : targ list) (values_input : value list) :
-    value =
+let add_map (ctx : Ctx.t) (at : region) (targs : targ list)
+    (values_input : value list) : value =
   let _typ_key, _typ_value = Extract.two at targs in
   let value_map, value_key, value_value = Extract.three at values_input in
-  map_of_value value_map |> VMap.add value_key value_value |> value_of_map
+  map_of_value value_map |> VMap.add value_key value_value |> value_of_map ctx
 
 (* dec $adds_map<K, V>(map<K, V>, K*, V* ) : map<K, V> *)
 
-let adds_map (at : region) (targs : targ list) (values_input : value list) :
-    value =
+let adds_map (ctx : Ctx.t) (at : region) (targs : targ list)
+    (values_input : value list) : value =
   let _typ_key, _typ_value = Extract.two at targs in
   let value_map, value_keys, value_values = Extract.three at values_input in
   let map = map_of_value value_map in
@@ -98,12 +116,12 @@ let adds_map (at : region) (targs : targ list) (values_input : value list) :
   List.fold_left2
     (fun map value_key value_value -> VMap.add value_key value_value map)
     map values_key values_value
-  |> value_of_map
+  |> value_of_map ctx
 
 (* dec $update_map<K, V>(map<K, V>, K, V) : map<K, V> *)
 
-let update_map (at : region) (targs : targ list) (values_input : value list) :
-    value =
+let update_map (ctx : Ctx.t) (at : region) (targs : targ list)
+    (values_input : value list) : value =
   let _typ_key, _typ_value = Extract.two at targs in
   let value_map, value_key, value_value = Extract.three at values_input in
-  map_of_value value_map |> VMap.add value_key value_value |> value_of_map
+  map_of_value value_map |> VMap.add value_key value_value |> value_of_map ctx
