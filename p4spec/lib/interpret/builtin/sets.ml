@@ -23,11 +23,11 @@ let set_of_value (value : value) : set =
 
 let value_of_set (ctx : Ctx.t) (set : set) : value =
   let values_element = VSet.elements set in
-  let value_elements = ListV values_element $$$ Dep.Node.fresh () in
+  let value_elements = ListV values_element $$$ Dep.Graph.fresh () in
   Ctx.add_node ctx value_elements;
   let value =
     CaseV ([ [ Atom.Atom "SET" $ no_region ]; [] ], [ value_elements ])
-    $$$ Dep.Node.fresh ()
+    $$$ Dep.Graph.fresh ()
   in
   Ctx.add_node ctx value;
   value
@@ -79,7 +79,7 @@ let is_subset (ctx : Ctx.t) (at : region) (targs : targ list)
   let value_set_a, value_set_b = Extract.two at values_input in
   let set_a = set_of_value value_set_a in
   let set_b = set_of_value value_set_b in
-  let value = BoolV (VSet.subset set_a set_b) $$$ Dep.Node.fresh () in
+  let value = BoolV (VSet.subset set_a set_b) $$$ Dep.Graph.fresh () in
   Ctx.add_node ctx value;
   value
 
@@ -91,6 +91,6 @@ let eq_set (ctx : Ctx.t) (at : region) (targs : targ list)
   let value_set_a, value_set_b = Extract.two at values_input in
   let set_a = set_of_value value_set_a in
   let set_b = set_of_value value_set_b in
-  let value = BoolV (VSet.equal set_a set_b) $$$ Dep.Node.fresh () in
+  let value = BoolV (VSet.equal set_a set_b) $$$ Dep.Graph.fresh () in
   Ctx.add_node ctx value;
   value

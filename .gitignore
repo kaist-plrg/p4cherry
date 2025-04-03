@@ -15,6 +15,10 @@ spec-gen.include
 # p4spectec build and executables
 p4spectec
 
+# p4spectec graphs
+deps/prems
+deps/*.dot
+
 # p4cherry build and executables
 p4cherry
 doc/_sphinx

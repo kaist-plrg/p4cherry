@@ -4,11 +4,7 @@ open Util.Source
 
 (* Execution trace *)
 
-type time =
-  | ING of float
-  (* start time *)
-  | END of (float * float)
-(* accumulated duration, duration *)
+type time = ING of float | END of (float * float)
 
 type t =
   | Rel of {
@@ -26,7 +22,7 @@ type t =
       subtraces : t list;
     }
   | Iter of { inner : string; time : time; subtraces : t list }
-  | Prem of prem
+  | Prem of { prem : prem; dep : vid option }
   | Empty
 
 (* Openers *)
@@ -98,18 +94,59 @@ let commit (trace : t) (trace_sub : t) : t =
 
 (* Extension *)
 
-let extend (trace : t) (prem : prem) : t =
+let extend (trace : t) (prem : prem) : t * int =
+  let prem = Prem { prem; dep = None } in
   match trace with
   | Rel { id_rel; id_rule; values_input; time; subtraces } ->
-      let subtraces = subtraces @ [ Prem prem ] in
+      let idx_prem = List.length subtraces in
+      let subtraces = subtraces @ [ prem ] in
+      let trace = Rel { id_rel; id_rule; values_input; time; subtraces } in
+      (trace, idx_prem)
+  | Dec { id_func; idx_clause; values_input; time; subtraces } ->
+      let idx_prem = List.length subtraces in
+      let subtraces = subtraces @ [ prem ] in
+      let trace = Dec { id_func; idx_clause; values_input; time; subtraces } in
+      (trace, idx_prem)
+  | Iter { inner; time; subtraces } ->
+      let idx_prem = List.length subtraces in
+      let subtraces = subtraces @ [ prem ] in
+      let prem = Iter { inner; time; subtraces } in
+      (prem, idx_prem)
+  | Prem _ | Empty -> assert false
+
+(* Annotation of value dependency *)
+
+let annotate (trace : t) (idx_prem : int) (vid : vid) : t =
+  let annotate'' (subtrace : t) : t =
+    match subtrace with
+    | Prem { prem; dep = None } -> Prem { prem; dep = Some vid }
+    | _ -> trace
+  in
+  let annotate' (subtraces : t list) : t list =
+    List.mapi
+      (fun idx trace -> if idx = idx_prem then annotate'' trace else trace)
+      subtraces
+  in
+  match trace with
+  | Rel { id_rel; id_rule; values_input; time; subtraces } ->
+      let subtraces = annotate' subtraces in
       Rel { id_rel; id_rule; values_input; time; subtraces }
   | Dec { id_func; idx_clause; values_input; time; subtraces } ->
-      let subtraces = subtraces @ [ Prem prem ] in
+      let subtraces = annotate' subtraces in
       Dec { id_func; idx_clause; values_input; time; subtraces }
   | Iter { inner; time; subtraces } ->
-      let subtraces = subtraces @ [ Prem prem ] in
+      let subtraces = annotate' subtraces in
       Iter { inner; time; subtraces }
   | Prem _ | Empty -> assert false
+
+(* Querying falsifiability *)
+
+let rec collect_queries (trace : t) : (prem * vid) list =
+  match trace with
+  | Rel { subtraces; _ } | Dec { subtraces; _ } | Iter { subtraces; _ } ->
+      List.concat_map collect_queries subtraces
+  | Prem { prem; dep = Some vid } -> [ (prem, vid) ]
+  | _ -> []
 
 (* Printing *)
 
@@ -167,8 +204,10 @@ let rec log ?(tagger = Tagger.empty) ?(depth = 0) ?(idx = 0) ?(verbose = false)
         (tag tagger depth) inner
         (logs ~tagger ~depth ~verbose subtraces)
         (tag tagger depth) duration
-  | Prem prem ->
-      Format.asprintf "[%s-%d] %s" (tag tagger depth) idx (string_of_prem prem)
+  | Prem { prem; dep } ->
+      Format.asprintf "[%s-%d] %s%s" (tag tagger depth) idx
+        (string_of_prem prem)
+        (match dep with Some vid -> Format.asprintf " [#%d]" vid | None -> "")
   | Empty -> ""
 
 and logs ?(tagger = Tagger.empty) ?(depth = 0) ?(verbose = false)

@@ -39,18 +39,18 @@ let value_of_map (ctx : Ctx.t) (map : map) : value =
       CaseV
         ( [ [ Atom.Atom "PAIR" $ no_region ]; []; [] ],
           [ value_key; value_value ] )
-      $$$ Dep.Node.fresh ()
+      $$$ Dep.Graph.fresh ()
     in
     Ctx.add_node ctx value;
     value
   in
   let value_pairs =
-    ListV (VMap.bindings map |> List.map value_of_tuple) $$$ Dep.Node.fresh ()
+    ListV (VMap.bindings map |> List.map value_of_tuple) $$$ Dep.Graph.fresh ()
   in
   Ctx.add_node ctx value_pairs;
   let value =
     CaseV ([ [ Atom.Atom "MAP" $ no_region ]; [] ], [ value_pairs ])
-    $$$ Dep.Node.fresh ()
+    $$$ Dep.Graph.fresh ()
   in
   Ctx.add_node ctx value;
   value
@@ -67,8 +67,8 @@ let find_map_opt (ctx : Ctx.t) (at : region) (targs : targ list)
   let value_opt = VMap.find_opt value_key map in
   let value =
     match value_opt with
-    | Some value -> OptV (Some value) $$$ Dep.Node.fresh ()
-    | None -> OptV None $$$ Dep.Node.fresh ()
+    | Some value -> OptV (Some value) $$$ Dep.Graph.fresh ()
+    | None -> OptV None $$$ Dep.Graph.fresh ()
   in
   Ctx.add_node ctx value;
   value
@@ -90,8 +90,8 @@ let find_maps_opt (ctx : Ctx.t) (at : region) (targs : targ list)
   in
   let value =
     match value_opt with
-    | Some value -> OptV (Some value) $$$ Dep.Node.fresh ()
-    | None -> OptV None $$$ Dep.Node.fresh ()
+    | Some value -> OptV (Some value) $$$ Dep.Graph.fresh ()
+    | None -> OptV None $$$ Dep.Graph.fresh ()
   in
   Ctx.add_node ctx value;
   value

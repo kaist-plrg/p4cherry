@@ -22,7 +22,7 @@ type cursor = Global | Local
 
 (* Config *)
 
-type config = { debug : bool; profile : bool }
+type config = { debug : bool; profile : bool; derive : bool }
 
 (* Global layer *)
 
@@ -49,9 +49,9 @@ type local = {
 type t = {
   (* Config *)
   config : config;
-  (* Value dependency graph *)
-  graph : Dep.Graph.t;
-  (* Execution trace *)
+  (* Global value dependency graph *)
+  graph : Dep.Graph.t ref;
+  (* Local execution trace *)
   trace : Trace.t;
   (* Global layer *)
   global : global;
@@ -92,10 +92,22 @@ let trace_open_iter (ctx : t) (inner : string) : t =
   let trace = Trace.open_iter inner in
   { ctx with trace }
 
-let trace_close (ctx : t) : t =
-  let trace = Trace.close ctx.trace in
+let trace_extend (ctx : t) (prem : prem) : t * int =
+  let trace, idx_prem = Trace.extend ctx.trace prem in
+  if ctx.config.debug then
+    Format.asprintf "Premise: %s\n" (prem |> Il.Print.string_of_prem)
+    |> print_endline;
+  let ctx = { ctx with trace } in
+  (ctx, idx_prem)
+
+let trace_annotate (ctx : t) (idx_prem : int) (value : value) : t =
+  let trace = Trace.annotate ctx.trace idx_prem value.note in
+  { ctx with trace }
+
+let trace_commit (ctx : t) (ctx_sub : t) : t =
+  let trace_sub = Trace.close ctx_sub.trace in
   (if ctx.config.debug then
-     match trace with
+     match trace_sub with
      | Rel { id_rel; id_rule; _ } ->
          Format.asprintf "Closing rule %s/%s\n" id_rel.it id_rule.it
          |> print_endline
@@ -104,27 +116,30 @@ let trace_close (ctx : t) : t =
          |> print_endline
      | Iter _ -> Format.asprintf "Closing iteration\n" |> print_endline
      | _ -> ());
-  { ctx with trace }
-
-let trace_extend (ctx : t) (prem : prem) : t =
-  let trace = Trace.extend ctx.trace prem in
-  if ctx.config.debug then
-    Format.asprintf "Premise: %s\n" (prem |> Il.Print.string_of_prem)
-    |> print_endline;
-  { ctx with trace }
-
-let trace_commit (ctx : t) (trace : Trace.t) : t =
-  let trace = Trace.commit ctx.trace trace in
+  let trace = Trace.commit ctx.trace trace_sub in
   { ctx with trace }
 
 (* Value dependencies *)
 
 let add_node (ctx : t) (value : value) : unit =
-  Dep.Graph.add_node ctx.graph value
+  Dep.Graph.add_node ~taint:false ctx.graph value
 
 let add_edge (ctx : t) (value_from : value) (value_to : value)
     (label : Dep.Edges.label) : unit =
   Dep.Graph.add_edge ctx.graph value_from value_to label
+
+let derive (ctx : t) : unit =
+  if ctx.config.derive then (
+    let queries = Trace.collect_queries ctx.trace in
+    let oc = open_out "deps/prems" in
+    queries
+    |> List.map (fun (prem, vid) ->
+           Format.asprintf "[#%d] %s" vid (Il.Print.string_of_prem prem))
+    |> String.concat "\n" |> output_string oc;
+    close_out oc;
+    List.iter
+      (fun (prem, vid) -> Dep.Graph.derive !(ctx.graph) prem vid)
+      queries)
 
 (* Finders *)
 
@@ -251,8 +266,9 @@ let empty_global () : global =
 let empty_local () : local =
   { tdenv = TDEnv.empty; fenv = FEnv.empty; venv = VEnv.empty }
 
-let empty (debug : bool) (profile : bool) (graph : Dep.Graph.t) : t =
-  let config = { debug; profile } in
+let empty ~(debug : bool) ~(profile : bool) ~(derive : bool)
+    (graph : Dep.Graph.t ref) : t =
+  let config = { debug; profile; derive } in
   let trace = Trace.Empty in
   let global = empty_global () in
   let local = empty_local () in

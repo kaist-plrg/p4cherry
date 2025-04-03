@@ -18,6 +18,7 @@ let string_of_typid typid = typid.it
 let string_of_relid relid = relid.it
 let string_of_ruleid ruleid = ruleid.it
 let string_of_defid defid = "$" ^ defid.it
+let string_of_vid vid = "#" ^ string_of_int vid
 
 (* Atoms *)
 

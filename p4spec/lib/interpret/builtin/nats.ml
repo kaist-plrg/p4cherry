@@ -9,7 +9,7 @@ let bigint_of_value (value : value) : Bigint.t =
   value |> Value.get_num |> Num.to_int
 
 let value_of_bigint (ctx : Ctx.t) (i : Bigint.t) : value =
-  let value = NumV (`Nat i) $$$ Dep.Node.fresh () in
+  let value = NumV (`Nat i) $$$ Dep.Graph.fresh () in
   Ctx.add_node ctx value;
   value
 
