@@ -23,12 +23,14 @@ let funcs =
   |> Funcs.add "rev_" Lists.rev_
   |> Funcs.add "concat_" Lists.concat_
   |> Funcs.add "distinct_" Lists.distinct_
+  |> Funcs.add "partition_" Lists.partition_
+  |> Funcs.add "assoc_" Lists.assoc_
   (* Sets *)
   |> Funcs.add "intersect_set" Sets.intersect_set
   |> Funcs.add "union_set" Sets.union_set
   |> Funcs.add "unions_set" Sets.unions_set
   |> Funcs.add "diff_set" Sets.diff_set
-  |> Funcs.add "is_subset" Sets.is_subset
+  |> Funcs.add "sub_set" Sets.sub_set
   |> Funcs.add "eq_set" Sets.eq_set
   (* Maps *)
   |> Funcs.add "find_map_opt" Maps.find_map_opt

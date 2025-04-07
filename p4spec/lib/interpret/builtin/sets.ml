@@ -71,9 +71,9 @@ let diff_set (ctx : Ctx.t) (at : region) (targs : targ list)
   let set_b = set_of_value value_set_b in
   VSet.diff set_a set_b |> value_of_set ctx
 
-(* dec $is_subset<K>(set<K>, set<K>) : bool *)
+(* dec $sub_set<K>(set<K>, set<K>) : bool *)
 
-let is_subset (ctx : Ctx.t) (at : region) (targs : targ list)
+let sub_set (ctx : Ctx.t) (at : region) (targs : targ list)
     (values_input : value list) : value =
   let _typ_key = Extract.one at targs in
   let value_set_a, value_set_b = Extract.two at values_input in

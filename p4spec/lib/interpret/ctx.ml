@@ -92,16 +92,25 @@ let trace_open_iter (ctx : t) (inner : string) : t =
   let trace = Trace.open_iter inner in
   { ctx with trace }
 
-let trace_extend (ctx : t) (prem : prem) : t * int =
-  let trace, idx_prem = Trace.extend ctx.trace prem in
+let trace_extend (ctx : t) (subtrace : Trace.t) : t =
+  let trace, _idx_prem = Trace.extend ctx.trace subtrace in
+  { ctx with trace }
+
+let trace_extend_prem (ctx : t) (prem : prem) : t * int =
+  let subtrace = Trace.Prem { prem; dep = None } in
+  let trace, idx_prem = Trace.extend ctx.trace subtrace in
   if ctx.config.debug then
-    Format.asprintf "Premise: %s\n" (prem |> Il.Print.string_of_prem)
+    Format.asprintf "Prem: %s\n" (prem |> Il.Print.string_of_prem)
     |> print_endline;
   let ctx = { ctx with trace } in
   (ctx, idx_prem)
 
 let trace_annotate (ctx : t) (idx_prem : int) (value : value) : t =
   let trace = Trace.annotate ctx.trace idx_prem value.note in
+  { ctx with trace }
+
+let trace_replace (ctx : t) (subtraces : Trace.t list) : t =
+  let trace = Trace.replace_subtraces ctx.trace subtraces in
   { ctx with trace }
 
 let trace_commit (ctx : t) (ctx_sub : t) : t =

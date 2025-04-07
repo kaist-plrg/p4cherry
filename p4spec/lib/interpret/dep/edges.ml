@@ -9,12 +9,14 @@ type op =
   | UnOp of unop
   | BinOp of binop
   | CmpOp of cmpop
+  | CastOp of typ
+  | DownCastOp
+  | SubOp of typ
+  | MatchOp of pattern
   | CatOp
   | MemOp
   | LenOp
   | UpdOp
-  | CastOp of typ
-  | DownCastOp
 
 type label = Inside | Rel of rel | Func of func | Op of op
 
@@ -50,12 +52,14 @@ let dot_of_op (op : op) : string =
   | UnOp unop -> Il.Print.string_of_unop unop
   | BinOp binop -> Il.Print.string_of_binop binop
   | CmpOp cmpop -> Il.Print.string_of_cmpop cmpop
+  | CastOp typ -> "cast" ^ Il.Print.string_of_typ typ
+  | DownCastOp -> "downcast"
+  | SubOp typ -> "as " ^ Il.Print.string_of_typ typ
+  | MatchOp pattern -> "match " ^ Il.Print.string_of_pattern pattern
   | CatOp -> "cat"
   | MemOp -> "mem"
   | LenOp -> "len"
-  | UpdOp -> "upd"
-  | CastOp typ -> "cast" ^ Il.Print.string_of_typ typ
-  | DownCastOp -> "downcast")
+  | UpdOp -> "upd")
   |> String.escaped
 
 let dot_of_label (label : label) : string =
