@@ -1,6 +1,7 @@
 open Domain.Lib
 open Runtime_dynamic
 open Envs
+open Runtime_testgen
 open Il.Ast
 open Error
 open Attempt
@@ -22,7 +23,7 @@ type cursor = Global | Local
 
 (* Config *)
 
-type config = { debug : bool; profile : bool; derive : bool }
+type config = { debug : bool; profile : bool }
 
 (* Global layer *)
 
@@ -50,7 +51,7 @@ type t = {
   (* Config *)
   config : config;
   (* Global value dependency graph *)
-  graph : Dep.Graph.t ref;
+  graph : Dep.Graph.t option;
   (* Local execution trace *)
   trace : Trace.t;
   (* Global layer *)
@@ -130,25 +131,16 @@ let trace_commit (ctx : t) (ctx_sub : t) : t =
 
 (* Value dependencies *)
 
-let add_node (ctx : t) (value : value) : unit =
-  Dep.Graph.add_node ~taint:false ctx.graph value
+let add_node ?(taint = false) (ctx : t) (value : value) : unit =
+  match ctx.graph with
+  | Some graph -> Dep.Graph.add_node ~taint graph value
+  | None -> ()
 
 let add_edge (ctx : t) (value_from : value) (value_to : value)
     (label : Dep.Edges.label) : unit =
-  Dep.Graph.add_edge ctx.graph value_from value_to label
-
-let derive (ctx : t) : unit =
-  if ctx.config.derive then (
-    let queries = Trace.collect_queries ctx.trace in
-    let oc = open_out "deps/prems" in
-    queries
-    |> List.map (fun (prem, vid) ->
-           Format.asprintf "[#%d] %s" vid (Il.Print.string_of_prem prem))
-    |> String.concat "\n" |> output_string oc;
-    close_out oc;
-    List.iter
-      (fun (prem, vid) -> Dep.Graph.derive !(ctx.graph) prem vid)
-      queries)
+  match ctx.graph with
+  | Some graph -> Dep.Graph.add_edge graph value_from value_to label
+  | None -> ()
 
 (* Finders *)
 
@@ -275,9 +267,9 @@ let empty_global () : global =
 let empty_local () : local =
   { tdenv = TDEnv.empty; fenv = FEnv.empty; venv = VEnv.empty }
 
-let empty ~(debug : bool) ~(profile : bool) ~(derive : bool)
-    (graph : Dep.Graph.t ref) : t =
-  let config = { debug; profile; derive } in
+let empty ~(debug : bool) ~(profile : bool) ~(derive : bool) : t =
+  let config = { debug; profile } in
+  let graph = if derive then Some (Dep.Graph.init ()) else None in
   let trace = Trace.Empty in
   let global = empty_global () in
   let local = empty_local () in

@@ -1,6 +1,7 @@
 open Xl
 open Il.Ast
 module Value = Runtime_dynamic.Value
+module Dep = Runtime_testgen.Dep
 open Util.Source
 
 (* dec $int_to_text(int) : text *)

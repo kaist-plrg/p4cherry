@@ -1,4 +1,5 @@
 open Il.Ast
+module Dep = Runtime_testgen.Dep
 open Util.Source
 
 let ctr = ref 0

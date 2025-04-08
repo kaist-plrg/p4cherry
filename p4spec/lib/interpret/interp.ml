@@ -7,12 +7,12 @@ module Typ = Runtime_dynamic.Typ
 module Value = Runtime_dynamic.Value
 module Rel = Runtime_dynamic.Rel
 open Runtime_dynamic.Envs
+module Dep = Runtime_testgen.Dep
 open Error
 open Attempt
 module F = Format
 open Util.Source
 module Cache = Cache.Cache
-module Pp = Il.Print
 
 (* Caches *)
 
@@ -1133,16 +1133,14 @@ let load_spec (ctx : Ctx.t) (spec : spec) : Ctx.t =
 (* Entry point: run typing rule from `Prog_ok` relation *)
 
 let run_typing ~(debug : bool) ~(profile : bool) ~(derive : bool) (spec : spec)
-    (program : P4.program) : value list =
+    (program : P4.program) : Trace.t * Dep.Graph.t option * value list =
   Builtin.init ();
   Cache.reset !func_cache;
   Cache.reset !rule_cache;
   Dep.Graph.refresh ();
-  let graph = Dep.Graph.empty () |> ref in
-  let program = Program.In.in_program graph program in
-  let ctx = Ctx.empty ~debug ~profile ~derive graph in
+  let ctx = Ctx.empty ~debug ~profile ~derive in
+  let program = Program.In.in_program ctx program in
   let ctx = load_spec ctx spec in
   let+ ctx, values = invoke_rel ctx ("Prog_ok" $ no_region) [ program ] in
-  Ctx.derive ctx;
   Ctx.profile ctx;
-  values
+  (ctx.trace, ctx.graph, values)

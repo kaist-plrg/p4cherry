@@ -1,0 +1,64 @@
+(* 0 *)
+;; spec/2c6-runtime-type-wellformed.watsup:415.6-415.21
+if (dir_h =/= `NO`_dir())
+
+(* 1 *)
+;; spec/2e-runtime-env.watsup:88.6-88.81
+if ($find_match_named<V>(fid, V, id_a*{id_a <- id_a*} ++ id_deft*{id_deft <- id_deft*}, (id_p, bool_p)*{bool_p <- bool_p*, id_p <- id_p*}) =/= ?())
+
+(* 2 *)
+;; spec/4a2-typing-tblctx.watsup:95.6-95.23
+if ((n \ 2) =/= 0)
+
+(* 3 *)
+;; spec/4e-typing-expr.watsup:246.6-246.25
+if (ctk_r'' =/= `LCTK`_ctk())
+
+(* 4 *)
+;; spec/4e-typing-expr.watsup:632.6-632.23
+if (ctk_i =/= `LCTK`_ctk())
+
+(* 5 *)
+;; spec/4e-typing-expr.watsup:809.6-809.22
+if (typ =/= `VoidT`_primtyp() as typ)
+
+(* 6 *)
+;; spec/4e-typing-expr.watsup:835.6-835.22
+if (typ =/= `VoidT`_primtyp() as typ)
+
+(* 7 *)
+;; spec/4g-typing-decl.watsup:536.6-536.20
+if (id_e =/= id)
+
+(* 8 *)
+;; spec/4g-typing-decl.watsup:558.6-558.20
+if (id_e =/= id)
+
+(* 9 *)
+;; spec/4g-typing-decl.watsup:796.6-796.19
+if (dir =/= `NO`_dir())
+
+(* 10 *)
+;; spec/4g-typing-decl.watsup:924.6-924.30
+if (matchkind =/= "exact")
+
+(* 11 *)
+;; spec/4g-typing-decl.watsup:932.6-932.30
+if (matchkind =/= "exact")
+
+(* 12 *)
+;; spec/4g-typing-decl.watsup:1065.6-1065.41
+if (tblctx.PRIORITIES.VALUES =/= [])
+
+(* 13 *)
+;; spec/4g-typing-decl.watsup:1079.6-1079.41
+if (tblctx.PRIORITIES.VALUES =/= [])
+
+(* 14 *)
+;; spec/4g-typing-decl.watsup:1093.6-1093.41
+if (tblctx.PRIORITIES.VALUES =/= [])
+
+(* 15 *)
+;; spec/4h-typing-call.watsup:323.6-323.23
+if (typ_h =/= `AnyT`_synthtyp() as typ)
+

@@ -1,0 +1,12 @@
+(* 0 *)
+;; spec/4g-typing-decl.watsup:1043.6-1043.39
+if tblctx.PRIORITIES.LARGEST_WINS
+
+(* 1 *)
+;; spec/4g-typing-decl.watsup:1066.6-1066.31
+if tblctx.PRIORITIES.INIT
+
+(* 2 *)
+;; spec/4g-typing-decl.watsup:1084.6-1084.39
+if tblctx.PRIORITIES.LARGEST_WINS
+

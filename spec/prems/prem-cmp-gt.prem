@@ -1,0 +1,40 @@
+(* 0 *)
+;; spec/2e-runtime-env.watsup:119.6-119.21
+if (|id_a'*{id_a' <- id_a'*}| > 0)
+
+(* 1 *)
+;; spec/2e-runtime-env.watsup:131.6-131.21
+if (|id_a'*{id_a' <- id_a'*}| > 0)
+
+(* 2 *)
+;; spec/2e-runtime-env.watsup:161.6-161.23
+if (|id_a?{id_a <- id_a?}*{id_a? <- id_a?*}| > 0)
+
+(* 3 *)
+;; spec/2e-runtime-env.watsup:166.6-166.23
+if (|id_a?{id_a <- id_a?}*{id_a? <- id_a?*}| > 0)
+
+(* 4 *)
+;; spec/4a2-typing-tblctx.watsup:94.6-94.17
+if (w > 0)
+
+(* 5 *)
+;; spec/4a2-typing-tblctx.watsup:99.6-99.17
+if (w > 0)
+
+(* 6 *)
+;; spec/4e-typing-expr.watsup:229.6-229.19
+if (n_r > 0)
+
+(* 7 *)
+;; spec/4g-typing-decl.watsup:154.6-154.20
+if (|decl*{decl <- decl*}| > 0)
+
+(* 8 *)
+;; spec/4h-typing-call.watsup:731.6-731.25
+if (|tid_fresh*{tid_fresh <- tid_fresh*}| > 0)
+
+(* 9 *)
+;; spec/4g-typing-decl.watsup:1193.6-1193.23
+if (i_delta > 0 as int)
+

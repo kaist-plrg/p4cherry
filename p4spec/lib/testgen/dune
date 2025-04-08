@@ -1,7 +1,5 @@
-(include_subdirs qualified)
-
 (library
- (name interpret)
+ (name testgen)
  (libraries
   util
   domain
@@ -11,4 +9,6 @@
   runtime_static
   runtime_dynamic
   runtime_testgen
-  p4))
+  interpret
+  p4)
+ (modules classify gen))

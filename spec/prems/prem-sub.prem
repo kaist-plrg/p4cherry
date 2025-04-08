@@ -1,0 +1,2356 @@
+(* 0 *)
+;; spec/2c2-runtime-type-aux.watsup:9.14-9.21
+if typ <: basetyp
+
+(* 1 *)
+;; spec/2c2-runtime-type-aux.watsup:15.14-15.21
+if typ <: primtyp
+
+(* 2 *)
+;; spec/2c2-runtime-type-aux.watsup:51.13-51.19
+if typ <: numtyp
+
+(* 3 *)
+;; spec/2c2-runtime-type-aux.watsup:63.15-63.22
+if typ <: numtyp
+
+(* 4 *)
+;; spec/2c2-runtime-type-aux.watsup:69.15-69.22
+if typ <: numtyp
+
+(* 5 *)
+;; spec/2c2-runtime-type-aux.watsup:75.15-75.22
+if typ <: numtyp
+
+(* 6 *)
+;; spec/2c2-runtime-type-aux.watsup:81.18-81.24
+if typ <: abstyp
+
+(* 7 *)
+;; spec/2c2-runtime-type-aux.watsup:87.14-87.20
+if typ <: abstyp
+
+(* 8 *)
+;; spec/2c2-runtime-type-aux.watsup:93.15-93.24
+if typ <: abstyp
+
+(* 9 *)
+;; spec/2c2-runtime-type-aux.watsup:99.13-99.19
+if typ <: deftyp
+
+(* 10 *)
+;; spec/2c2-runtime-type-aux.watsup:105.15-105.23
+if typ <: aliastyp
+
+(* 11 *)
+;; spec/2c2-runtime-type-aux.watsup:111.14-111.20
+if typ <: aliastyp
+
+(* 12 *)
+;; spec/2c2-runtime-type-aux.watsup:117.14-117.21
+if typ <: datatyp
+
+(* 13 *)
+;; spec/2c2-runtime-type-aux.watsup:123.14-123.22
+if typ <: datatyp
+
+(* 14 *)
+;; spec/2c2-runtime-type-aux.watsup:129.15-129.24
+if typ <: datatyp
+
+(* 15 *)
+;; spec/2c2-runtime-type-aux.watsup:135.16-135.28
+if typ <: datatyp
+
+(* 16 *)
+;; spec/2c2-runtime-type-aux.watsup:141.15-141.22
+if typ <: datatyp
+
+(* 17 *)
+;; spec/2c2-runtime-type-aux.watsup:147.16-147.24
+if typ <: datatyp
+
+(* 18 *)
+;; spec/2c2-runtime-type-aux.watsup:153.16-153.26
+if typ <: datatyp
+
+(* 19 *)
+;; spec/2c2-runtime-type-aux.watsup:159.17-159.28
+if typ <: datatyp
+
+(* 20 *)
+;; spec/2c2-runtime-type-aux.watsup:165.17-165.28
+if typ <: datatyp
+
+(* 21 *)
+;; spec/2c2-runtime-type-aux.watsup:171.16-171.26
+if typ <: datatyp
+
+(* 22 *)
+;; spec/2c2-runtime-type-aux.watsup:177.13-177.19
+if typ <: objtyp
+
+(* 23 *)
+;; spec/2c2-runtime-type-aux.watsup:183.17-183.28
+if typ <: objtyp
+
+(* 24 *)
+;; spec/2c2-runtime-type-aux.watsup:189.17-189.26
+if typ <: objtyp
+
+(* 25 *)
+;; spec/2c2-runtime-type-aux.watsup:195.18-195.28
+if typ <: objtyp
+
+(* 26 *)
+;; spec/2c2-runtime-type-aux.watsup:201.18-201.28
+if typ <: objtyp
+
+(* 27 *)
+;; spec/2c2-runtime-type-aux.watsup:207.16-207.26
+if typ <: objtyp
+
+(* 28 *)
+;; spec/2c2-runtime-type-aux.watsup:213.15-213.23
+if typ <: synthtyp
+
+(* 29 *)
+;; spec/2c2-runtime-type-aux.watsup:219.14-219.20
+if typ <: synthtyp
+
+(* 30 *)
+;; spec/2c2-runtime-type-aux.watsup:225.17-225.26
+if typ <: synthtyp
+
+(* 31 *)
+;; spec/2c2-runtime-type-aux.watsup:231.14-231.20
+if typ <: synthtyp
+
+(* 32 *)
+;; spec/2c2-runtime-type-aux.watsup:237.23-237.39
+if typ <: synthtyp
+
+(* 33 *)
+;; spec/2c2-runtime-type-aux.watsup:335.25-335.34
+if funcdef <: monofuncdef
+
+(* 34 *)
+;; spec/2c2-runtime-type-aux.watsup:336.25-336.39
+if funcdef <: polyfuncdef
+
+(* 35 *)
+;; spec/2c2-runtime-type-aux.watsup:340.26-340.35
+if funcdef <: monofuncdef
+
+(* 36 *)
+;; spec/2c2-runtime-type-aux.watsup:341.26-341.40
+if funcdef <: polyfuncdef
+
+(* 37 *)
+;; spec/2c3-runtime-type-subst.watsup:31.15-31.22
+if typ <: basetyp
+
+(* 38 *)
+;; spec/2c3-runtime-type-subst.watsup:33.15-33.22
+if typ <: abstyp
+
+(* 39 *)
+;; spec/2c3-runtime-type-subst.watsup:35.15-35.29
+if typ' <: abstyp
+
+(* 40 *)
+;; spec/2c3-runtime-type-subst.watsup:39.15-39.23
+if typ' <: aliastyp
+
+(* 41 *)
+;; spec/2c3-runtime-type-subst.watsup:41.15-41.25
+if typ' <: datatyp
+
+(* 42 *)
+;; spec/2c3-runtime-type-subst.watsup:43.15-43.24
+if typ <: datatyp
+
+(* 43 *)
+;; spec/2c3-runtime-type-subst.watsup:45.15-45.29
+if typ' <: datatyp
+
+(* 44 *)
+;; spec/2c3-runtime-type-subst.watsup:47.15-47.24
+if typ' <: datatyp
+
+(* 45 *)
+;; spec/2c3-runtime-type-subst.watsup:49.15-49.26
+if typ' <: datatyp
+
+(* 46 *)
+;; spec/2c3-runtime-type-subst.watsup:51.15-51.27
+if typ' <: datatyp
+
+(* 47 *)
+;; spec/2c3-runtime-type-subst.watsup:53.15-53.34
+if typ' <: datatyp
+
+(* 48 *)
+;; spec/2c3-runtime-type-subst.watsup:55.15-55.34
+if typ' <: datatyp
+
+(* 49 *)
+;; spec/2c3-runtime-type-subst.watsup:57.15-57.33
+if typ' <: datatyp
+
+(* 50 *)
+;; spec/2c3-runtime-type-subst.watsup:59.15-59.43
+if typ <: objtyp
+
+(* 51 *)
+;; spec/2c3-runtime-type-subst.watsup:61.15-61.26
+if typ' <: objtyp
+
+(* 52 *)
+;; spec/2c3-runtime-type-subst.watsup:64.15-64.27
+if typ' <: objtyp
+
+(* 53 *)
+;; spec/2c3-runtime-type-subst.watsup:67.15-67.28
+if typ' <: objtyp
+
+(* 54 *)
+;; spec/2c3-runtime-type-subst.watsup:69.15-69.27
+if typ' <: objtyp
+
+(* 55 *)
+;; spec/2c3-runtime-type-subst.watsup:73.15-73.24
+if typ' <: synthtyp
+
+(* 56 *)
+;; spec/2c3-runtime-type-subst.watsup:75.15-75.31
+if typ' <: synthtyp
+
+(* 57 *)
+;; spec/2c3-runtime-type-subst.watsup:77.15-77.32
+if typ' <: synthtyp
+
+(* 58 *)
+;; spec/2c3-runtime-type-subst.watsup:79.15-79.39
+if typ' <: synthtyp
+
+(* 59 *)
+;; spec/2c3-runtime-type-subst.watsup:83.15-83.23
+if typ' <: synthtyp
+
+(* 60 *)
+;; spec/2c3-runtime-type-subst.watsup:87.15-87.29
+if typ <: synthtyp
+
+(* 61 *)
+;; spec/2c3-runtime-type-subst.watsup:89.15-89.39
+if typ' <: synthtyp
+
+(* 62 *)
+;; spec/2c3-runtime-type-subst.watsup:151.19-151.28
+if funcdef <: monofuncdef
+
+(* 63 *)
+;; spec/2c3-runtime-type-subst.watsup:153.19-153.57
+if funcdef <: polyfuncdef
+
+(* 64 *)
+;; spec/2c3-runtime-type-subst.watsup:162.23-162.30
+if typ <: abstyp
+
+(* 65 *)
+;; spec/2c3-runtime-type-subst.watsup:165.23-165.37
+if typ'' <: abstyp
+
+(* 66 *)
+;; spec/2c3-runtime-type-subst.watsup:169.23-169.31
+if typ' <: aliastyp
+
+(* 67 *)
+;; spec/2c3-runtime-type-subst.watsup:171.23-171.34
+if typ' <: datatyp
+
+(* 68 *)
+;; spec/2c3-runtime-type-subst.watsup:173.23-173.51
+if typ' <: datatyp
+
+(* 69 *)
+;; spec/2c3-runtime-type-subst.watsup:175.23-175.32
+if typ' <: datatyp
+
+(* 70 *)
+;; spec/2c3-runtime-type-subst.watsup:177.23-177.34
+if typ' <: datatyp
+
+(* 71 *)
+;; spec/2c3-runtime-type-subst.watsup:179.23-179.37
+if typ' <: datatyp
+
+(* 72 *)
+;; spec/2c3-runtime-type-subst.watsup:181.23-181.48
+if typ' <: datatyp
+
+(* 73 *)
+;; spec/2c3-runtime-type-subst.watsup:183.23-183.48
+if typ' <: datatyp
+
+(* 74 *)
+;; spec/2c3-runtime-type-subst.watsup:185.23-185.47
+if typ' <: datatyp
+
+(* 75 *)
+;; spec/2c3-runtime-type-subst.watsup:187.23-187.38
+if typ <: objtyp
+
+(* 76 *)
+;; spec/2c3-runtime-type-subst.watsup:191.23-191.34
+if typ' <: objtyp
+
+(* 77 *)
+;; spec/2c3-runtime-type-subst.watsup:195.23-195.35
+if typ' <: objtyp
+
+(* 78 *)
+;; spec/2c3-runtime-type-subst.watsup:199.23-199.36
+if typ' <: objtyp
+
+(* 79 *)
+;; spec/2c3-runtime-type-subst.watsup:201.23-201.36
+if typ' <: objtyp
+
+(* 80 *)
+;; spec/2c3-runtime-type-subst.watsup:203.23-203.53
+if typ' <: synthtyp
+
+(* 81 *)
+;; spec/2c3-runtime-type-subst.watsup:205.23-205.32
+if typ' <: synthtyp
+
+(* 82 *)
+;; spec/2c3-runtime-type-subst.watsup:207.23-207.39
+if typ' <: synthtyp
+
+(* 83 *)
+;; spec/2c3-runtime-type-subst.watsup:209.23-209.45
+if typ' <: synthtyp
+
+(* 84 *)
+;; spec/2c3-runtime-type-subst.watsup:211.23-211.52
+if typ' <: synthtyp
+
+(* 85 *)
+;; spec/2c3-runtime-type-subst.watsup:213.23-213.31
+if typ' <: synthtyp
+
+(* 86 *)
+;; spec/2c3-runtime-type-subst.watsup:241.27-241.36
+if funcdef <: monofuncdef
+
+(* 87 *)
+;; spec/2c3-runtime-type-subst.watsup:243.27-243.65
+if funcdef <: polyfuncdef
+
+(* 88 *)
+;; spec/2c3-runtime-type-subst.watsup:315.24-315.33
+if typdef <: monotypdef
+
+(* 89 *)
+;; spec/2c3-runtime-type-subst.watsup:316.24-316.62
+if typdef <: polytypdef
+
+(* 90 *)
+;; spec/2c3-runtime-type-subst.watsup:327.25-327.34
+if funcdef <: monofuncdef
+
+(* 91 *)
+;; spec/2c3-runtime-type-subst.watsup:329.25-329.63
+if funcdef <: polyfuncdef
+
+(* 92 *)
+;; spec/2c3-runtime-type-subst.watsup:333.25-333.63
+if funcdef <: polyfuncdef
+
+(* 93 *)
+;; spec/2c3-runtime-type-subst.watsup:339.25-339.63
+if funcdef <: polyfuncdef
+
+(* 94 *)
+;; spec/2c3-runtime-type-subst.watsup:379.16-379.32
+if typ' <: abstyp
+
+(* 95 *)
+;; spec/2c3-runtime-type-subst.watsup:381.16-381.24
+if typ' <: aliastyp
+
+(* 96 *)
+;; spec/2c4-runtime-type-util.watsup:12.18-12.26
+if typ <: datatyp
+
+(* 97 *)
+;; spec/2c4-runtime-type-util.watsup:13.18-13.27
+if typ <: datatyp
+
+(* 98 *)
+;; spec/2c4-runtime-type-util.watsup:14.18-14.30
+if typ <: datatyp
+
+(* 99 *)
+;; spec/2c4-runtime-type-util.watsup:15.18-15.29
+if typ <: datatyp
+
+(* 100 *)
+;; spec/2c4-runtime-type-util.watsup:16.18-16.29
+if typ <: datatyp
+
+(* 101 *)
+;; spec/2c4-runtime-type-util.watsup:17.18-17.28
+if typ <: datatyp
+
+(* 102 *)
+;; spec/2c4-runtime-type-util.watsup:18.18-18.29
+if typ <: objtyp
+
+(* 103 *)
+;; spec/2c4-runtime-type-util.watsup:19.18-19.28
+if typ <: objtyp
+
+(* 104 *)
+;; spec/2c4-runtime-type-util.watsup:34.19-34.26
+if typ <: numtyp
+
+(* 105 *)
+;; spec/2c4-runtime-type-util.watsup:35.19-35.26
+if typ <: numtyp
+
+(* 106 *)
+;; spec/2c4-runtime-type-util.watsup:36.19-36.26
+if typ <: numtyp
+
+(* 107 *)
+;; spec/2c4-runtime-type-util.watsup:37.19-37.30
+if typ <: datatyp
+
+(* 108 *)
+;; spec/2c4-runtime-type-util.watsup:38.19-38.28
+if typ <: datatyp
+
+(* 109 *)
+;; spec/2c4-runtime-type-util.watsup:39.19-39.34
+if typ <: datatyp
+
+(* 110 *)
+;; spec/2c4-runtime-type-util.watsup:40.19-40.31
+if typ <: datatyp
+
+(* 111 *)
+;; spec/2c4-runtime-type-util.watsup:42.19-42.31
+if typ' <: datatyp
+
+(* 112 *)
+;; spec/2c4-runtime-type-util.watsup:43.19-43.39
+if typ <: datatyp
+
+(* 113 *)
+;; spec/2c4-runtime-type-util.watsup:45.19-45.39
+if typ <: datatyp
+
+(* 114 *)
+;; spec/2c4-runtime-type-util.watsup:47.19-47.38
+if typ <: datatyp
+
+(* 115 *)
+;; spec/2c4-runtime-type-util.watsup:60.20-60.26
+if typ <: abstyp
+
+(* 116 *)
+;; spec/2c4-runtime-type-util.watsup:61.20-61.31
+if typ <: objtyp
+
+(* 117 *)
+;; spec/2c4-runtime-type-util.watsup:62.20-62.29
+if typ <: objtyp
+
+(* 118 *)
+;; spec/2c4-runtime-type-util.watsup:63.20-63.30
+if typ <: objtyp
+
+(* 119 *)
+;; spec/2c4-runtime-type-util.watsup:64.20-64.30
+if typ <: objtyp
+
+(* 120 *)
+;; spec/2c4-runtime-type-util.watsup:65.20-65.30
+if typ <: objtyp
+
+(* 121 *)
+;; spec/2c4-runtime-type-util.watsup:66.20-66.28
+if typ <: synthtyp
+
+(* 122 *)
+;; spec/2c4-runtime-type-util.watsup:80.21-80.27
+if typ <: objtyp
+
+(* 123 *)
+;; spec/2c4-runtime-type-util.watsup:81.21-81.29
+if typ <: synthtyp
+
+(* 124 *)
+;; spec/2c4-runtime-type-util.watsup:93.17-93.24
+if typ <: numtyp
+
+(* 125 *)
+;; spec/2c4-runtime-type-util.watsup:94.17-94.24
+if typ <: numtyp
+
+(* 126 *)
+;; spec/2c4-runtime-type-util.watsup:95.17-95.24
+if typ <: numtyp
+
+(* 127 *)
+;; spec/2c4-runtime-type-util.watsup:96.17-96.27
+if typ' <: datatyp
+
+(* 128 *)
+;; spec/2c5-runtime-type-alpha.watsup:22.14-22.21
+if typ' <: basetyp
+
+(* 129 *)
+;; spec/2c5-runtime-type-alpha.watsup:22.3-22.10
+if typ <: basetyp
+
+(* 130 *)
+;; spec/2c5-runtime-type-alpha.watsup:25.16-25.25
+if typ' <: abstyp
+
+(* 131 *)
+;; spec/2c5-runtime-type-alpha.watsup:25.3-25.12
+if typ <: abstyp
+
+(* 132 *)
+;; spec/2c5-runtime-type-alpha.watsup:28.27-28.47
+if typ' <: abstyp
+
+(* 133 *)
+;; spec/2c5-runtime-type-alpha.watsup:28.3-28.23
+if typ <: abstyp
+
+(* 134 *)
+;; spec/2c5-runtime-type-alpha.watsup:39.27-39.47
+if typ' <: abstyp
+
+(* 135 *)
+;; spec/2c5-runtime-type-alpha.watsup:39.3-39.23
+if typ <: abstyp
+
+(* 136 *)
+;; spec/2c5-runtime-type-alpha.watsup:49.3-49.15
+if typ <: aliastyp
+
+(* 137 *)
+;; spec/2c5-runtime-type-alpha.watsup:53.12-53.24
+if typ <: aliastyp
+
+(* 138 *)
+;; spec/2c5-runtime-type-alpha.watsup:57.22-57.37
+if typ' <: datatyp
+
+(* 139 *)
+;; spec/2c5-runtime-type-alpha.watsup:57.3-57.18
+if typ <: datatyp
+
+(* 140 *)
+;; spec/2c5-runtime-type-alpha.watsup:61.25-61.43
+if typ' <: datatyp
+
+(* 141 *)
+;; spec/2c5-runtime-type-alpha.watsup:61.3-61.21
+if typ <: datatyp
+
+(* 142 *)
+;; spec/2c5-runtime-type-alpha.watsup:64.41-64.75
+if typ' <: datatyp
+
+(* 143 *)
+;; spec/2c5-runtime-type-alpha.watsup:64.3-64.37
+if typ <: datatyp
+
+(* 144 *)
+;; spec/2c5-runtime-type-alpha.watsup:69.20-69.33
+if typ' <: datatyp
+
+(* 145 *)
+;; spec/2c5-runtime-type-alpha.watsup:69.3-69.16
+if typ <: datatyp
+
+(* 146 *)
+;; spec/2c5-runtime-type-alpha.watsup:73.22-73.37
+if typ' <: datatyp
+
+(* 147 *)
+;; spec/2c5-runtime-type-alpha.watsup:73.3-73.18
+if typ <: datatyp
+
+(* 148 *)
+;; spec/2c5-runtime-type-alpha.watsup:77.28-77.49
+if typ' <: datatyp
+
+(* 149 *)
+;; spec/2c5-runtime-type-alpha.watsup:77.3-77.24
+if typ <: datatyp
+
+(* 150 *)
+;; spec/2c5-runtime-type-alpha.watsup:81.36-81.65
+if typ' <: datatyp
+
+(* 151 *)
+;; spec/2c5-runtime-type-alpha.watsup:81.3-81.32
+if typ <: datatyp
+
+(* 152 *)
+;; spec/2c5-runtime-type-alpha.watsup:85.36-85.65
+if typ' <: datatyp
+
+(* 153 *)
+;; spec/2c5-runtime-type-alpha.watsup:85.3-85.32
+if typ <: datatyp
+
+(* 154 *)
+;; spec/2c5-runtime-type-alpha.watsup:89.35-89.63
+if typ' <: datatyp
+
+(* 155 *)
+;; spec/2c5-runtime-type-alpha.watsup:89.3-89.31
+if typ <: datatyp
+
+(* 156 *)
+;; spec/2c5-runtime-type-alpha.watsup:93.26-93.45
+if typ' <: objtyp
+
+(* 157 *)
+;; spec/2c5-runtime-type-alpha.watsup:93.3-93.22
+if typ <: objtyp
+
+(* 158 *)
+;; spec/2c5-runtime-type-alpha.watsup:102.22-102.37
+if typ' <: objtyp
+
+(* 159 *)
+;; spec/2c5-runtime-type-alpha.watsup:102.3-102.18
+if typ <: objtyp
+
+(* 160 *)
+;; spec/2c5-runtime-type-alpha.watsup:110.23-110.39
+if typ' <: objtyp
+
+(* 161 *)
+;; spec/2c5-runtime-type-alpha.watsup:110.3-110.19
+if typ <: objtyp
+
+(* 162 *)
+;; spec/2c5-runtime-type-alpha.watsup:118.24-118.41
+if typ' <: objtyp
+
+(* 163 *)
+;; spec/2c5-runtime-type-alpha.watsup:118.3-118.20
+if typ <: objtyp
+
+(* 164 *)
+;; spec/2c5-runtime-type-alpha.watsup:122.24-122.41
+if typ' <: objtyp
+
+(* 165 *)
+;; spec/2c5-runtime-type-alpha.watsup:122.3-122.20
+if typ <: objtyp
+
+(* 166 *)
+;; spec/2c5-runtime-type-alpha.watsup:129.20-129.33
+if typ' <: synthtyp
+
+(* 167 *)
+;; spec/2c5-runtime-type-alpha.watsup:129.3-129.16
+if typ <: synthtyp
+
+(* 168 *)
+;; spec/2c5-runtime-type-alpha.watsup:133.27-133.47
+if typ' <: synthtyp
+
+(* 169 *)
+;; spec/2c5-runtime-type-alpha.watsup:133.3-133.23
+if typ <: synthtyp
+
+(* 170 *)
+;; spec/2c5-runtime-type-alpha.watsup:137.33-137.59
+if typ' <: synthtyp
+
+(* 171 *)
+;; spec/2c5-runtime-type-alpha.watsup:137.3-137.29
+if typ <: synthtyp
+
+(* 172 *)
+;; spec/2c5-runtime-type-alpha.watsup:141.40-141.73
+if typ' <: synthtyp
+
+(* 173 *)
+;; spec/2c5-runtime-type-alpha.watsup:141.3-141.36
+if typ <: synthtyp
+
+(* 174 *)
+;; spec/2c5-runtime-type-alpha.watsup:148.19-148.31
+if typ' <: synthtyp
+
+(* 175 *)
+;; spec/2c5-runtime-type-alpha.watsup:148.3-148.15
+if typ <: synthtyp
+
+(* 176 *)
+;; spec/2c5-runtime-type-alpha.watsup:155.30-155.53
+if typ' <: synthtyp
+
+(* 177 *)
+;; spec/2c5-runtime-type-alpha.watsup:155.3-155.26
+if typ <: synthtyp
+
+(* 178 *)
+;; spec/2c5-runtime-type-alpha.watsup:158.41-158.75
+if typ' <: synthtyp
+
+(* 179 *)
+;; spec/2c5-runtime-type-alpha.watsup:158.3-158.37
+if typ <: synthtyp
+
+(* 180 *)
+;; spec/2c5-runtime-type-alpha.watsup:247.20-247.33
+if funcdef' <: monofuncdef
+
+(* 181 *)
+;; spec/2c5-runtime-type-alpha.watsup:247.3-247.16
+if funcdef <: monofuncdef
+
+(* 182 *)
+;; spec/2c5-runtime-type-alpha.watsup:251.53-251.99
+if funcdef' <: polyfuncdef
+
+(* 183 *)
+;; spec/2c5-runtime-type-alpha.watsup:251.3-251.49
+if funcdef <: polyfuncdef
+
+(* 184 *)
+;; spec/2c6-runtime-type-wellformed.watsup:26.13-26.20
+if typ <: basetyp
+
+(* 185 *)
+;; spec/2c6-runtime-type-wellformed.watsup:29.13-29.21
+if typ <: abstyp
+
+(* 186 *)
+;; spec/2c6-runtime-type-wellformed.watsup:33.13-33.29
+if typ' <: abstyp
+
+(* 187 *)
+;; spec/2c6-runtime-type-wellformed.watsup:48.13-48.21
+if typ' <: aliastyp
+
+(* 188 *)
+;; spec/2c6-runtime-type-wellformed.watsup:65.13-65.23
+if typ' <: datatyp
+
+(* 189 *)
+;; spec/2c6-runtime-type-wellformed.watsup:70.13-70.28
+if typ <: datatyp
+
+(* 190 *)
+;; spec/2c6-runtime-type-wellformed.watsup:95.13-95.40
+if typ' <: datatyp
+
+(* 191 *)
+;; spec/2c6-runtime-type-wellformed.watsup:110.13-110.22
+if typ' <: datatyp
+
+(* 192 *)
+;; spec/2c6-runtime-type-wellformed.watsup:127.13-127.24
+if typ' <: datatyp
+
+(* 193 *)
+;; spec/2c6-runtime-type-wellformed.watsup:142.13-142.30
+if typ' <: datatyp
+
+(* 194 *)
+;; spec/2c6-runtime-type-wellformed.watsup:160.13-160.37
+if typ' <: datatyp
+
+(* 195 *)
+;; spec/2c6-runtime-type-wellformed.watsup:194.13-194.37
+if typ' <: datatyp
+
+(* 196 *)
+;; spec/2c6-runtime-type-wellformed.watsup:210.13-210.36
+if typ' <: datatyp
+
+(* 197 *)
+;; spec/2c6-runtime-type-wellformed.watsup:216.13-216.27
+if typ <: objtyp
+
+(* 198 *)
+;; spec/2c6-runtime-type-wellformed.watsup:221.13-221.24
+if typ <: objtyp
+
+(* 199 *)
+;; spec/2c6-runtime-type-wellformed.watsup:225.13-225.25
+if typ <: objtyp
+
+(* 200 *)
+;; spec/2c6-runtime-type-wellformed.watsup:229.13-229.26
+if typ' <: objtyp
+
+(* 201 *)
+;; spec/2c6-runtime-type-wellformed.watsup:233.13-233.25
+if typ'' <: objtyp
+
+(* 202 *)
+;; spec/2c6-runtime-type-wellformed.watsup:242.13-242.22
+if typ' <: synthtyp
+
+(* 203 *)
+;; spec/2c6-runtime-type-wellformed.watsup:246.13-246.29
+if typ' <: synthtyp
+
+(* 204 *)
+;; spec/2c6-runtime-type-wellformed.watsup:250.13-250.35
+if typ' <: synthtyp
+
+(* 205 *)
+;; spec/2c6-runtime-type-wellformed.watsup:255.13-255.42
+if typ' <: synthtyp
+
+(* 206 *)
+;; spec/2c6-runtime-type-wellformed.watsup:314.13-314.21
+if typ'' <: synthtyp
+
+(* 207 *)
+;; spec/2c6-runtime-type-wellformed.watsup:323.13-323.33
+if typ <: synthtyp
+
+(* 208 *)
+;; spec/2c6-runtime-type-wellformed.watsup:327.13-327.42
+if typ' <: synthtyp
+
+(* 209 *)
+;; spec/2c6-runtime-type-wellformed.watsup:329.32-329.59
+if typ'''' <: synthtyp
+
+(* 210 *)
+;; spec/2c6-runtime-type-wellformed.watsup:351.13-351.22
+if typdef <: monotypdef
+
+(* 211 *)
+;; spec/2c6-runtime-type-wellformed.watsup:370.13-370.51
+if typdef <: polytypdef
+
+(* 212 *)
+;; spec/2c6-runtime-type-wellformed.watsup:451.31-451.49
+if typ <: synthtyp
+
+(* 213 *)
+;; spec/2c6-runtime-type-wellformed.watsup:509.13-509.22
+if funcdef <: monofuncdef
+
+(* 214 *)
+;; spec/2c6-runtime-type-wellformed.watsup:519.13-519.51
+if funcdef <: polyfuncdef
+
+(* 215 *)
+;; spec/2c6-runtime-type-wellformed.watsup:551.9-551.24
+if typ'' <: objtyp
+
+(* 216 *)
+;; spec/2c6-runtime-type-wellformed.watsup:563.9-563.18
+if typ' <: objtyp
+
+(* 217 *)
+;; spec/2c6-runtime-type-wellformed.watsup:575.9-575.19
+if typ' <: objtyp
+
+(* 218 *)
+;; spec/2c6-runtime-type-wellformed.watsup:587.9-587.19
+if typ' <: objtyp
+
+(* 219 *)
+;; spec/2c6-runtime-type-wellformed.watsup:41.21-41.28
+if typ <: basetyp
+
+(* 220 *)
+;; spec/2c6-runtime-type-wellformed.watsup:42.21-42.27
+if typ <: abstyp
+
+(* 221 *)
+;; spec/2c6-runtime-type-wellformed.watsup:43.21-43.28
+if typ <: datatyp
+
+(* 222 *)
+;; spec/2c6-runtime-type-wellformed.watsup:57.21-57.28
+if typ <: numtyp
+
+(* 223 *)
+;; spec/2c6-runtime-type-wellformed.watsup:58.21-58.28
+if typ <: numtyp
+
+(* 224 *)
+;; spec/2c6-runtime-type-wellformed.watsup:59.21-59.27
+if typ <: abstyp
+
+(* 225 *)
+;; spec/2c6-runtime-type-wellformed.watsup:60.21-60.29
+if typ <: datatyp
+
+(* 226 *)
+;; spec/2c6-runtime-type-wellformed.watsup:79.23-79.30
+if typ <: numtyp
+
+(* 227 *)
+;; spec/2c6-runtime-type-wellformed.watsup:80.23-80.30
+if typ <: numtyp
+
+(* 228 *)
+;; spec/2c6-runtime-type-wellformed.watsup:81.23-81.29
+if typ <: abstyp
+
+(* 229 *)
+;; spec/2c6-runtime-type-wellformed.watsup:82.23-82.33
+if typ' <: datatyp
+
+(* 230 *)
+;; spec/2c6-runtime-type-wellformed.watsup:87.31-87.38
+if typ <: numtyp
+
+(* 231 *)
+;; spec/2c6-runtime-type-wellformed.watsup:88.31-88.38
+if typ <: numtyp
+
+(* 232 *)
+;; spec/2c6-runtime-type-wellformed.watsup:89.31-89.37
+if typ <: abstyp
+
+(* 233 *)
+;; spec/2c6-runtime-type-wellformed.watsup:90.31-90.39
+if typ <: datatyp
+
+(* 234 *)
+;; spec/2c6-runtime-type-wellformed.watsup:104.22-104.29
+if typ <: basetyp
+
+(* 235 *)
+;; spec/2c6-runtime-type-wellformed.watsup:105.22-105.28
+if typ <: abstyp
+
+(* 236 *)
+;; spec/2c6-runtime-type-wellformed.watsup:106.22-106.29
+if typ <: datatyp
+
+(* 237 *)
+;; spec/2c6-runtime-type-wellformed.watsup:120.23-120.29
+if typ <: numtyp
+
+(* 238 *)
+;; spec/2c6-runtime-type-wellformed.watsup:121.23-121.29
+if typ <: abstyp
+
+(* 239 *)
+;; spec/2c6-runtime-type-wellformed.watsup:122.23-122.30
+if typ <: datatyp
+
+(* 240 *)
+;; spec/2c6-runtime-type-wellformed.watsup:135.23-135.31
+if typ <: abstyp
+
+(* 241 *)
+;; spec/2c6-runtime-type-wellformed.watsup:136.23-136.34
+if typ <: datatyp
+
+(* 242 *)
+;; spec/2c6-runtime-type-wellformed.watsup:137.23-137.33
+if typ <: datatyp
+
+(* 243 *)
+;; spec/2c6-runtime-type-wellformed.watsup:153.24-153.30
+if typ <: numtyp
+
+(* 244 *)
+;; spec/2c6-runtime-type-wellformed.watsup:154.24-154.30
+if typ <: abstyp
+
+(* 245 *)
+;; spec/2c6-runtime-type-wellformed.watsup:155.24-155.31
+if typ <: datatyp
+
+(* 246 *)
+;; spec/2c6-runtime-type-wellformed.watsup:172.24-172.30
+if typ <: numtyp
+
+(* 247 *)
+;; spec/2c6-runtime-type-wellformed.watsup:173.24-173.30
+if typ <: abstyp
+
+(* 248 *)
+;; spec/2c6-runtime-type-wellformed.watsup:174.24-174.32
+if typ <: datatyp
+
+(* 249 *)
+;; spec/2c6-runtime-type-wellformed.watsup:175.24-175.36
+if typ <: datatyp
+
+(* 250 *)
+;; spec/2c6-runtime-type-wellformed.watsup:176.24-176.43
+if typ' <: datatyp
+
+(* 251 *)
+;; spec/2c6-runtime-type-wellformed.watsup:183.35-183.42
+if typ <: numtyp
+
+(* 252 *)
+;; spec/2c6-runtime-type-wellformed.watsup:184.35-184.42
+if typ <: numtyp
+
+(* 253 *)
+;; spec/2c6-runtime-type-wellformed.watsup:185.35-185.41
+if typ <: abstyp
+
+(* 254 *)
+;; spec/2c6-runtime-type-wellformed.watsup:186.35-186.43
+if typ <: datatyp
+
+(* 255 *)
+;; spec/2c6-runtime-type-wellformed.watsup:187.35-187.47
+if typ <: datatyp
+
+(* 256 *)
+;; spec/2c6-runtime-type-wellformed.watsup:188.35-188.54
+if typ' <: datatyp
+
+(* 257 *)
+;; spec/2c6-runtime-type-wellformed.watsup:203.23-203.29
+if typ <: abstyp
+
+(* 258 *)
+;; spec/2c6-runtime-type-wellformed.watsup:204.23-204.31
+if typ <: datatyp
+
+(* 259 *)
+;; spec/2c6-runtime-type-wellformed.watsup:205.23-205.34
+if typ <: datatyp
+
+(* 260 *)
+;; spec/2c6-runtime-type-wellformed.watsup:272.21-272.28
+if typ <: numtyp
+
+(* 261 *)
+;; spec/2c6-runtime-type-wellformed.watsup:273.21-273.28
+if typ <: numtyp
+
+(* 262 *)
+;; spec/2c6-runtime-type-wellformed.watsup:274.21-274.27
+if typ <: abstyp
+
+(* 263 *)
+;; spec/2c6-runtime-type-wellformed.watsup:275.21-275.29
+if typ <: datatyp
+
+(* 264 *)
+;; spec/2c6-runtime-type-wellformed.watsup:276.21-276.30
+if typ <: datatyp
+
+(* 265 *)
+;; spec/2c6-runtime-type-wellformed.watsup:277.21-277.33
+if typ <: datatyp
+
+(* 266 *)
+;; spec/2c6-runtime-type-wellformed.watsup:278.21-278.32
+if typ' <: datatyp
+
+(* 267 *)
+;; spec/2c6-runtime-type-wellformed.watsup:280.21-280.30
+if typ' <: synthtyp
+
+(* 268 *)
+;; spec/2c6-runtime-type-wellformed.watsup:287.31-287.38
+if typ <: numtyp
+
+(* 269 *)
+;; spec/2c6-runtime-type-wellformed.watsup:288.31-288.38
+if typ <: numtyp
+
+(* 270 *)
+;; spec/2c6-runtime-type-wellformed.watsup:289.31-289.37
+if typ <: abstyp
+
+(* 271 *)
+;; spec/2c6-runtime-type-wellformed.watsup:290.31-290.39
+if typ <: datatyp
+
+(* 272 *)
+;; spec/2c6-runtime-type-wellformed.watsup:291.31-291.40
+if typ <: datatyp
+
+(* 273 *)
+;; spec/2c6-runtime-type-wellformed.watsup:292.31-292.43
+if typ <: datatyp
+
+(* 274 *)
+;; spec/2c6-runtime-type-wellformed.watsup:293.31-293.42
+if typ' <: datatyp
+
+(* 275 *)
+;; spec/2c6-runtime-type-wellformed.watsup:300.29-300.36
+if typ <: numtyp
+
+(* 276 *)
+;; spec/2c6-runtime-type-wellformed.watsup:301.29-301.36
+if typ <: numtyp
+
+(* 277 *)
+;; spec/2c6-runtime-type-wellformed.watsup:302.29-302.35
+if typ <: abstyp
+
+(* 278 *)
+;; spec/2c6-runtime-type-wellformed.watsup:303.29-303.37
+if typ <: datatyp
+
+(* 279 *)
+;; spec/2c6-runtime-type-wellformed.watsup:304.29-304.38
+if typ <: datatyp
+
+(* 280 *)
+;; spec/2c6-runtime-type-wellformed.watsup:305.29-305.41
+if typ <: datatyp
+
+(* 281 *)
+;; spec/2c6-runtime-type-wellformed.watsup:306.29-306.40
+if typ' <: datatyp
+
+(* 282 *)
+;; spec/2c6-runtime-type-wellformed.watsup:308.29-308.38
+if typ' <: synthtyp
+
+(* 283 *)
+;; spec/2c6-runtime-type-wellformed.watsup:341.21-341.27
+if typ <: abstyp
+
+(* 284 *)
+;; spec/2c6-runtime-type-wellformed.watsup:342.21-342.27
+if typ <: aliastyp
+
+(* 285 *)
+;; spec/2c6-runtime-type-wellformed.watsup:343.21-343.29
+if typ <: datatyp
+
+(* 286 *)
+;; spec/2c6-runtime-type-wellformed.watsup:344.21-344.30
+if typ <: datatyp
+
+(* 287 *)
+;; spec/2c6-runtime-type-wellformed.watsup:345.21-345.33
+if typ <: datatyp
+
+(* 288 *)
+;; spec/2c6-runtime-type-wellformed.watsup:346.21-346.31
+if typ <: objtyp
+
+(* 289 *)
+;; spec/2c6-runtime-type-wellformed.watsup:357.21-357.29
+if typ <: datatyp
+
+(* 290 *)
+;; spec/2c6-runtime-type-wellformed.watsup:358.21-358.31
+if typ <: datatyp
+
+(* 291 *)
+;; spec/2c6-runtime-type-wellformed.watsup:359.21-359.32
+if typ <: datatyp
+
+(* 292 *)
+;; spec/2c6-runtime-type-wellformed.watsup:360.21-360.32
+if typ <: datatyp
+
+(* 293 *)
+;; spec/2c6-runtime-type-wellformed.watsup:361.21-361.31
+if typ <: datatyp
+
+(* 294 *)
+;; spec/2c6-runtime-type-wellformed.watsup:362.21-362.32
+if typ <: objtyp
+
+(* 295 *)
+;; spec/2c6-runtime-type-wellformed.watsup:363.21-363.30
+if typ <: objtyp
+
+(* 296 *)
+;; spec/2c6-runtime-type-wellformed.watsup:364.21-364.31
+if typ <: objtyp
+
+(* 297 *)
+;; spec/2c6-runtime-type-wellformed.watsup:365.21-365.31
+if typ <: objtyp
+
+(* 298 *)
+;; spec/2d1-runtime-numerics.watsup:623.15-623.22
+if typ <: numtyp
+
+(* 299 *)
+;; spec/2d1-runtime-numerics.watsup:624.15-624.22
+if typ <: numtyp
+
+(* 300 *)
+;; spec/2d1-runtime-numerics.watsup:625.15-625.22
+if typ <: numtyp
+
+(* 301 *)
+;; spec/2d1-runtime-numerics.watsup:626.15-626.39
+if typ <: datatyp
+
+(* 302 *)
+;; spec/2d1-runtime-numerics.watsup:627.15-627.43
+if typ' <: datatyp
+
+(* 303 *)
+;; spec/2d1-runtime-numerics.watsup:631.15-631.43
+if typ' <: datatyp
+
+(* 304 *)
+;; spec/2d1-runtime-numerics.watsup:635.15-635.26
+if typ' <: datatyp
+
+(* 305 *)
+;; spec/2d1-runtime-numerics.watsup:636.15-636.29
+if typ' <: datatyp
+
+(* 306 *)
+;; spec/2d1-runtime-numerics.watsup:636.26-636.29
+if int <: nat
+
+(* 307 *)
+;; spec/2d1-runtime-numerics.watsup:639.15-639.40
+if typ' <: datatyp
+
+(* 308 *)
+;; spec/2d1-runtime-numerics.watsup:641.15-641.40
+if typ' <: datatyp
+
+(* 309 *)
+;; spec/2d1-runtime-numerics.watsup:643.15-643.39
+if typ' <: datatyp
+
+(* 310 *)
+;; spec/2d1-runtime-numerics.watsup:434.17-434.24
+if typ <: numtyp
+
+(* 311 *)
+;; spec/2d1-runtime-numerics.watsup:435.17-435.24
+if typ <: numtyp
+
+(* 312 *)
+;; spec/2d1-runtime-numerics.watsup:436.17-436.27
+if typ' <: datatyp
+
+(* 313 *)
+;; spec/2d1-runtime-numerics.watsup:449.16-449.23
+if typ <: numtyp
+
+(* 314 *)
+;; spec/2d1-runtime-numerics.watsup:450.16-450.23
+if typ <: numtyp
+
+(* 315 *)
+;; spec/2d1-runtime-numerics.watsup:451.16-451.26
+if typ' <: datatyp
+
+(* 316 *)
+;; spec/2d1-runtime-numerics.watsup:452.16-452.24
+if typ' <: synthtyp
+
+(* 317 *)
+;; spec/2d1-runtime-numerics.watsup:465.17-465.27
+if typ <: numtyp
+
+(* 318 *)
+;; spec/2d1-runtime-numerics.watsup:467.17-467.27
+if typ <: numtyp
+
+(* 319 *)
+;; spec/2d1-runtime-numerics.watsup:469.17-469.27
+if typ' <: datatyp
+
+(* 320 *)
+;; spec/2d1-runtime-numerics.watsup:470.17-470.25
+if typ' <: synthtyp
+
+(* 321 *)
+;; spec/2d1-runtime-numerics.watsup:484.17-484.27
+if typ <: numtyp
+
+(* 322 *)
+;; spec/2d1-runtime-numerics.watsup:486.17-486.27
+if typ <: numtyp
+
+(* 323 *)
+;; spec/2d1-runtime-numerics.watsup:488.17-488.27
+if typ' <: datatyp
+
+(* 324 *)
+;; spec/2d1-runtime-numerics.watsup:489.17-489.25
+if typ' <: synthtyp
+
+(* 325 *)
+;; spec/2d1-runtime-numerics.watsup:506.19-506.31
+if typ <: datatyp
+
+(* 326 *)
+;; spec/2d1-runtime-numerics.watsup:519.19-519.31
+if typ <: datatyp
+
+(* 327 *)
+;; spec/2d1-runtime-numerics.watsup:531.16-531.25
+if typ' <: datatyp
+
+(* 328 *)
+;; spec/2d1-runtime-numerics.watsup:534.16-534.27
+if typ' <: datatyp
+
+(* 329 *)
+;; spec/2d1-runtime-numerics.watsup:537.16-537.33
+if typ' <: datatyp
+
+(* 330 *)
+;; spec/2d1-runtime-numerics.watsup:541.16-541.41
+if typ' <: datatyp
+
+(* 331 *)
+;; spec/2d1-runtime-numerics.watsup:544.16-544.41
+if typ' <: datatyp
+
+(* 332 *)
+;; spec/2d1-runtime-numerics.watsup:559.19-559.46
+if typ' <: datatyp
+
+(* 333 *)
+;; spec/2d1-runtime-numerics.watsup:564.19-564.46
+if typ' <: datatyp
+
+(* 334 *)
+;; spec/2d1-runtime-numerics.watsup:586.26-586.34
+if typ' <: synthtyp
+
+(* 335 *)
+;; spec/2d1-runtime-numerics.watsup:594.21-594.29
+if typ' <: synthtyp
+
+(* 336 *)
+;; spec/2d1-runtime-numerics.watsup:604.22-604.30
+if typ' <: synthtyp
+
+(* 337 *)
+;; spec/2d1-runtime-numerics.watsup:656.9-656.10
+if int <: nat
+
+(* 338 *)
+;; spec/2d2-runtime-builtins.watsup:26.27-26.34
+if typ <: numtyp
+
+(* 339 *)
+;; spec/2d2-runtime-builtins.watsup:27.27-27.34
+if typ <: numtyp
+
+(* 340 *)
+;; spec/2d2-runtime-builtins.watsup:28.27-28.34
+if typ <: numtyp
+
+(* 341 *)
+;; spec/2d2-runtime-builtins.watsup:29.27-29.37
+if typ' <: datatyp
+
+(* 342 *)
+;; spec/2d2-runtime-builtins.watsup:30.27-30.41
+if typ' <: datatyp
+
+(* 343 *)
+;; spec/2d2-runtime-builtins.watsup:31.27-31.38
+if typ' <: datatyp
+
+(* 344 *)
+;; spec/2d2-runtime-builtins.watsup:32.27-32.41
+if typ' <: datatyp
+
+(* 345 *)
+;; spec/2d2-runtime-builtins.watsup:32.38-32.41
+if int <: nat
+
+(* 346 *)
+;; spec/2d2-runtime-builtins.watsup:33.27-33.46
+if typ' <: datatyp
+
+(* 347 *)
+;; spec/2d2-runtime-builtins.watsup:34.27-34.46
+if typ' <: datatyp
+
+(* 348 *)
+;; spec/2d2-runtime-builtins.watsup:35.27-35.45
+if typ' <: datatyp
+
+(* 349 *)
+;; spec/2d2-runtime-builtins.watsup:52.27-52.34
+if typ <: numtyp
+
+(* 350 *)
+;; spec/2d2-runtime-builtins.watsup:53.27-53.34
+if typ <: numtyp
+
+(* 351 *)
+;; spec/2d2-runtime-builtins.watsup:54.27-54.34
+if typ <: numtyp
+
+(* 352 *)
+;; spec/2d2-runtime-builtins.watsup:55.27-55.37
+if typ' <: datatyp
+
+(* 353 *)
+;; spec/2d2-runtime-builtins.watsup:56.27-56.41
+if typ' <: datatyp
+
+(* 354 *)
+;; spec/2d2-runtime-builtins.watsup:57.27-57.38
+if typ' <: datatyp
+
+(* 355 *)
+;; spec/2d2-runtime-builtins.watsup:58.27-58.41
+if typ' <: datatyp
+
+(* 356 *)
+;; spec/2d2-runtime-builtins.watsup:58.38-58.41
+if int <: nat
+
+(* 357 *)
+;; spec/2d2-runtime-builtins.watsup:59.27-59.46
+if typ' <: datatyp
+
+(* 358 *)
+;; spec/2d2-runtime-builtins.watsup:60.27-60.46
+if typ' <: datatyp
+
+(* 359 *)
+;; spec/2d2-runtime-builtins.watsup:61.27-61.45
+if typ' <: datatyp
+
+(* 360 *)
+;; spec/4a2-typing-tblctx.watsup:92.30-92.31
+if bitstr <: nat
+
+(* 361 *)
+;; spec/4a2-typing-tblctx.watsup:97.30-97.31
+if bitstr <: nat
+
+(* 362 *)
+;; spec/4c-typing-static-eval.watsup:128.9-128.18
+if typdef <: monotypdef
+
+(* 363 *)
+;; spec/4d1-typing-type.watsup:28.9-28.10
+if int <: nat
+
+(* 364 *)
+;; spec/4d1-typing-type.watsup:35.9-35.10
+if int <: nat
+
+(* 365 *)
+;; spec/4d1-typing-type.watsup:42.9-42.10
+if int <: nat
+
+(* 366 *)
+;; spec/4d1-typing-type.watsup:73.9-73.18
+if typdef <: monotypdef
+
+(* 367 *)
+;; spec/4d1-typing-type.watsup:77.9-77.47
+if typdef <: polytypdef
+
+(* 368 *)
+;; spec/4d1-typing-type.watsup:82.9-82.18
+if typdef <: monotypdef
+
+(* 369 *)
+;; spec/4d1-typing-type.watsup:86.9-86.12
+if typdef <: polytypdef
+
+(* 370 *)
+;; spec/4d2-typing-subtyping.watsup:23.20-23.33
+if typ' <: numtyp
+
+(* 371 *)
+;; spec/4d2-typing-subtyping.watsup:23.3-23.16
+if typ <: numtyp
+
+(* 372 *)
+;; spec/4d2-typing-subtyping.watsup:26.20-26.33
+if typ' <: numtyp
+
+(* 373 *)
+;; spec/4d2-typing-subtyping.watsup:26.3-26.16
+if typ <: numtyp
+
+(* 374 *)
+;; spec/4d2-typing-subtyping.watsup:29.20-29.33
+if typ' <: numtyp
+
+(* 375 *)
+;; spec/4d2-typing-subtyping.watsup:29.3-29.16
+if typ <: numtyp
+
+(* 376 *)
+;; spec/4d2-typing-subtyping.watsup:32.20-32.33
+if typ' <: numtyp
+
+(* 377 *)
+;; spec/4d2-typing-subtyping.watsup:32.3-32.16
+if typ <: numtyp
+
+(* 378 *)
+;; spec/4d2-typing-subtyping.watsup:35.3-35.14
+if typ' <: numtyp
+
+(* 379 *)
+;; spec/4d2-typing-subtyping.watsup:38.3-38.14
+if typ' <: numtyp
+
+(* 380 *)
+;; spec/4d2-typing-subtyping.watsup:41.11-41.22
+if typ' <: numtyp
+
+(* 381 *)
+;; spec/4d2-typing-subtyping.watsup:44.11-44.22
+if typ' <: numtyp
+
+(* 382 *)
+;; spec/4d2-typing-subtyping.watsup:47.3-47.15
+if typ <: datatyp
+
+(* 383 *)
+;; spec/4d2-typing-subtyping.watsup:51.12-51.24
+if typ <: datatyp
+
+(* 384 *)
+;; spec/4d2-typing-subtyping.watsup:55.3-55.19
+if typ <: datatyp
+
+(* 385 *)
+;; spec/4d2-typing-subtyping.watsup:59.12-59.28
+if typ <: datatyp
+
+(* 386 *)
+;; spec/4d2-typing-subtyping.watsup:63.18-63.29
+if typ' <: datatyp
+
+(* 387 *)
+;; spec/4d2-typing-subtyping.watsup:63.3-63.14
+if typ <: synthtyp
+
+(* 388 *)
+;; spec/4d2-typing-subtyping.watsup:67.18-67.31
+if typ' <: datatyp
+
+(* 389 *)
+;; spec/4d2-typing-subtyping.watsup:67.3-67.14
+if typ <: synthtyp
+
+(* 390 *)
+;; spec/4d2-typing-subtyping.watsup:71.18-71.37
+if typ' <: datatyp
+
+(* 391 *)
+;; spec/4d2-typing-subtyping.watsup:71.3-71.14
+if typ <: synthtyp
+
+(* 392 *)
+;; spec/4d2-typing-subtyping.watsup:76.18-76.39
+if typ' <: datatyp
+
+(* 393 *)
+;; spec/4d2-typing-subtyping.watsup:76.3-76.14
+if typ <: synthtyp
+
+(* 394 *)
+;; spec/4d2-typing-subtyping.watsup:80.18-80.39
+if typ' <: datatyp
+
+(* 395 *)
+;; spec/4d2-typing-subtyping.watsup:80.3-80.14
+if typ <: synthtyp
+
+(* 396 *)
+;; spec/4d2-typing-subtyping.watsup:84.33-84.61
+if typ' <: datatyp
+
+(* 397 *)
+;; spec/4d2-typing-subtyping.watsup:84.3-84.29
+if typ <: synthtyp
+
+(* 398 *)
+;; spec/4d2-typing-subtyping.watsup:92.33-92.61
+if typ' <: datatyp
+
+(* 399 *)
+;; spec/4d2-typing-subtyping.watsup:92.3-92.29
+if typ <: synthtyp
+
+(* 400 *)
+;; spec/4d2-typing-subtyping.watsup:104.25-104.38
+if typ' <: datatyp
+
+(* 401 *)
+;; spec/4d2-typing-subtyping.watsup:104.3-104.21
+if typ <: synthtyp
+
+(* 402 *)
+;; spec/4d2-typing-subtyping.watsup:112.25-112.44
+if typ' <: datatyp
+
+(* 403 *)
+;; spec/4d2-typing-subtyping.watsup:112.3-112.21
+if typ <: synthtyp
+
+(* 404 *)
+;; spec/4d2-typing-subtyping.watsup:118.25-118.46
+if typ' <: datatyp
+
+(* 405 *)
+;; spec/4d2-typing-subtyping.watsup:118.3-118.21
+if typ <: synthtyp
+
+(* 406 *)
+;; spec/4d2-typing-subtyping.watsup:126.25-126.46
+if typ' <: datatyp
+
+(* 407 *)
+;; spec/4d2-typing-subtyping.watsup:126.3-126.21
+if typ <: synthtyp
+
+(* 408 *)
+;; spec/4d2-typing-subtyping.watsup:134.40-134.68
+if typ' <: datatyp
+
+(* 409 *)
+;; spec/4d2-typing-subtyping.watsup:134.3-134.36
+if typ <: synthtyp
+
+(* 410 *)
+;; spec/4d2-typing-subtyping.watsup:145.40-145.68
+if typ' <: datatyp
+
+(* 411 *)
+;; spec/4d2-typing-subtyping.watsup:145.3-145.36
+if typ <: synthtyp
+
+(* 412 *)
+;; spec/4d2-typing-subtyping.watsup:156.15-156.26
+if typ' <: datatyp
+
+(* 413 *)
+;; spec/4d2-typing-subtyping.watsup:159.15-159.25
+if typ' <: datatyp
+
+(* 414 *)
+;; spec/4d2-typing-subtyping.watsup:162.17-162.27
+if typ' <: synthtyp
+
+(* 415 *)
+;; spec/4d2-typing-subtyping.watsup:162.3-162.13
+if typ <: synthtyp
+
+(* 416 *)
+;; spec/4d2-typing-subtyping.watsup:166.12-166.22
+if typ <: synthtyp
+
+(* 417 *)
+;; spec/4d2-typing-subtyping.watsup:182.11-182.18
+if typ' <: numtyp
+
+(* 418 *)
+;; spec/4d2-typing-subtyping.watsup:185.11-185.18
+if typ' <: numtyp
+
+(* 419 *)
+;; spec/4d2-typing-subtyping.watsup:188.3-188.19
+if typ <: datatyp
+
+(* 420 *)
+;; spec/4d2-typing-subtyping.watsup:192.18-192.29
+if typ' <: datatyp
+
+(* 421 *)
+;; spec/4d2-typing-subtyping.watsup:192.3-192.14
+if typ <: synthtyp
+
+(* 422 *)
+;; spec/4d2-typing-subtyping.watsup:196.18-196.31
+if typ' <: datatyp
+
+(* 423 *)
+;; spec/4d2-typing-subtyping.watsup:196.3-196.14
+if typ <: synthtyp
+
+(* 424 *)
+;; spec/4d2-typing-subtyping.watsup:200.18-200.37
+if typ' <: datatyp
+
+(* 425 *)
+;; spec/4d2-typing-subtyping.watsup:200.3-200.14
+if typ <: synthtyp
+
+(* 426 *)
+;; spec/4d2-typing-subtyping.watsup:205.18-205.39
+if typ' <: datatyp
+
+(* 427 *)
+;; spec/4d2-typing-subtyping.watsup:205.3-205.14
+if typ <: synthtyp
+
+(* 428 *)
+;; spec/4d2-typing-subtyping.watsup:209.18-209.39
+if typ' <: datatyp
+
+(* 429 *)
+;; spec/4d2-typing-subtyping.watsup:209.3-209.14
+if typ <: synthtyp
+
+(* 430 *)
+;; spec/4d2-typing-subtyping.watsup:213.18-213.29
+if typ' <: synthtyp
+
+(* 431 *)
+;; spec/4d2-typing-subtyping.watsup:213.3-213.14
+if typ <: synthtyp
+
+(* 432 *)
+;; spec/4d2-typing-subtyping.watsup:217.33-217.61
+if typ' <: datatyp
+
+(* 433 *)
+;; spec/4d2-typing-subtyping.watsup:217.3-217.29
+if typ <: synthtyp
+
+(* 434 *)
+;; spec/4d2-typing-subtyping.watsup:225.33-225.61
+if typ' <: datatyp
+
+(* 435 *)
+;; spec/4d2-typing-subtyping.watsup:225.3-225.29
+if typ <: synthtyp
+
+(* 436 *)
+;; spec/4d2-typing-subtyping.watsup:237.25-237.38
+if typ' <: datatyp
+
+(* 437 *)
+;; spec/4d2-typing-subtyping.watsup:237.3-237.21
+if typ <: synthtyp
+
+(* 438 *)
+;; spec/4d2-typing-subtyping.watsup:245.25-245.44
+if typ' <: datatyp
+
+(* 439 *)
+;; spec/4d2-typing-subtyping.watsup:245.3-245.21
+if typ <: synthtyp
+
+(* 440 *)
+;; spec/4d2-typing-subtyping.watsup:251.25-251.46
+if typ' <: datatyp
+
+(* 441 *)
+;; spec/4d2-typing-subtyping.watsup:251.3-251.21
+if typ <: synthtyp
+
+(* 442 *)
+;; spec/4d2-typing-subtyping.watsup:259.25-259.46
+if typ' <: datatyp
+
+(* 443 *)
+;; spec/4d2-typing-subtyping.watsup:259.3-259.21
+if typ <: synthtyp
+
+(* 444 *)
+;; spec/4d2-typing-subtyping.watsup:267.40-267.68
+if typ' <: datatyp
+
+(* 445 *)
+;; spec/4d2-typing-subtyping.watsup:267.3-267.36
+if typ <: synthtyp
+
+(* 446 *)
+;; spec/4d2-typing-subtyping.watsup:278.40-278.69
+if typ' <: datatyp
+
+(* 447 *)
+;; spec/4d2-typing-subtyping.watsup:278.3-278.36
+if typ <: synthtyp
+
+(* 448 *)
+;; spec/4d2-typing-subtyping.watsup:289.15-289.26
+if typ' <: datatyp
+
+(* 449 *)
+;; spec/4d2-typing-subtyping.watsup:292.15-292.25
+if typ' <: datatyp
+
+(* 450 *)
+;; spec/4e-typing-expr.watsup:228.9-228.12
+if int <: nat
+
+(* 451 *)
+;; spec/4e-typing-expr.watsup:605.9-605.23
+if typ' <: datatyp
+
+(* 452 *)
+;; spec/4e-typing-expr.watsup:607.9-607.10
+if int <: nat
+
+(* 453 *)
+;; spec/4e-typing-expr.watsup:620.9-620.26
+if typ <: datatyp
+
+(* 454 *)
+;; spec/4e-typing-expr.watsup:636.9-636.24
+if typ <: datatyp
+
+(* 455 *)
+;; spec/4e-typing-expr.watsup:690.9-690.12
+if int <: nat
+
+(* 456 *)
+;; spec/4e-typing-expr.watsup:699.9-699.12
+if int' <: nat
+
+(* 457 *)
+;; spec/4e-typing-expr.watsup:721.9-721.18
+if typdef <: monotypdef
+
+(* 458 *)
+;; spec/4e-typing-expr.watsup:722.9-722.29
+if typ' <: datatyp
+
+(* 459 *)
+;; spec/4e-typing-expr.watsup:727.9-727.18
+if typdef <: monotypdef
+
+(* 460 *)
+;; spec/4e-typing-expr.watsup:728.9-728.45
+if typ' <: datatyp
+
+(* 461 *)
+;; spec/4e-typing-expr.watsup:739.9-739.27
+if typ <: datatyp
+
+(* 462 *)
+;; spec/4e-typing-expr.watsup:747.9-747.27
+if typ <: datatyp
+
+(* 463 *)
+;; spec/4e-typing-expr.watsup:755.9-755.27
+if typ <: datatyp
+
+(* 464 *)
+;; spec/4e-typing-expr.watsup:761.9-761.27
+if typ <: datatyp
+
+(* 465 *)
+;; spec/4e-typing-expr.watsup:767.9-767.40
+if typ' <: datatyp
+
+(* 466 *)
+;; spec/4e-typing-expr.watsup:775.9-775.40
+if typ' <: datatyp
+
+(* 467 *)
+;; spec/4e-typing-expr.watsup:783.9-783.39
+if typ' <: datatyp
+
+(* 468 *)
+;; spec/4e-typing-expr.watsup:791.9-791.45
+if typ' <: synthtyp
+
+(* 469 *)
+;; spec/4f-typing-stmt.watsup:92.11-92.26
+if typ <: synthtyp
+
+(* 470 *)
+;; spec/4g-typing-decl.watsup:163.15-163.91
+if typ''' <: abstyp
+
+(* 471 *)
+;; spec/4g-typing-decl.watsup:163.57-163.83
+if typ'' <: objtyp
+
+(* 472 *)
+;; spec/4g-typing-decl.watsup:174.9-174.25
+(if funcdef <: polyfuncdef)*{funcdef <- funcdef*}
+
+(* 473 *)
+;; spec/4g-typing-decl.watsup:364.9-364.20
+if typdef <: monotypdef
+
+(* 474 *)
+;; spec/4g-typing-decl.watsup:376.9-376.12
+if typdef <: polytypdef
+
+(* 475 *)
+;; spec/4g-typing-decl.watsup:403.9-403.20
+if typdef <: monotypdef
+
+(* 476 *)
+;; spec/4g-typing-decl.watsup:415.9-415.12
+if typdef <: polytypdef
+
+(* 477 *)
+;; spec/4h-typing-call.watsup:66.9-66.30
+if typ <: datatyp
+
+(* 478 *)
+;; spec/4h-typing-call.watsup:75.9-75.41
+if typ <: datatyp
+
+(* 479 *)
+;; spec/4h-typing-call.watsup:83.9-83.43
+if typ <: datatyp
+
+(* 480 *)
+;; spec/4h-typing-call.watsup:90.9-90.40
+if typ <: datatyp
+
+(* 481 *)
+;; spec/4h-typing-call.watsup:97.9-97.28
+if typ <: objtyp
+
+(* 482 *)
+;; spec/4h-typing-call.watsup:107.9-107.20
+if typ <: objtyp
+
+(* 483 *)
+;; spec/4h-typing-call.watsup:123.9-123.21
+if typ <: objtyp
+
+(* 484 *)
+;; spec/4h-typing-call.watsup:139.9-139.24
+if typ <: objtyp
+
+(* 485 *)
+;; spec/4d2-typing-subtyping.watsup:308.9-308.24
+if typ'' <: datatyp
+
+(* 486 *)
+;; spec/4d2-typing-subtyping.watsup:325.9-325.26
+if typ <: datatyp
+
+(* 487 *)
+;; spec/4d2-typing-subtyping.watsup:333.9-333.26
+if typ <: datatyp
+
+(* 488 *)
+;; spec/4e-typing-expr.watsup:92.23-92.30
+if typ <: numtyp
+
+(* 489 *)
+;; spec/4e-typing-expr.watsup:93.23-93.30
+if typ <: numtyp
+
+(* 490 *)
+;; spec/4e-typing-expr.watsup:122.24-122.31
+if typ <: numtyp
+
+(* 491 *)
+;; spec/4e-typing-expr.watsup:123.24-123.31
+if typ <: numtyp
+
+(* 492 *)
+;; spec/4e-typing-expr.watsup:138.25-138.32
+if typ <: numtyp
+
+(* 493 *)
+;; spec/4e-typing-expr.watsup:139.25-139.32
+if typ <: numtyp
+
+(* 494 *)
+;; spec/4e-typing-expr.watsup:159.41-159.48
+if typ' <: numtyp
+
+(* 495 *)
+;; spec/4e-typing-expr.watsup:159.32-159.39
+if typ <: numtyp
+
+(* 496 *)
+;; spec/4e-typing-expr.watsup:160.41-160.48
+if typ' <: numtyp
+
+(* 497 *)
+;; spec/4e-typing-expr.watsup:160.32-160.39
+if typ <: numtyp
+
+(* 498 *)
+;; spec/4e-typing-expr.watsup:184.40-184.47
+if typ' <: numtyp
+
+(* 499 *)
+;; spec/4e-typing-expr.watsup:184.31-184.38
+if typ <: numtyp
+
+(* 500 *)
+;; spec/4e-typing-expr.watsup:185.40-185.47
+if typ' <: numtyp
+
+(* 501 *)
+;; spec/4e-typing-expr.watsup:185.31-185.38
+if typ <: numtyp
+
+(* 502 *)
+;; spec/4e-typing-expr.watsup:255.30-255.37
+if typ' <: numtyp
+
+(* 503 *)
+;; spec/4e-typing-expr.watsup:256.30-256.37
+if typ' <: numtyp
+
+(* 504 *)
+;; spec/4e-typing-expr.watsup:257.24-257.31
+if typ' <: numtyp
+
+(* 505 *)
+;; spec/4e-typing-expr.watsup:258.33-258.40
+if typ' <: numtyp
+
+(* 506 *)
+;; spec/4e-typing-expr.watsup:258.24-258.31
+if typ <: numtyp
+
+(* 507 *)
+;; spec/4e-typing-expr.watsup:259.33-259.40
+if typ' <: numtyp
+
+(* 508 *)
+;; spec/4e-typing-expr.watsup:259.24-259.31
+if typ <: numtyp
+
+(* 509 *)
+;; spec/4e-typing-expr.watsup:260.24-260.31
+if typ' <: numtyp
+
+(* 510 *)
+;; spec/4e-typing-expr.watsup:261.33-261.40
+if typ' <: numtyp
+
+(* 511 *)
+;; spec/4e-typing-expr.watsup:261.24-261.31
+if typ <: numtyp
+
+(* 512 *)
+;; spec/4e-typing-expr.watsup:262.33-262.40
+if typ' <: numtyp
+
+(* 513 *)
+;; spec/4e-typing-expr.watsup:262.24-262.31
+if typ <: numtyp
+
+(* 514 *)
+;; spec/4e-typing-expr.watsup:302.35-302.42
+if typ' <: numtyp
+
+(* 515 *)
+;; spec/4e-typing-expr.watsup:302.26-302.33
+if typ <: numtyp
+
+(* 516 *)
+;; spec/4e-typing-expr.watsup:303.35-303.42
+if typ' <: numtyp
+
+(* 517 *)
+;; spec/4e-typing-expr.watsup:303.26-303.33
+if typ <: numtyp
+
+(* 518 *)
+;; spec/4e-typing-expr.watsup:327.35-327.42
+if typ' <: numtyp
+
+(* 519 *)
+;; spec/4e-typing-expr.watsup:327.26-327.33
+if typ <: numtyp
+
+(* 520 *)
+;; spec/4e-typing-expr.watsup:328.35-328.42
+if typ' <: numtyp
+
+(* 521 *)
+;; spec/4e-typing-expr.watsup:328.26-328.33
+if typ <: numtyp
+
+(* 522 *)
+;; spec/4e-typing-expr.watsup:352.34-352.41
+if typ' <: numtyp
+
+(* 523 *)
+;; spec/4e-typing-expr.watsup:352.25-352.32
+if typ <: numtyp
+
+(* 524 *)
+;; spec/4e-typing-expr.watsup:353.34-353.41
+if typ' <: numtyp
+
+(* 525 *)
+;; spec/4e-typing-expr.watsup:353.25-353.32
+if typ <: numtyp
+
+(* 526 *)
+;; spec/4e-typing-expr.watsup:354.34-354.41
+if typ' <: numtyp
+
+(* 527 *)
+;; spec/4e-typing-expr.watsup:354.25-354.32
+if typ <: numtyp
+
+(* 528 *)
+;; spec/4e-typing-expr.watsup:355.34-355.41
+if typ' <: numtyp
+
+(* 529 *)
+;; spec/4e-typing-expr.watsup:355.25-355.32
+if typ <: numtyp
+
+(* 530 *)
+;; spec/4e-typing-expr.watsup:459.32-459.39
+if typ' <: numtyp
+
+(* 531 *)
+;; spec/4e-typing-expr.watsup:459.23-459.30
+if typ <: numtyp
+
+(* 532 *)
+;; spec/4e-typing-expr.watsup:460.32-460.39
+if typ' <: numtyp
+
+(* 533 *)
+;; spec/4e-typing-expr.watsup:460.23-460.30
+if typ <: numtyp
+
+(* 534 *)
+;; spec/4e-typing-expr.watsup:487.33-487.40
+if typ' <: numtyp
+
+(* 535 *)
+;; spec/4e-typing-expr.watsup:487.24-487.31
+if typ <: numtyp
+
+(* 536 *)
+;; spec/4e-typing-expr.watsup:488.33-488.40
+if typ' <: numtyp
+
+(* 537 *)
+;; spec/4e-typing-expr.watsup:488.24-488.31
+if typ <: numtyp
+
+(* 538 *)
+;; spec/4e-typing-expr.watsup:515.11-515.19
+if typ' <: synthtyp
+
+(* 539 *)
+;; spec/4e-typing-expr.watsup:522.11-522.19
+if typ' <: synthtyp
+
+(* 540 *)
+;; spec/4e-typing-expr.watsup:590.29-590.36
+if typ <: numtyp
+
+(* 541 *)
+;; spec/4e-typing-expr.watsup:591.29-591.36
+if typ <: numtyp
+
+(* 542 *)
+;; spec/4e-typing-expr.watsup:647.32-647.39
+if typ <: numtyp
+
+(* 543 *)
+;; spec/4e-typing-expr.watsup:648.32-648.39
+if typ <: numtyp
+
+(* 544 *)
+;; spec/4e-typing-expr.watsup:657.33-657.40
+if typ <: numtyp
+
+(* 545 *)
+;; spec/4e-typing-expr.watsup:658.33-658.40
+if typ <: numtyp
+
+(* 546 *)
+;; spec/4e-typing-expr.watsup:668.32-668.39
+if typ <: numtyp
+
+(* 547 *)
+;; spec/4e-typing-expr.watsup:671.32-671.39
+if typ <: numtyp
+
+(* 548 *)
+;; spec/4e-typing-expr.watsup:864.34-864.48
+if typ <: objtyp
+
+(* 549 *)
+;; spec/4e-typing-expr.watsup:871.35-871.79
+if funcdef <: polyfuncdef
+
+(* 550 *)
+;; spec/4g-typing-decl.watsup:146.9-146.78
+if funcdef <: polyfuncdef
+
+(* 551 *)
+;; spec/4g-typing-decl.watsup:526.9-526.40
+if typdef <: polytypdef
+
+(* 552 *)
+;; spec/4g-typing-decl.watsup:730.9-730.24
+if typ'' <: datatyp
+
+(* 553 *)
+;; spec/4g-typing-decl.watsup:734.9-734.20
+if typ'' <: datatyp
+
+(* 554 *)
+;; spec/4g-typing-decl.watsup:743.9-743.24
+if typ'' <: datatyp
+
+(* 555 *)
+;; spec/4g-typing-decl.watsup:747.9-747.20
+if typ'' <: datatyp
+
+(* 556 *)
+;; spec/4g-typing-decl.watsup:815.9-815.29
+if funcdef <: monofuncdef
+
+(* 557 *)
+;; spec/4g-typing-decl.watsup:848.11-848.19
+if typ' <: synthtyp
+
+(* 558 *)
+;; spec/4g-typing-decl.watsup:875.11-875.19
+if typ' <: synthtyp
+
+(* 559 *)
+;; spec/4g-typing-decl.watsup:892.11-892.19
+if typ' <: synthtyp
+
+(* 560 *)
+;; spec/4h-typing-call.watsup:207.21-207.29
+if typ <: abstyp
+
+(* 561 *)
+;; spec/4h-typing-call.watsup:210.42-210.61
+if typ' <: abstyp
+
+(* 562 *)
+;; spec/4h-typing-call.watsup:210.21-210.40
+if typ <: abstyp
+
+(* 563 *)
+;; spec/4h-typing-call.watsup:216.42-216.61
+if typ' <: abstyp
+
+(* 564 *)
+;; spec/4h-typing-call.watsup:216.21-216.40
+if typ <: abstyp
+
+(* 565 *)
+;; spec/4h-typing-call.watsup:222.21-222.32
+if typ <: aliastyp
+
+(* 566 *)
+;; spec/4h-typing-call.watsup:224.28-224.39
+if typ <: aliastyp
+
+(* 567 *)
+;; spec/4h-typing-call.watsup:226.37-226.51
+if typ' <: datatyp
+
+(* 568 *)
+;; spec/4h-typing-call.watsup:226.21-226.35
+if typ <: datatyp
+
+(* 569 *)
+;; spec/4h-typing-call.watsup:228.34-228.45
+if typ' <: datatyp
+
+(* 570 *)
+;; spec/4h-typing-call.watsup:228.21-228.32
+if typ <: datatyp
+
+(* 571 *)
+;; spec/4h-typing-call.watsup:230.36-230.49
+if typ' <: datatyp
+
+(* 572 *)
+;; spec/4h-typing-call.watsup:230.21-230.34
+if typ <: datatyp
+
+(* 573 *)
+;; spec/4h-typing-call.watsup:232.40-232.57
+if typ' <: datatyp
+
+(* 574 *)
+;; spec/4h-typing-call.watsup:232.21-232.38
+if typ <: datatyp
+
+(* 575 *)
+;; spec/4h-typing-call.watsup:234.53-234.83
+if typ' <: datatyp
+
+(* 576 *)
+;; spec/4h-typing-call.watsup:234.21-234.51
+if typ <: datatyp
+
+(* 577 *)
+;; spec/4h-typing-call.watsup:236.53-236.83
+if typ' <: datatyp
+
+(* 578 *)
+;; spec/4h-typing-call.watsup:236.21-236.51
+if typ <: datatyp
+
+(* 579 *)
+;; spec/4h-typing-call.watsup:238.52-238.81
+if typ' <: datatyp
+
+(* 580 *)
+;; spec/4h-typing-call.watsup:238.21-238.50
+if typ <: datatyp
+
+(* 581 *)
+;; spec/4h-typing-call.watsup:240.41-240.59
+if typ' <: objtyp
+
+(* 582 *)
+;; spec/4h-typing-call.watsup:240.21-240.39
+if typ <: objtyp
+
+(* 583 *)
+;; spec/4h-typing-call.watsup:245.36-245.49
+if typ' <: objtyp
+
+(* 584 *)
+;; spec/4h-typing-call.watsup:245.21-245.34
+if typ <: objtyp
+
+(* 585 *)
+;; spec/4h-typing-call.watsup:249.37-249.51
+if typ' <: objtyp
+
+(* 586 *)
+;; spec/4h-typing-call.watsup:249.21-249.35
+if typ <: objtyp
+
+(* 587 *)
+;; spec/4h-typing-call.watsup:253.38-253.53
+if typ' <: objtyp
+
+(* 588 *)
+;; spec/4h-typing-call.watsup:253.21-253.36
+if typ <: objtyp
+

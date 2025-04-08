@@ -1,0 +1,24 @@
+(* 0 *)
+;; spec/2c6-runtime-type-wellformed.watsup:383.6-383.51
+if ($is_externt($canon_typ(typ)) => (dir = `NO`_dir()))
+
+(* 1 *)
+;; spec/2c6-runtime-type-wellformed.watsup:388.6-388.51
+if ($is_externt($canon_typ(typ)) => (dir = `NO`_dir()))
+
+(* 2 *)
+;; spec/4e-typing-expr.watsup:277.6-277.67
+if (($is_fintt(typ_r') \/ $is_intt(typ_r')) => (ctk_r' = `LCTK`_ctk()))
+
+(* 3 *)
+;; spec/4e-typing-expr.watsup:431.6-431.56
+if ($is_intt(typ') => ((ctk_c = `CTK`_ctk()) \/ (ctk_c = `LCTK`_ctk())))
+
+(* 4 *)
+;; spec/4f-typing-stmt.watsup:210.6-211.95
+if ((name = `CURRENT%`_name("verify")) => (((p = `BLOCK`_cursor()) /\ (C.BLOCK.KIND = `PARSER`_bkind())) \/ ((p = `LOCAL`_cursor()) /\ (C.LOCAL.KIND = `PARSERSTATE`_lkind()))))
+
+(* 5 *)
+;; spec/4g-typing-decl.watsup:1137.6-1137.51
+if ((|tblctx_0.KEYS| = 0) => (|tblentry*{tblentry <- tblentry*}| = 0))
+

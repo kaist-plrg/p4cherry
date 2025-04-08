@@ -1,0 +1,79 @@
+(* 0 *)
+;; spec/2c3-runtime-type-subst.watsup:335.6-335.39
+if ((|typ_a*{typ_a <- typ_a*}| = 0) /\ (|tparam'*{tparam' <- tparam'*}| > 0))
+(* 1 *)
+;; spec/2c3-runtime-type-subst.watsup:341.6-341.69
+if (((|typ_a*{typ_a <- typ_a*}| > 0) /\ (|tparam*{tparam <- tparam*}| = |typ_a*{typ_a <- typ_a*}|)) /\ (|tparam_hidden*{tparam_hidden <- tparam_hidden*}| > 0))
+
+(* 2 *)
+;; spec/2c3-runtime-type-subst.watsup:360.6-360.39
+if ((|typ_a*{typ_a <- typ_a*}| = 0) /\ (|tparam'*{tparam' <- tparam'*}| > 0))
+
+(* 3 *)
+;; spec/2c3-runtime-type-subst.watsup:366.6-366.69
+if (((|typ_a*{typ_a <- typ_a*}| > 0) /\ (|tparam*{tparam <- tparam*}| = |typ_a*{typ_a <- typ_a*}|)) /\ (|tparam_hidden*{tparam_hidden <- tparam_hidden*}| > 0))
+
+(* 4 *)
+;; spec/2c5-runtime-type-alpha.watsup:35.6-35.51
+if ($is_nominal(typ_a') /\ $is_nominal(typ_b'))
+
+(* 5 *)
+;; spec/2c5-runtime-type-alpha.watsup:46.6-46.53
+if (~ $is_nominal(typ_a') /\ ~ $is_nominal(typ_b'))
+
+(* 6 *)
+;; spec/2c6-runtime-type-wellformed.watsup:424.9-426.45
+(if ((((~ $is_deft(typ') /\ ~ $is_spect(typ')) /\ ~ $is_intt(typ')) /\ ~ $is_obj(typ')) /\ (~ $is_strt(typ') \/ (dir = `NO`_dir()))))*{dir <- dir*, typ' <- typ'*}
+
+(* 7 *)
+;; spec/2c6-runtime-type-wellformed.watsup:434.9-437.29
+(if (((~ $is_deft(typ') /\ ~ $is_spect(typ')) /\ ~ ($is_obj(typ') /\ ~ $is_externt(typ'))) /\ (~ ($is_strt(typ') \/ $is_intt(typ')) \/ (dir = `NO`_dir()))))*{dir <- dir*, typ' <- typ'*}
+
+(* 8 *)
+;; spec/2c6-runtime-type-wellformed.watsup:459.9-462.29
+(if (((~ $is_deft(typ') /\ ~ $is_spect(typ')) /\ ~ ($is_obj(typ') /\ ~ $is_externt(typ'))) /\ (~ ($is_strt(typ') \/ $is_intt(typ')) \/ (dir = `NO`_dir()))))*{dir <- dir*, typ' <- typ'*}
+
+(* 9 *)
+;; spec/2c6-runtime-type-wellformed.watsup:472.9-474.29
+(if (((~ $is_deft(typ') /\ ~ $is_spect(typ')) /\ ~ $is_obj(typ')) /\ (~ ($is_strt(typ') \/ $is_intt(typ')) \/ (dir = `NO`_dir()))))*{dir <- dir*, typ' <- typ'*}
+
+(* 10 *)
+;; spec/2c6-runtime-type-wellformed.watsup:484.9-487.29
+(if (((~ $is_deft(typ') /\ ~ $is_spect(typ')) /\ ~ ($is_obj(typ') /\ ~ $is_externt(typ'))) /\ (~ ($is_strt(typ') \/ $is_intt(typ')) \/ (dir = `NO`_dir()))))*{dir <- dir*, typ' <- typ'*}
+
+(* 11 *)
+;; spec/2c6-runtime-type-wellformed.watsup:497.9-500.29
+(if (((~ $is_deft(typ') /\ ~ $is_spect(typ')) /\ ~ ($is_obj(typ') /\ ~ $is_externt(typ'))) /\ (~ ($is_strt(typ') \/ $is_intt(typ')) \/ (dir = `NO`_dir()))))*{dir <- dir*, typ' <- typ'*}
+
+(* 12 *)
+;; spec/2c6-runtime-type-wellformed.watsup:556.9-557.52
+(if ((~ $is_deft(typ') /\ ~ $is_spect(typ')) /\ ~ ($is_obj(typ') /\ ~ $is_externt(typ'))))*{typ' <- typ'*}
+
+(* 13 *)
+;; spec/2c6-runtime-type-wellformed.watsup:568.9-569.83
+(if ((((~ $is_deft(typ_p') /\ ~ $is_spect(typ_p')) /\ ~ $is_controlt(typ_p')) /\ ~ $is_packaget(typ_p')) /\ ~ $is_tablet(typ_p')))*{typ_p' <- typ_p'*}
+
+(* 14 *)
+;; spec/2c6-runtime-type-wellformed.watsup:580.9-581.82
+(if ((((~ $is_deft(typ_p') /\ ~ $is_spect(typ_p')) /\ ~ $is_parsert(typ_p')) /\ ~ $is_packaget(typ_p')) /\ ~ $is_tablet(typ_p')))*{typ_p' <- typ_p'*}
+
+(* 15 *)
+;; spec/2c6-runtime-type-wellformed.watsup:592.9-592.73
+(if ((~ $is_deft(typ_p') /\ ~ $is_spect(typ_p')) /\ ~ $is_tablet(typ_p')))*{typ_p' <- typ_p'*}
+
+(* 16 *)
+;; spec/4e-typing-expr.watsup:623.6-623.33
+if ((0 as int <= i) /\ (i <= i_s))
+
+(* 17 *)
+;; spec/4g-typing-decl.watsup:908.6-908.80
+if (((matchkind =/= "lpm") /\ (matchkind =/= "ternary")) /\ (matchkind =/= "range"))
+
+(* 18 *)
+;; spec/4g-typing-decl.watsup:1198.6-1198.95
+if (((member =/= "size") /\ (member =/= "largest_priority_wins")) /\ (member =/= "priority_delta"))
+
+(* 19 *)
+;; spec/4h-typing-call.watsup:213.6-213.53
+if ($is_nominal(typ_p'') /\ $is_nominal(typ_a''))
+

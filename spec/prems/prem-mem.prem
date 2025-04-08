@@ -1,0 +1,8 @@
+(* 0 *)
+;; spec/4e-typing-expr.watsup:723.6-723.28
+if member <- member_t*{member_t <- member_t*}
+
+(* 1 *)
+;; spec/4h-typing-call.watsup:155.6-155.25
+if id_p <- id_deft*{id_deft <- id_deft*}
+

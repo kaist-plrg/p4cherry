@@ -1,0 +1,12 @@
+(* 0 *)
+;; spec/4d2-typing-subtyping.watsup:72.6-72.27
+if (|typ_a*{typ_a <- typ_a*}| as int <= i_size)
+
+(* 1 *)
+;; spec/4d2-typing-subtyping.watsup:201.6-201.27
+if (|typ_a*{typ_a <- typ_a*}| as int <= i_size)
+
+(* 2 *)
+;; spec/4g-typing-decl.watsup:1270.6-1270.35
+if (|$keys_of_table(tbl)| <= 1)
+

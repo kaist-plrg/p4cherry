@@ -1,0 +1,448 @@
+(* 0 *)
+;; spec/2c3-runtime-type-subst.watsup:163.6-163.50
+if $in_set<id>(id, $dom_map<id, typ>(theta))
+
+(* 1 *)
+;; spec/2c4-runtime-type-util.watsup:41.9-41.27
+(if $is_deftable(typ'))*{typ' <- typ'*}
+
+(* 2 *)
+;; spec/2c4-runtime-type-util.watsup:44.9-44.27
+(if $is_deftable(typ'))*{typ' <- typ'*}
+
+(* 3 *)
+;; spec/2c4-runtime-type-util.watsup:46.9-46.27
+(if $is_deftable(typ'))*{typ' <- typ'*}
+
+(* 4 *)
+;; spec/2c4-runtime-type-util.watsup:48.9-48.27
+(if $is_deftable(typ'))*{typ' <- typ'*}
+
+(* 5 *)
+;; spec/2c5-runtime-type-alpha.watsup:98.6-98.45
+if $eq_set<fid>(`SET%`_set<fid>(fid_a*{fid_a <- fid_a*}), `SET%`_set<fid>(fid_b*{fid_b <- fid_b*}))
+
+(* 6 *)
+;; spec/2c6-runtime-type-wellformed.watsup:30.6-30.34
+if $in_set<tid>(tid, tidset)
+
+(* 7 *)
+;; spec/2c6-runtime-type-wellformed.watsup:49.6-49.28
+if $nestable_deft(typ)
+
+(* 8 *)
+;; spec/2c6-runtime-type-wellformed.watsup:66.6-66.28
+if $nestable_newt(typ)
+
+(* 9 *)
+;; spec/2c6-runtime-type-wellformed.watsup:71.6-71.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 10 *)
+;; spec/2c6-runtime-type-wellformed.watsup:96.6-96.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 11 *)
+;; spec/2c6-runtime-type-wellformed.watsup:97.6-97.30
+if $nestable_senumt(typ)
+
+(* 12 *)
+;; spec/2c6-runtime-type-wellformed.watsup:111.6-111.29
+if $nestable_listt(typ)
+
+(* 13 *)
+;; spec/2c6-runtime-type-wellformed.watsup:128.9-128.30
+(if $nestable_tuplet(typ))*{typ <- typ*}
+
+(* 14 *)
+;; spec/2c6-runtime-type-wellformed.watsup:144.6-144.30
+if $nestable_stackt(typ)
+
+(* 15 *)
+;; spec/2c6-runtime-type-wellformed.watsup:161.6-161.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 16 *)
+;; spec/2c6-runtime-type-wellformed.watsup:162.9-162.31
+(if $nestable_structt(typ))*{typ <- typ*}
+
+(* 17 *)
+;; spec/2c6-runtime-type-wellformed.watsup:195.6-195.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 18 *)
+;; spec/2c6-runtime-type-wellformed.watsup:196.9-196.31
+(if $nestable_headert(typ))*{typ <- typ*}
+
+(* 19 *)
+;; spec/2c6-runtime-type-wellformed.watsup:211.6-211.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 20 *)
+;; spec/2c6-runtime-type-wellformed.watsup:212.9-212.30
+(if $nestable_uniont(typ))*{typ <- typ*}
+
+(* 21 *)
+;; spec/2c6-runtime-type-wellformed.watsup:235.6-235.32
+if $is_table_structt(typ')
+
+(* 22 *)
+;; spec/2c6-runtime-type-wellformed.watsup:251.6-251.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 23 *)
+;; spec/2c6-runtime-type-wellformed.watsup:256.6-256.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 24 *)
+;; spec/2c6-runtime-type-wellformed.watsup:316.6-316.28
+if $nestable_sett(typ)
+
+(* 25 *)
+;; spec/2c6-runtime-type-wellformed.watsup:324.6-324.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 26 *)
+;; spec/2c6-runtime-type-wellformed.watsup:352.6-352.29
+if $nestable_monod(typ)
+
+(* 27 *)
+;; spec/2c6-runtime-type-wellformed.watsup:371.6-371.29
+if $nestable_polyd(typ)
+
+(* 28 *)
+;; spec/2c6-runtime-type-wellformed.watsup:372.6-372.51
+if $distinct_<tid>(tparam*{tparam <- tparam*} ++ tparam_hidden*{tparam_hidden <- tparam_hidden*})
+
+(* 29 *)
+;; spec/2c6-runtime-type-wellformed.watsup:394.6-394.28
+if $distinct_<id>(id*{id <- id*})
+
+(* 30 *)
+;; spec/2c6-runtime-type-wellformed.watsup:421.6-421.34
+if $is_trailing_action(dir*{dir <- dir*})
+
+(* 31 *)
+;; spec/2c6-runtime-type-wellformed.watsup:525.6-525.51
+if $distinct_<tid>(tparam*{tparam <- tparam*} ++ tparam_hidden*{tparam_hidden <- tparam_hidden*})
+
+(* 32 *)
+;; spec/2c6-runtime-type-wellformed.watsup:540.6-540.28
+if $distinct_<id>(id*{id <- id*})
+
+(* 33 *)
+;; spec/2c6-runtime-type-wellformed.watsup:608.6-608.51
+if $distinct_<tid>(tparam*{tparam <- tparam*} ++ tparam_hidden*{tparam_hidden <- tparam_hidden*})
+
+(* 34 *)
+;; spec/2c6-runtime-type-wellformed.watsup:177.9-177.42
+(if $nestable_structt_in_headert(typ))*{typ <- typ*}
+
+(* 35 *)
+;; spec/2c6-runtime-type-wellformed.watsup:189.9-189.42
+(if $nestable_structt_in_headert(typ))*{typ <- typ*}
+
+(* 36 *)
+;; spec/2c6-runtime-type-wellformed.watsup:279.9-279.38
+(if $nestable_tuplet_in_sett(typ))*{typ <- typ*}
+
+(* 37 *)
+;; spec/2c6-runtime-type-wellformed.watsup:281.9-281.36
+(if $nestable_seqt_in_sett(typ))*{typ <- typ*}
+
+(* 38 *)
+;; spec/2c6-runtime-type-wellformed.watsup:294.9-294.38
+(if $nestable_tuplet_in_sett(typ))*{typ <- typ*}
+
+(* 39 *)
+;; spec/2c6-runtime-type-wellformed.watsup:307.9-307.36
+(if $nestable_seqt_in_sett(typ))*{typ <- typ*}
+
+(* 40 *)
+;; spec/2c6-runtime-type-wellformed.watsup:309.9-309.36
+(if $nestable_seqt_in_sett(typ))*{typ <- typ*}
+
+(* 41 *)
+;; spec/2e-runtime-env.watsup:77.6-77.42
+if $eq_set<id>(`SET%`_set<id>(id_a*{id_a <- id_a*}), `SET%`_set<id>(id_p*{id_p <- id_p*}))
+
+(* 42 *)
+;; spec/2e-runtime-env.watsup:113.6-113.38
+if $check_func_name(id_f, id_f')
+
+(* 43 *)
+;; spec/2e-runtime-env.watsup:114.6-114.43
+if $check_arity_more(id_a?{id_a <- id_a?}*{id_a? <- id_a?*}, id_p*{id_p <- id_p*})
+
+(* 44 *)
+;; spec/2e-runtime-env.watsup:120.6-120.38
+if $check_func_name(id_f, id_f')
+
+(* 45 *)
+;; spec/2e-runtime-env.watsup:121.6-121.38
+if $check_arity(id_a?{id_a <- id_a?}*{id_a? <- id_a?*}, id_p*{id_p <- id_p*})
+
+(* 46 *)
+;; spec/2e-runtime-env.watsup:125.6-125.38
+if $check_func_name(id_f, id_f')
+
+(* 47 *)
+;; spec/2e-runtime-env.watsup:126.6-126.38
+if $check_arity(id_a?{id_a <- id_a?}*{id_a? <- id_a?*}, id_p*{id_p <- id_p*})
+
+(* 48 *)
+;; spec/2e-runtime-env.watsup:132.6-132.38
+if $check_func_name(id_f, id_f')
+
+(* 49 *)
+;; spec/2e-runtime-env.watsup:133.6-133.43
+if $check_arity_less(id_a?{id_a <- id_a?}*{id_a? <- id_a?*}, id_p*{id_p <- id_p*})
+
+(* 50 *)
+;; spec/2e-runtime-env.watsup:138.6-138.38
+if $check_func_name(id_f, id_f')
+
+(* 51 *)
+;; spec/2e-runtime-env.watsup:139.6-139.43
+if $check_arity_less(id_a?{id_a <- id_a?}*{id_a? <- id_a?*}, id_p*{id_p <- id_p*})
+
+(* 52 *)
+;; spec/4d2-typing-subtyping.watsup:85.6-85.54
+if $eq_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_b*{member_b <- member_b*}))
+
+(* 53 *)
+;; spec/4d2-typing-subtyping.watsup:93.6-93.54
+if $eq_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_b*{member_b <- member_b*}))
+
+(* 54 *)
+;; spec/4d2-typing-subtyping.watsup:101.6-101.26
+if $is_deftable(typ)
+
+(* 55 *)
+;; spec/4d2-typing-subtyping.watsup:109.9-109.30
+(if $is_deftable(typ_d))*{typ_d <- typ_d*}
+
+(* 56 *)
+;; spec/4d2-typing-subtyping.watsup:115.6-115.28
+if $is_deftable(typ_b)
+
+(* 57 *)
+;; spec/4d2-typing-subtyping.watsup:123.9-123.30
+(if $is_deftable(typ_d))*{typ_d <- typ_d*}
+
+(* 58 *)
+;; spec/4d2-typing-subtyping.watsup:131.9-131.30
+(if $is_deftable(typ_d))*{typ_d <- typ_d*}
+
+(* 59 *)
+;; spec/4d2-typing-subtyping.watsup:135.6-135.55
+if $sub_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_b*{member_b <- member_b*}))
+
+(* 60 *)
+;; spec/4d2-typing-subtyping.watsup:142.9-142.85
+(if $is_deftable($find_map<member, typ>(`MAP%`_map<member, typ>(`PAIR%%`_pair<member, typ>(member_b, typ_b)*{member_b <- member_b*, typ_b <- typ_b*}), member_c)))*{member_c <- member_c*}
+
+(* 61 *)
+;; spec/4d2-typing-subtyping.watsup:146.6-146.55
+if $sub_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_a*{member_a <- member_a*}))
+
+(* 62 *)
+;; spec/4d2-typing-subtyping.watsup:153.9-153.85
+(if $is_deftable($find_map<member, typ>(`MAP%`_map<member, typ>(`PAIR%%`_pair<member, typ>(member_b, typ_b)*{member_b <- member_b*, typ_b <- typ_b*}), member_c)))*{member_c <- member_c*}
+
+(* 63 *)
+;; spec/4d2-typing-subtyping.watsup:218.6-218.54
+if $eq_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_b*{member_b <- member_b*}))
+
+(* 64 *)
+;; spec/4d2-typing-subtyping.watsup:226.6-226.54
+if $eq_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_b*{member_b <- member_b*}))
+
+(* 65 *)
+;; spec/4d2-typing-subtyping.watsup:234.6-234.26
+if $is_deftable(typ)
+
+(* 66 *)
+;; spec/4d2-typing-subtyping.watsup:242.9-242.30
+(if $is_deftable(typ_d))*{typ_d <- typ_d*}
+
+(* 67 *)
+;; spec/4d2-typing-subtyping.watsup:248.6-248.28
+if $is_deftable(typ_b)
+
+(* 68 *)
+;; spec/4d2-typing-subtyping.watsup:256.9-256.30
+(if $is_deftable(typ_d))*{typ_d <- typ_d*}
+
+(* 69 *)
+;; spec/4d2-typing-subtyping.watsup:264.9-264.30
+(if $is_deftable(typ_d))*{typ_d <- typ_d*}
+
+(* 70 *)
+;; spec/4d2-typing-subtyping.watsup:268.6-268.55
+if $sub_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_b*{member_b <- member_b*}))
+
+(* 71 *)
+;; spec/4d2-typing-subtyping.watsup:275.9-275.85
+(if $is_deftable($find_map<member, typ>(`MAP%`_map<member, typ>(`PAIR%%`_pair<member, typ>(member_b, typ_b)*{member_b <- member_b*, typ_b <- typ_b*}), member_c)))*{member_c <- member_c*}
+
+(* 72 *)
+;; spec/4d2-typing-subtyping.watsup:279.6-279.55
+if $sub_set<member>(`SET%`_set<member>(member_a*{member_a <- member_a*}), `SET%`_set<member>(member_b*{member_b <- member_b*}))
+
+(* 73 *)
+;; spec/4d2-typing-subtyping.watsup:286.9-286.85
+(if $is_deftable($find_map<member, typ>(`MAP%`_map<member, typ>(`PAIR%%`_pair<member, typ>(member_b, typ_b)*{member_b <- member_b*, typ_b <- typ_b*}), member_c)))*{member_c <- member_c*}
+
+(* 74 *)
+;; spec/4e-typing-expr.watsup:166.6-166.58
+if $in_set<binop>(binop, `SET%`_set<binop>([`PLUS`_binop(), `MINUS`_binop(), `MUL`_binop()]))
+
+(* 75 *)
+;; spec/4e-typing-expr.watsup:191.6-191.55
+if $in_set<binop>(binop, `SET%`_set<binop>([`SPLUS`_binop(), `SMINUS`_binop()]))
+
+(* 76 *)
+;; spec/4e-typing-expr.watsup:215.6-215.50
+if $in_set<binop>(binop, `SET%`_set<binop>([`DIV`_binop(), `MOD`_binop()]))
+
+(* 77 *)
+;; spec/4e-typing-expr.watsup:235.6-235.50
+if $in_set<binop>(binop, `SET%`_set<binop>([`DIV`_binop(), `MOD`_binop()]))
+
+(* 78 *)
+;; spec/4e-typing-expr.watsup:268.6-268.50
+if $in_set<binop>(binop, `SET%`_set<binop>([`SHL`_binop(), `SHR`_binop()]))
+
+(* 79 *)
+;; spec/4e-typing-expr.watsup:283.6-283.48
+if $in_set<binop>(binop, `SET%`_set<binop>([`EQ`_binop(), `NE`_binop()]))
+
+(* 80 *)
+;; spec/4e-typing-expr.watsup:292.6-292.28
+if $is_equalable(typ')
+
+(* 81 *)
+;; spec/4e-typing-expr.watsup:309.6-309.56
+if $in_set<binop>(binop, `SET%`_set<binop>([`LE`_binop(), `GE`_binop(), `LT`_binop(), `GT`_binop()]))
+
+(* 82 *)
+;; spec/4e-typing-expr.watsup:334.6-334.57
+if $in_set<binop>(binop, `SET%`_set<binop>([`BAND`_binop(), `BXOR`_binop(), `BOR`_binop()]))
+
+(* 83 *)
+;; spec/4e-typing-expr.watsup:370.6-370.26
+if $is_fintt(typ_l')
+
+(* 84 *)
+;; spec/4e-typing-expr.watsup:386.6-386.26
+if $is_fbitt(typ_l')
+
+(* 85 *)
+;; spec/4e-typing-expr.watsup:402.6-402.51
+if $in_set<binop>(binop, `SET%`_set<binop>([`LAND`_binop(), `LOR`_binop()]))
+
+(* 86 *)
+;; spec/4e-typing-expr.watsup:702.6-702.52
+if $is_valid_bitstring_slice(typ_b', n_l, n_h)
+
+(* 87 *)
+;; spec/4e-typing-expr.watsup:817.6-817.112
+if $in_set<member>(member, `SET%`_set<member>(["minSizeInBits", "minSizeInBytes", "maxSizeInBits", "maxSizeInBytes"]))
+
+(* 88 *)
+;; spec/4e-typing-expr.watsup:845.6-845.112
+if $in_set<member>(member, `SET%`_set<member>(["minSizeInBits", "minSizeInBytes", "maxSizeInBits", "maxSizeInBytes"]))
+
+(* 89 *)
+;; spec/4e-typing-expr.watsup:885.6-885.41
+if $not_abstract_extern_object(typ)
+
+(* 90 *)
+;; spec/4f-typing-stmt.watsup:16.6-16.28
+if $is_assignable(typ)
+
+(* 91 *)
+;; spec/4f-typing-stmt.watsup:95.6-95.46
+if $distinct_<switchlabel>(switchlabel*{switchlabel <- switchlabel*})
+
+(* 92 *)
+;; spec/4f-typing-stmt.watsup:150.6-150.46
+if $distinct_<switchlabel>(switchlabel*{switchlabel <- switchlabel*})
+
+(* 93 *)
+;; spec/4g-typing-decl.watsup:70.6-70.28
+if $is_assignable(typ)
+
+(* 94 *)
+;; spec/4g-typing-decl.watsup:77.6-77.28
+if $is_assignable(typ)
+
+(* 95 *)
+;; spec/4g-typing-decl.watsup:197.6-197.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 96 *)
+;; spec/4g-typing-decl.watsup:211.6-211.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 97 *)
+;; spec/4g-typing-decl.watsup:273.6-273.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 98 *)
+;; spec/4g-typing-decl.watsup:327.6-327.36
+if $distinct_<member>(member*{member <- member*})
+
+(* 99 *)
+;; spec/4g-typing-decl.watsup:683.6-683.44
+if $distinct_<statelabel>(statelabel*{statelabel <- statelabel*})
+
+(* 100 *)
+;; spec/4g-typing-decl.watsup:684.6-684.54
+if $in_set<statelabel>("start", `SET%`_set<statelabel>(statelabel*{statelabel <- statelabel*}))
+
+(* 101 *)
+;; spec/4h-typing-call.watsup:58.6-58.112
+if $in_set<member>(member, `SET%`_set<member>(["minSizeInBits", "minSizeInBytes", "maxSizeInBits", "maxSizeInBytes"]))
+
+(* 102 *)
+;; spec/4h-typing-call.watsup:711.6-711.40
+if $is_packaget($canon_typ(typ_i))
+
+(* 103 *)
+;; spec/4h-typing-call.watsup:729.6-729.40
+if $is_packaget($canon_typ(typ_i))
+
+(* 104 *)
+;; spec/4d2-typing-subtyping.watsup:303.6-303.26
+if $check_unary(typ)
+
+(* 105 *)
+;; spec/4d2-typing-subtyping.watsup:319.6-319.36
+if $check_binary(typ_a, typ_b)
+
+(* 106 *)
+;; spec/4e-typing-expr.watsup:867.9-867.44
+(if $not_abstract_extern_object''(fd))*{fd <- fd*}
+
+(* 107 *)
+;; spec/4g-typing-decl.watsup:761.6-761.41
+if $check_table_key(matchkind, typ)
+
+(* 108 *)
+;; spec/4g-typing-decl.watsup:835.6-835.32
+if $distinct_<name>(name*{name <- name*})
+
+(* 109 *)
+;; spec/4h-typing-call.watsup:208.6-208.53
+if $in_set<tid>(tid, $dom_map<tid, typ?>(cstr))
+
+(* 110 *)
+;; spec/4h-typing-call.watsup:243.6-243.45
+if $eq_set<fid>(`SET%`_set<fid>(fid_p*{fid_p <- fid_p*}), `SET%`_set<fid>(fid_a*{fid_a <- fid_a*}))
+
+(* 111 *)
+;; spec/4h-typing-call.watsup:280.6-280.79
+if $eq_set<tid>($dom_map<tid, typ?>(cstr_o), $dom_map<tid, typ?>(cstr_n))
+

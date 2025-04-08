@@ -1,0 +1,148 @@
+(* 0 *)
+;; spec/2c3-runtime-type-subst.watsup:227.9-227.49
+(if ~ $in_set<tid>(tparam', tidset_capture))*{tparam' <- tparam'*}
+
+(* 1 *)
+;; spec/2c3-runtime-type-subst.watsup:248.9-248.49
+(if ~ $in_set<tid>(tparam', tidset_capture))*{tparam' <- tparam'*}
+
+(* 2 *)
+;; spec/2e-runtime-env.watsup:67.6-67.40
+if ~ $in_set<id>(id_p_h, `SET%`_set<id>(id_a*{id_a <- id_a*}))
+
+(* 3 *)
+;; spec/2e-runtime-env.watsup:109.6-109.39
+if ~ $check_func_name(id_f, id_f')
+
+(* 4 *)
+;; spec/4a1-typing-context.watsup:151.6-151.61
+if ~ $in_set<id>(id, $dom_map<id, styp>(C.GLOBAL.FRAME))
+
+(* 5 *)
+;; spec/4a1-typing-context.watsup:154.6-154.60
+if ~ $in_set<id>(id, $dom_map<id, styp>(C.BLOCK.FRAME))
+
+(* 6 *)
+;; spec/4a1-typing-context.watsup:158.6-158.54
+if ~ $in_set<id>(id, $dom_map<id, styp>(frame_h))
+
+(* 7 *)
+;; spec/4a1-typing-context.watsup:195.6-195.66
+if ~ $in_set<tid>(tid, $dom_map<tid, typdef>(C.GLOBAL.TDENV))
+
+(* 8 *)
+;; spec/4a1-typing-context.watsup:198.6-198.65
+if ~ $in_set<tid>(tid, $dom_map<tid, typdef>(C.BLOCK.TDENV))
+
+(* 9 *)
+;; spec/4a1-typing-context.watsup:201.6-201.65
+if ~ $in_set<tid>(tid, $dom_map<tid, typdef>(C.LOCAL.TDENV))
+
+(* 10 *)
+;; spec/4a1-typing-context.watsup:218.6-218.68
+if ~ $in_set<tid>(tparam, $dom_map<tid, typdef>(C.BLOCK.TDENV))
+
+(* 11 *)
+;; spec/4a1-typing-context.watsup:222.6-222.68
+if ~ $in_set<tid>(tparam, $dom_map<tid, typdef>(C.LOCAL.TDENV))
+
+(* 12 *)
+;; spec/4a1-typing-context.watsup:238.6-238.67
+if ~ $in_set<fid>(fid, $dom_map<fid, funcdef>(C.GLOBAL.FDENV))
+
+(* 13 *)
+;; spec/4a1-typing-context.watsup:241.6-241.66
+if ~ $in_set<fid>(fid, $dom_map<fid, funcdef>(C.BLOCK.FDENV))
+
+(* 14 *)
+;; spec/4a1-typing-context.watsup:250.6-250.23
+if ~ id <- id_k*{id_k <- id_k*}
+
+(* 15 *)
+;; spec/4a1-typing-context.watsup:255.6-255.23
+if ~ id <- id_k*{id_k <- id_k*}
+
+(* 16 *)
+;; spec/4a1-typing-context.watsup:264.6-264.67
+if ~ $in_set<cid>(cid, $dom_map<cid, consdef>(C.GLOBAL.CDENV))
+
+(* 17 *)
+;; spec/4e-typing-expr.watsup:825.6-825.113
+if ~ $in_set<member>(member, `SET%`_set<member>(["minSizeInBits", "minSizeInBytes", "maxSizeInBits", "maxSizeInBytes"]))
+
+(* 18 *)
+;; spec/4g-typing-decl.watsup:175.7-175.40
+(if ~ $is_externabstractmethodt(ft))*{ft <- ft*}
+
+(* 19 *)
+;; spec/4g-typing-decl.watsup:685.6-685.56
+if ~ $in_set<statelabel>("accept", `SET%`_set<statelabel>(statelabel*{statelabel <- statelabel*}))
+
+(* 20 *)
+;; spec/4g-typing-decl.watsup:686.6-686.56
+if ~ $in_set<statelabel>("reject", `SET%`_set<statelabel>(statelabel*{statelabel <- statelabel*}))
+
+(* 21 *)
+;; spec/4h-typing-call.watsup:451.9-451.48
+(if ~ $is_table_apply_in_action_arg(argIL))*{argIL <- argIL*}
+
+(* 22 *)
+;; spec/4h-typing-call.watsup:756.6-756.59
+if ~ ((p = `GLOBAL`_cursor()) /\ $is_packaget($canon_typ(typ_i)))
+
+(* 23 *)
+;; spec/4h-typing-call.watsup:773.6-773.59
+if ~ ((p = `GLOBAL`_cursor()) /\ $is_packaget($canon_typ(typ_i)))
+
+(* 24 *)
+;; spec/4d2-typing-subtyping.watsup:307.6-307.27
+if ~ $check_unary(typ)
+
+(* 25 *)
+;; spec/4d2-typing-subtyping.watsup:324.6-324.37
+if ~ $check_binary(typ_a, typ_b)
+
+(* 26 *)
+;; spec/4d2-typing-subtyping.watsup:332.6-332.37
+if ~ $check_binary(typ_a, typ_b)
+
+(* 27 *)
+;; spec/4e-typing-expr.watsup:863.6-863.26
+if ~ $is_externt(typ)
+
+(* 28 *)
+;; spec/4g-typing-decl.watsup:861.6-861.47
+if ~ ($is_maske(expr) \/ $is_rangee(expr))
+
+(* 29 *)
+;; spec/4g-typing-decl.watsup:880.6-880.47
+if ~ ($is_maske(expr) \/ $is_rangee(expr))
+
+(* 30 *)
+;; spec/4g-typing-decl.watsup:897.6-897.47
+if ~ ($is_maske(expr) \/ $is_rangee(expr))
+
+(* 31 *)
+;; spec/4g-typing-decl.watsup:909.6-909.47
+if ~ ($is_maske(expr) \/ $is_rangee(expr))
+
+(* 32 *)
+;; spec/4g-typing-decl.watsup:1027.6-1027.30
+if ~ tblctx.ENTRIES.CONST
+
+(* 33 *)
+;; spec/4g-typing-decl.watsup:1057.6-1057.40
+if ~ tblctx.PRIORITIES.LARGEST_WINS
+
+(* 34 *)
+;; spec/4g-typing-decl.watsup:1064.6-1064.30
+if ~ tblctx.ENTRIES.CONST
+
+(* 35 *)
+;; spec/4g-typing-decl.watsup:1098.6-1098.40
+if ~ tblctx.PRIORITIES.LARGEST_WINS
+
+(* 36 *)
+;; spec/4h-typing-call.watsup:219.6-219.56
+if ~ ($is_nominal(typ_p'') /\ $is_nominal(typ_a''))
+

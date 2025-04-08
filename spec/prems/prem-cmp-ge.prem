@@ -1,0 +1,36 @@
+(* 0 *)
+;; spec/2c6-runtime-type-wellformed.watsup:143.6-143.20
+if (i_size >= 0 as int)
+
+(* 1 *)
+;; spec/2d1-runtime-numerics.watsup:190.6-190.20
+if (i_l >= 0 as int)
+
+(* 2 *)
+;; spec/2d1-runtime-numerics.watsup:202.6-202.20
+if (i_l >= 0 as int)
+
+(* 3 *)
+;; spec/2d1-runtime-numerics.watsup:212.6-212.20
+if (i_l >= 0 as int)
+
+(* 4 *)
+;; spec/4g-typing-decl.watsup:1034.6-1034.18
+if (i >= 0 as int)
+
+(* 5 *)
+;; spec/4g-typing-decl.watsup:1049.6-1049.18
+if (i >= 0 as int)
+
+(* 6 *)
+;; spec/4g-typing-decl.watsup:1072.6-1072.18
+if (i >= 0 as int)
+
+(* 7 *)
+;; spec/4g-typing-decl.watsup:1087.6-1087.19
+if (i' >= 0 as int)
+
+(* 8 *)
+;; spec/4g-typing-decl.watsup:1101.6-1101.19
+if (i' >= 0 as int)
+

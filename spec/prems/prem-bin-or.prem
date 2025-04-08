@@ -1,0 +1,224 @@
+(* 0 *)
+;; spec/2c6-runtime-type-wellformed.watsup:389.6-389.29
+if ((dir = `IN`_dir()) \/ (dir = `NO`_dir()))
+
+(* 1 *)
+;; spec/2c6-runtime-type-wellformed.watsup:510.6-514.37
+if (((($is_builtinmethodt(ft) \/ $is_actiont(ft)) \/ $is_parserapplymethodt(ft)) \/ $is_controlapplymethodt(ft)) \/ $is_tableapplymethodt(ft))
+
+(* 2 *)
+;; spec/2c6-runtime-type-wellformed.watsup:520.6-523.41
+if ((($is_externfunct(ft) \/ $is_funct(ft)) \/ $is_externmethodt(ft)) \/ $is_externabstractmethodt(ft))
+
+(* 3 *)
+;; spec/2c6-runtime-type-wellformed.watsup:603.6-606.32
+if ((($is_externt(typ_r') \/ $is_parsert(typ_r')) \/ $is_controlt(typ_r')) \/ $is_packaget(typ_r'))
+
+(* 4 *)
+;; spec/4a1-typing-context.watsup:179.8-179.47
+if (((dir = `IN`_dir()) \/ (dir = `OUT`_dir())) \/ (dir = `INOUT`_dir()))
+
+(* 5 *)
+;; spec/4c-typing-static-eval.watsup:114.6-114.119
+if ((((member = "minSizeInBits") \/ (member = "minSizeInBytes")) \/ (member = "maxSizeInBits")) \/ (member = "maxSizeInBytes"))
+
+(* 6 *)
+;; spec/4c-typing-static-eval.watsup:125.6-126.65
+if ((((member = "minSizeInBits") \/ (member = "minSizeInBytes")) \/ (member = "maxSizeInBits")) \/ (member = "maxSizeInBytes"))
+
+(* 7 *)
+;; spec/4e-typing-expr.watsup:743.6-743.90
+if (((p = `BLOCK`_cursor()) /\ (C.BLOCK.KIND = `PARSER`_bkind())) \/ ((p = `LOCAL`_cursor()) /\ (C.LOCAL.KIND = `PARSERSTATE`_lkind())))
+
+(* 8 *)
+;; spec/4e-typing-expr.watsup:751.6-751.90
+if (((p = `BLOCK`_cursor()) /\ (C.BLOCK.KIND = `PARSER`_bkind())) \/ ((p = `LOCAL`_cursor()) /\ (C.LOCAL.KIND = `PARSERSTATE`_lkind())))
+
+(* 9 *)
+;; spec/4f-typing-stmt.watsup:15.6-15.33
+if ((dir = `OUT`_dir()) \/ (dir = `INOUT`_dir()))
+
+(* 10 *)
+;; spec/4f-typing-stmt.watsup:147.6-147.100
+if (((($is_errt(typ') \/ $is_fintt(typ')) \/ $is_fbitt(typ')) \/ $is_enumt(typ')) \/ $is_senumt(typ'))
+
+(* 11 *)
+;; spec/4f-typing-stmt.watsup:249.6-249.48
+if ($is_parsert(typ') \/ $is_controlt(typ'))
+
+(* 12 *)
+;; spec/4g-typing-decl.watsup:427.6-427.62
+if ((p = `GLOBAL`_cursor()) \/ ((p = `BLOCK`_cursor()) /\ (C_0.BLOCK.KIND = `CONTROL`_bkind())))
+
+(* 13 *)
+;; spec/4g-typing-decl.watsup:464.6-464.47
+if ((f = `RET`_flow()) \/ ((f = `CONT`_flow()) /\ (typ_r = `VoidT`_primtyp() as typ)))
+
+(* 14 *)
+;; spec/4g-typing-decl.watsup:619.6-619.59
+if ((p = `GLOBAL`_cursor()) \/ ((p = `BLOCK`_cursor()) /\ (C.BLOCK.KIND = `PARSER`_bkind())))
+
+(* 15 *)
+;; spec/4g-typing-decl.watsup:626.6-626.32
+if ((ctk = `CTK`_ctk()) \/ (ctk = `LCTK`_ctk()))
+
+(* 16 *)
+;; spec/4h-typing-call.watsup:11.6-11.33
+if ((dir = `OUT`_dir()) \/ (dir = `INOUT`_dir()))
+
+(* 17 *)
+;; spec/4h-typing-call.watsup:22.6-22.32
+if ((ctk = `LCTK`_ctk()) \/ (ctk = `CTK`_ctk()))
+
+(* 18 *)
+;; spec/4h-typing-call.watsup:340.6-340.56
+if ((C.BLOCK.KIND = `PARSER`_bkind()) \/ (C.BLOCK.KIND = `CONTROL`_bkind()))
+
+(* 19 *)
+;; spec/4h-typing-call.watsup:344.6-344.56
+if ((C.BLOCK.KIND = `PARSER`_bkind()) \/ (C.BLOCK.KIND = `CONTROL`_bkind()))
+
+(* 20 *)
+;; spec/4h-typing-call.watsup:348.6-348.56
+if ((C.BLOCK.KIND = `PARSER`_bkind()) \/ (C.BLOCK.KIND = `CONTROL`_bkind()))
+
+(* 21 *)
+;; spec/4h-typing-call.watsup:352.6-352.56
+if ((C.BLOCK.KIND = `PARSER`_bkind()) \/ (C.BLOCK.KIND = `CONTROL`_bkind()))
+
+(* 22 *)
+;; spec/4h-typing-call.watsup:356.6-358.43
+if (((C.LOCAL.KIND = `ACTION`_lkind()) \/ (C.LOCAL.KIND = `CONTROLAPPLYMETHOD`_lkind())) \/ (C.LOCAL.KIND = `TABLEAPPLYMETHOD`_lkind()))
+
+(* 23 *)
+;; spec/4h-typing-call.watsup:366.6-369.43
+if ((((C.LOCAL.KIND = `ACTION`_lkind()) \/ (C.LOCAL.KIND = `PARSERSTATE`_lkind())) \/ (C.LOCAL.KIND = `CONTROLAPPLYMETHOD`_lkind())) \/ (C.LOCAL.KIND = `TABLEAPPLYMETHOD`_lkind()))
+
+(* 24 *)
+;; spec/4h-typing-call.watsup:377.6-380.43
+if ((((C.LOCAL.KIND = `ACTION`_lkind()) \/ (C.LOCAL.KIND = `PARSERSTATE`_lkind())) \/ (C.LOCAL.KIND = `CONTROLAPPLYMETHOD`_lkind())) \/ (C.LOCAL.KIND = `TABLEAPPLYMETHOD`_lkind()))
+
+(* 25 *)
+;; spec/4h-typing-call.watsup:392.6-395.43
+if ((((C.LOCAL.KIND = `ACTION`_lkind()) \/ (C.LOCAL.KIND = `PARSERSTATE`_lkind())) \/ (C.LOCAL.KIND = `CONTROLAPPLYMETHOD`_lkind())) \/ (C.LOCAL.KIND = `TABLEAPPLYMETHOD`_lkind()))
+
+(* 26 *)
+;; spec/4h-typing-call.watsup:403.6-406.43
+if ((((C.LOCAL.KIND = `ACTION`_lkind()) \/ (C.LOCAL.KIND = `PARSERSTATE`_lkind())) \/ (C.LOCAL.KIND = `CONTROLAPPLYMETHOD`_lkind())) \/ (C.LOCAL.KIND = `TABLEAPPLYMETHOD`_lkind()))
+
+(* 27 *)
+;; spec/4h-typing-call.watsup:414.6-417.43
+if ((((C.LOCAL.KIND = `ACTION`_lkind()) \/ (C.LOCAL.KIND = `PARSERSTATE`_lkind())) \/ (C.LOCAL.KIND = `CONTROLAPPLYMETHOD`_lkind())) \/ (C.LOCAL.KIND = `TABLEAPPLYMETHOD`_lkind()))
+
+(* 28 *)
+;; spec/4h-typing-call.watsup:429.6-430.43
+if ((C.LOCAL.KIND = `CONTROLAPPLYMETHOD`_lkind()) \/ (C.LOCAL.KIND = `TABLEAPPLYMETHOD`_lkind()))
+
+(* 29 *)
+;; spec/4h-typing-call.watsup:62.6-62.54
+if ((member = "push_front") \/ (member = "pop_front"))
+
+(* 30 *)
+;; spec/4h-typing-call.watsup:79.6-79.53
+if ((member = "setValid") \/ (member = "setInvalid"))
+
+(* 31 *)
+;; spec/4h-typing-call.watsup:669.6-669.52
+if ($is_externt(typ_i') \/ $is_packaget(typ_i'))
+
+(* 32 *)
+;; spec/4h-typing-call.watsup:676.6-677.54
+if ((($is_externt(typ_i') \/ $is_parsert(typ_i')) \/ $is_controlt(typ_i')) \/ $is_packaget(typ_i'))
+
+(* 33 *)
+;; spec/4h-typing-call.watsup:684.6-684.51
+if ($is_externt(typ_i') \/ $is_parsert(typ_i'))
+
+(* 34 *)
+;; spec/4h-typing-call.watsup:691.6-691.74
+if (($is_externt(typ_i') \/ $is_controlt(typ_i')) \/ $is_tablet(typ_i'))
+
+(* 35 *)
+;; spec/4h-typing-call.watsup:698.6-698.51
+if ($is_externt(typ_i') \/ $is_parsert(typ_i'))
+
+(* 36 *)
+;; spec/4h-typing-call.watsup:705.6-705.52
+if ($is_externt(typ_i') \/ $is_controlt(typ_i'))
+
+(* 37 *)
+;; spec/4g-typing-decl.watsup:119.6-119.33
+if ((f = `RET`_flow()) \/ (typ_r = `VoidT`_primtyp() as typ))
+
+(* 38 *)
+;; spec/4g-typing-decl.watsup:721.6-721.54
+if ((matchkind = "exact") \/ (matchkind = "optional"))
+
+(* 39 *)
+;; spec/4g-typing-decl.watsup:723.6-726.25
+if (((((($is_errt(typ') \/ $is_boolt(typ')) \/ $is_intt(typ')) \/ $is_fintt(typ')) \/ $is_fbitt(typ')) \/ $is_vbitt(typ')) \/ $is_enumt(typ'))
+
+(* 40 *)
+;; spec/4g-typing-decl.watsup:729.6-729.54
+if ((matchkind = "exact") \/ (matchkind = "optional"))
+
+(* 41 *)
+;; spec/4g-typing-decl.watsup:733.6-733.54
+if ((matchkind = "exact") \/ (matchkind = "optional"))
+
+(* 42 *)
+;; spec/4g-typing-decl.watsup:737.6-737.74
+if (((matchkind = "lpm") \/ (matchkind = "ternary")) \/ (matchkind = "range"))
+
+(* 43 *)
+;; spec/4g-typing-decl.watsup:739.6-739.61
+if (($is_intt(typ') \/ $is_fintt(typ')) \/ $is_fbitt(typ'))
+
+(* 44 *)
+;; spec/4g-typing-decl.watsup:742.6-742.74
+if (((matchkind = "lpm") \/ (matchkind = "ternary")) \/ (matchkind = "range"))
+
+(* 45 *)
+;; spec/4g-typing-decl.watsup:746.6-746.74
+if (((matchkind = "lpm") \/ (matchkind = "ternary")) \/ (matchkind = "range"))
+
+(* 46 *)
+;; spec/4g-typing-decl.watsup:959.6-959.73
+if (((tblctx.MODE = `NOPRI`_mode()) \/ (tblctx.MODE = `PRI`_mode())) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 47 *)
+;; spec/4g-typing-decl.watsup:967.6-967.73
+if (((tblctx.MODE = `NOPRI`_mode()) \/ (tblctx.MODE = `PRI`_mode())) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 48 *)
+;; spec/4g-typing-decl.watsup:1026.6-1026.50
+if ((tblctx.MODE = `PRI`_mode()) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 49 *)
+;; spec/4g-typing-decl.watsup:1041.6-1041.50
+if ((tblctx.MODE = `PRI`_mode()) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 50 *)
+;; spec/4g-typing-decl.watsup:1055.6-1055.50
+if ((tblctx.MODE = `PRI`_mode()) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 51 *)
+;; spec/4g-typing-decl.watsup:1063.6-1063.50
+if ((tblctx.MODE = `PRI`_mode()) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 52 *)
+;; spec/4g-typing-decl.watsup:1078.6-1078.50
+if ((tblctx.MODE = `PRI`_mode()) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 53 *)
+;; spec/4g-typing-decl.watsup:1092.6-1092.50
+if ((tblctx.MODE = `PRI`_mode()) \/ (tblctx.MODE = `PRILPM`_mode()))
+
+(* 54 *)
+;; spec/4g-typing-decl.watsup:1174.6-1174.58
+if (($is_intt(typ) \/ $is_fintt(typ)) \/ $is_fbitt(typ))
+
+(* 55 *)
+;; spec/4g-typing-decl.watsup:1188.6-1188.58
+if (($is_intt(typ) \/ $is_fintt(typ)) \/ $is_fbitt(typ))
+

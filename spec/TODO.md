@@ -1,7 +1,5 @@
 # A list of TODOs to revisit
 
-## For P4-SpecTec
-
 **[1] Add support for `^n (ListN)` iterator**
 
   -- replace `$repeat_` and `$init_` list helpers
@@ -22,18 +20,7 @@
 
   -- this would de-necessiate markers like `consctxt`
 
-**[6] Add `IfLetPr` in IL to signify partial bindings**
-
-  -- variant case, cons-list case, and option case
-
 **[7] Of course, big ones:**
 
   -- LaTeX renderer
   -- Prose generator
-  -- IL interpreter
-
-## For the Spec Itself in DSL
-
-**[1] Add `NewTypeD id decl` and `TypeDefD id decl` to syntax**
-
-**[2] Think of adding `syntax sexprIL = exprIL typIL ctk`, like in p4cherry note**
