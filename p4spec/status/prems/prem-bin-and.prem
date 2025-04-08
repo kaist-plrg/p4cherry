@@ -1,6 +1,7 @@
 (* 0 *)
 ;; spec/2c3-runtime-type-subst.watsup:335.6-335.39
 if ((|typ_a*{typ_a <- typ_a*}| = 0) /\ (|tparam'*{tparam' <- tparam'*}| > 0))
+
 (* 1 *)
 ;; spec/2c3-runtime-type-subst.watsup:341.6-341.69
 if (((|typ_a*{typ_a <- typ_a*}| > 0) /\ (|tparam*{tparam <- tparam*}| = |typ_a*{typ_a <- typ_a*}|)) /\ (|tparam_hidden*{tparam_hidden <- tparam_hidden*}| > 0))

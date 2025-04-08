@@ -681,10 +681,10 @@ rule Decl_ok/parserd:
   -- if (statelabel block = parserstate)*
   ----
   -- if $distinct_<statelabel>(statelabel*)
-  -- if $in_set<statelabel>("start", SET statelabel*)
-  -- if ~$in_set<statelabel>("accept", SET statelabel*)
-  -- if ~$in_set<statelabel>("reject", SET statelabel*)
+  -- if ~("accept" <- statelabel*)
+  -- if ~("reject" <- statelabel*)
   -- if statelabel'* = "accept" :: "reject" :: statelabel*
+  -- if "start" <- statelabel'*
   ----
   -- if C_5 = $set_localkind(C_4, PARSERSTATE)
   ----

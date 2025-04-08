@@ -3,6 +3,10 @@
 if member <- member_t*{member_t <- member_t*}
 
 (* 1 *)
+;; spec/4g-typing-decl.watsup:687.6-687.32
+if "start" <- statelabel'*{statelabel' <- statelabel'*}
+
+(* 2 *)
 ;; spec/4h-typing-call.watsup:155.6-155.25
 if id_p <- id_deft*{id_deft <- id_deft*}
 

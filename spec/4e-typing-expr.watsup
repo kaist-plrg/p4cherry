@@ -596,13 +596,13 @@ rule Expr_ok/arracce-tuplet:
   p C |- ArrAccE expr_b expr_i : ArrAccE exprIL_b exprIL_i' `(typ; DYN)
   -- Expr_ok: p C |- expr_b : exprIL_b
   -- if `(typ_b; ctk_b) = $annot(exprIL_b)
+  -- if TupleT typ_b'* = $canon_typ(typ_b)
   ----
   -- Expr_ok: p C |- expr_i : exprIL_i
   -- if `(typ_i; LCTK) = $annot(exprIL_i)
   ----
   -- if exprIL_i' = $reduce_senum_unary(exprIL_i, def $compatible_arrayindex)
   ----
-  -- if TupleT typ_b'* = $canon_typ(typ_b)
   -- Eval_static: p C |- exprIL_i' ~> val_i
   -- if n = $get_num(val_i)
   -- if typ = typ_b'*[n]
@@ -611,13 +611,13 @@ rule Expr_ok/arracce-stackt-lctk:
   p C |- ArrAccE expr_b expr_i : ArrAccE exprIL_b exprIL_i' `(typ_b'; DYN)
   -- Expr_ok: p C |- expr_b : exprIL_b
   -- if `(typ_b; _) = $annot(exprIL_b)
+  -- if StackT typ_b' i_s = $canon_typ(typ_b)
   ----
   -- Expr_ok: p C |- expr_i : exprIL_i
   -- if `(typ_i; LCTK) = $annot(exprIL_i)
   ----
   -- if exprIL_i' = $reduce_senum_unary(exprIL_i, def $compatible_arrayindex)
   ----
-  -- if StackT typ_b' i_s = $canon_typ(typ_b)
   -- Eval_static: p C |- exprIL_i' ~> val_i
   -- if i = $get_num(val_i)
   -- if $(0 <= i) /\ $(i <= i_s)
@@ -626,14 +626,13 @@ rule Expr_ok/arracce-stackt-ctk-dyn:
   p C |- ArrAccE expr_b expr_i : ArrAccE exprIL_b exprIL_i' `(typ_b'; DYN)
   -- Expr_ok: p C |- expr_b : exprIL_b
   -- if `(typ_b; ctk_b) = $annot(exprIL_b)
+  -- if StackT typ_b' _ = $canon_typ(typ_b)
   ----
   -- Expr_ok: p C |- expr_i : exprIL_i
   -- if `(typ_i; ctk_i) = $annot(exprIL_i)
   -- if ctk_i =/= LCTK
   ----
   -- if exprIL_i' = $reduce_senum_unary(exprIL_i, def $compatible_arrayindex)
-  ----
-  -- if StackT typ_b' _ = $canon_typ(typ_b)
 
 ;;
 ;; Bitstring access expression
@@ -766,6 +765,7 @@ rule Expr_ok/expracce-structt:
   -- if `(typ_b; ctk_b) = $annot(exprIL_b)
   -- if StructT id_s (member_s, typ_s)* = $canon_typ(typ_b)
   ----
+  -- if member <- member_s*
   -- if typ = $assoc_<member, typ>(member, (member_s, typ_s)*)
 
 rule Expr_ok/expracce-headert:

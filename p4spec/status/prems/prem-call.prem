@@ -399,50 +399,46 @@ if $distinct_<member>(member*{member <- member*})
 if $distinct_<statelabel>(statelabel*{statelabel <- statelabel*})
 
 (* 100 *)
-;; spec/4g-typing-decl.watsup:684.6-684.54
-if $in_set<statelabel>("start", `SET%`_set<statelabel>(statelabel*{statelabel <- statelabel*}))
-
-(* 101 *)
 ;; spec/4h-typing-call.watsup:58.6-58.112
 if $in_set<member>(member, `SET%`_set<member>(["minSizeInBits", "minSizeInBytes", "maxSizeInBits", "maxSizeInBytes"]))
 
-(* 102 *)
+(* 101 *)
 ;; spec/4h-typing-call.watsup:711.6-711.40
 if $is_packaget($canon_typ(typ_i))
 
-(* 103 *)
+(* 102 *)
 ;; spec/4h-typing-call.watsup:729.6-729.40
 if $is_packaget($canon_typ(typ_i))
 
-(* 104 *)
+(* 103 *)
 ;; spec/4d2-typing-subtyping.watsup:303.6-303.26
 if $check_unary(typ)
 
-(* 105 *)
+(* 104 *)
 ;; spec/4d2-typing-subtyping.watsup:319.6-319.36
 if $check_binary(typ_a, typ_b)
 
-(* 106 *)
+(* 105 *)
 ;; spec/4e-typing-expr.watsup:867.9-867.44
 (if $not_abstract_extern_object''(fd))*{fd <- fd*}
 
-(* 107 *)
+(* 106 *)
 ;; spec/4g-typing-decl.watsup:761.6-761.41
 if $check_table_key(matchkind, typ)
 
-(* 108 *)
+(* 107 *)
 ;; spec/4g-typing-decl.watsup:835.6-835.32
 if $distinct_<name>(name*{name <- name*})
 
-(* 109 *)
+(* 108 *)
 ;; spec/4h-typing-call.watsup:208.6-208.53
 if $in_set<tid>(tid, $dom_map<tid, typ?>(cstr))
 
-(* 110 *)
+(* 109 *)
 ;; spec/4h-typing-call.watsup:243.6-243.45
 if $eq_set<fid>(`SET%`_set<fid>(fid_p*{fid_p <- fid_p*}), `SET%`_set<fid>(fid_a*{fid_a <- fid_a*}))
 
-(* 111 *)
+(* 110 *)
 ;; spec/4h-typing-call.watsup:280.6-280.79
 if $eq_set<tid>($dom_map<tid, typ?>(cstr_o), $dom_map<tid, typ?>(cstr_n))
 

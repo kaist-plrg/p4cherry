@@ -75,12 +75,12 @@ if ~ $in_set<member>(member, `SET%`_set<member>(["minSizeInBits", "minSizeInByte
 (if ~ $is_externabstractmethodt(ft))*{ft <- ft*}
 
 (* 19 *)
-;; spec/4g-typing-decl.watsup:685.6-685.56
-if ~ $in_set<statelabel>("accept", `SET%`_set<statelabel>(statelabel*{statelabel <- statelabel*}))
+;; spec/4g-typing-decl.watsup:684.6-684.35
+if ~ "accept" <- statelabel*{statelabel <- statelabel*}
 
 (* 20 *)
-;; spec/4g-typing-decl.watsup:686.6-686.56
-if ~ $in_set<statelabel>("reject", `SET%`_set<statelabel>(statelabel*{statelabel <- statelabel*}))
+;; spec/4g-typing-decl.watsup:685.6-685.35
+if ~ "reject" <- statelabel*{statelabel <- statelabel*}
 
 (* 21 *)
 ;; spec/4h-typing-call.watsup:451.9-451.48
