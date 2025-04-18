@@ -133,6 +133,13 @@ Given a P4 program, below command runs the typing rules of the P4 language.
 $ ./p4spectec run-typing spec/*.watsup -i p4/testdata/arch -p [FILENAME].p4
 ```
 
+### To Generate Tests
+WIP: template-based automatic test generation.
+```shell
+# Need to create output directory and pass using `-d` flag
+$ ./p4spectec test-gen -d p4/testdata/generated/output
+```
+
 ### Contributing
 
 p4cherry is an open-source project. Please feel free to contribute by opening issues or pull requests.

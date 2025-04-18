@@ -103,6 +103,22 @@ let cover_sl_command =
          Interp_sl.Interp.cover_typing spec_sl includes_p4 filenames_p4
        with Error (at, msg) -> Format.printf "%s\n" (string_of_error at msg))
 
+let test_gen_command =
+  Core.Command.basic ~summary:"generate tests"
+    (let open Core.Command.Let_syntax in
+     let open Core.Command.Param in
+     let%map dir =
+       flag "-d" (required string) ~doc:"output directory"
+     in
+     fun () ->
+       try
+         let gen_results = Test_gen.Gen.sub_expl in
+         List.iter (fun (filename, contents) ->
+             let file = open_out (dir ^ "/" ^ filename) in
+             Printf.fprintf file "%s" contents;
+             close_out file;) gen_results
+       with Error (at, msg) -> Format.printf "%s\n" (string_of_error at msg))
+
 let command =
   Core.Command.group
     ~summary:"p4spec: a language design framework for the p4_16 language"
@@ -112,6 +128,7 @@ let command =
       ("struct", struct_command);
       ("run-sl", run_sl_command);
       ("cover-sl", cover_sl_command);
+      ("test-gen", test_gen_command);
     ]
 
 let () = Command_unix.run ~version command
