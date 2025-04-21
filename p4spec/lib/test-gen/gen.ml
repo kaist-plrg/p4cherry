@@ -55,7 +55,7 @@ let type_list =
     {
       name = "tuple";
       typ_str = "tuple<bit<4>>";
-      val_str = "{ 0, \"1\"}";
+      val_str = "{ 0, false }";
       def_str = "";
     };
     {
@@ -65,16 +65,28 @@ let type_list =
       def_str = "header Stack_inner {\n  bit<4> x; \n}\n";
     };
     {
-      name = "struct";
-      typ_str = "S";
+      name = "struct_bit4";
+      typ_str = "Sbit4";
       val_str = "";
-      def_str = "struct S {\n  bit<4> x; \n}\n";
+      def_str = "struct Sbit4 {\n  bit<4> x;\n}\n";
     };
     {
-      name = "header";
-      typ_str = "H";
+      name = "struct_bit4_bool";
+      typ_str = "Sbit4bool";
       val_str = "";
-      def_str = "header H {\n  bit<4> x; \n}\n";
+      def_str = "struct Sbit4bool {\n  bit<4> x;\n  bool y;\n}\n";
+    };
+    {
+      name = "header_bit4";
+      typ_str = "Hbit4";
+      val_str = "";
+      def_str = "header Hbit4 {\n  bit<4> x;\n}\n";
+    };
+    {
+      name = "header_bit4_bool";
+      typ_str = "Hbit4bool";
+      val_str = "";
+      def_str = "header Hbit4bool {\n  bit<4> x;\n  bool y;\n}\n";
     };
     {
       name = "headerunion";
@@ -92,63 +104,84 @@ let type_list =
     (* 4. Synthesized types *)
     { name = "default"; typ_str = ""; val_str = "..."; def_str = "" };
     { name = "seq"; typ_str = ""; val_str = "{ 0 }"; def_str = "" };
+    { name = "seq_mismatch"; typ_str = ""; val_str = "{ 0, 8w3 }"; def_str = "" };
     { name = "seqdefault"; typ_str = ""; val_str = "{ 2, ... }"; def_str = "" };
-    { name = "record"; typ_str = ""; val_str = "{ b = 2, f = 3 }"; def_str = "" };
-    { name = "recorddefault"; typ_str = ""; val_str = "{ b = 2, ... }"; def_str = "" };
+    { name = "seqdefault_mismatch"; typ_str = ""; val_str = "{ 8w3, ... }"; def_str = "" };
+    { name = "record"; typ_str = ""; val_str = "{ x = 2, y = false }"; def_str = "" };
+    { name = "record_mismatch"; typ_str = ""; val_str = "{ x = false, y = 2 }"; def_str = "" };
+    { name = "recorddefault"; typ_str = ""; val_str = "{ y = false, ... }"; def_str = "" };
+    { name = "recorddefault_mismatch"; typ_str = ""; val_str = "{ y = 2, ... }"; def_str = "" };
     { name = "invalid"; typ_str = ""; val_str = "{#}"; def_str = "" };
   ]
 
-let contents_sub_impl (typ_from : item) (typ_to : item) : string =
+let sub_impl (typ_from : item) (typ_to : item) : (string * string) option =
+  let filename =
+    F.sprintf "impl-%s-to-%s.p4" typ_from.name typ_to.name
+  in
   let defs =
     if typ_from.name = typ_to.name then typ_from.def_str
     else F.sprintf "%s%s" typ_from.def_str typ_to.def_str
   in
-  match (typ_from.name, typ_to.name) with
-  | "seq", _ ->
-      F.sprintf "%s\n%s func(){\n  return %s;\n}" defs typ_to.typ_str
-        typ_from.val_str
-  | _, "seq" ->
-      (* Doesn't work for now*)
-      F.sprintf "%s%sbool func(out %s a){\n  %s  return a;\n}" typ_from.def_str
-        typ_to.def_str typ_from.typ_str typ_to.val_str
-  | _, _ ->
-      F.sprintf "%s\n%s func(%s a)\n{\n  return a;\n}" defs typ_to.typ_str
-        typ_from.typ_str
-
-let contents_sub_expl (typ_from : item) (typ_to : item) : string =
+  let is_synthtyp typ =
+    typ.typ_str = ""
+  in
   match (typ_from.name, typ_to.name) with
   | _, _ ->
-      (* Select a template based on the to/from types *)
-      F.sprintf "%s func(%s a)\n{\n  return (%s) a;\n}" typ_to.typ_str
-        typ_from.typ_str typ_to.typ_str
+    if is_synthtyp typ_to then
+      Option.none
+    else if is_synthtyp typ_from then
+      (filename, F.sprintf "%s\n%s func(){\n  return %s;\n}" defs typ_to.typ_str
+         typ_from.val_str)
+      |> Option.some
+    else
+      (filename, F.sprintf "%s\n%s func(%s a)\n{\n  return a;\n}" defs typ_to.typ_str
+         typ_from.typ_str)
+      |> Option.some
 
-(* Generate filename string*)
-let filename_sub_impl (typ_from : item) (typ_to : item) : string =
-  F.sprintf "impl-%s-to-%s.p4" typ_from.name typ_to.name
-
-let filename_sub_expl (typ_from : item) (typ_to : item) : string =
-  F.sprintf "expl-%s-to-%s.p4" typ_from.name typ_to.name
+let sub_expl (typ_from : item) (typ_to : item) : (string * string) option =
+  let filename =
+    F.sprintf "expl-%s-to-%s.p4" typ_from.name typ_to.name
+  in
+  let defs =
+    if typ_from.name = typ_to.name then typ_from.def_str
+    else F.sprintf "%s%s" typ_from.def_str typ_to.def_str
+  in
+  let is_synthtyp typ =
+    typ.typ_str = ""
+  in
+  match (typ_from.name, typ_to.name) with
+  | _, _ ->
+    if is_synthtyp typ_to then
+      Option.none
+    else if is_synthtyp typ_from then
+      (filename, F.sprintf "%s\n%s func(){\n  return (%s) %s;\n}" defs typ_to.typ_str
+         typ_to.typ_str typ_from.val_str)
+      |> Option.some
+    else
+      (filename, F.sprintf "%s\n%s func(%s a)\n{\n  return (%s) a;\n}" defs typ_to.typ_str
+         typ_from.typ_str typ_to.typ_str)
+      |> Option.some
 
 let sub : (string * string) list =
   let sub_impl =
     List.map
       (fun typ_from ->
-        List.map
-          (fun typ_to ->
-            ( filename_sub_impl typ_from typ_to,
-              contents_sub_impl typ_from typ_to ))
-          type_list)
+         List.map
+           (fun typ_to ->
+              sub_impl typ_from typ_to
+              |> Option.to_list)
+           type_list |> List.flatten)
       type_list
     |> List.flatten
   in
   let sub_expl =
     List.map
       (fun typ_from ->
-        List.map
-          (fun typ_to ->
-            ( filename_sub_expl typ_from typ_to,
-              contents_sub_expl typ_from typ_to ))
-          type_list)
+         List.map
+           (fun typ_to ->
+              sub_expl typ_from typ_to
+              |> Option.to_list)
+           type_list |> List.flatten)
       type_list
     |> List.flatten
   in
