@@ -104,84 +104,106 @@ let type_list =
     (* 4. Synthesized types *)
     { name = "default"; typ_str = ""; val_str = "..."; def_str = "" };
     { name = "seq"; typ_str = ""; val_str = "{ 0 }"; def_str = "" };
-    { name = "seq_mismatch"; typ_str = ""; val_str = "{ 0, 8w3 }"; def_str = "" };
+    {
+      name = "seq_mismatch";
+      typ_str = "";
+      val_str = "{ 0, 8w3 }";
+      def_str = "";
+    };
     { name = "seqdefault"; typ_str = ""; val_str = "{ 2, ... }"; def_str = "" };
-    { name = "seqdefault_mismatch"; typ_str = ""; val_str = "{ 8w3, ... }"; def_str = "" };
-    { name = "record"; typ_str = ""; val_str = "{ x = 2, y = false }"; def_str = "" };
-    { name = "record_mismatch"; typ_str = ""; val_str = "{ x = false, y = 2 }"; def_str = "" };
-    { name = "recorddefault"; typ_str = ""; val_str = "{ y = false, ... }"; def_str = "" };
-    { name = "recorddefault_mismatch"; typ_str = ""; val_str = "{ y = 2, ... }"; def_str = "" };
+    {
+      name = "seqdefault_mismatch";
+      typ_str = "";
+      val_str = "{ 8w3, ... }";
+      def_str = "";
+    };
+    {
+      name = "record";
+      typ_str = "";
+      val_str = "{ x = 2, y = false }";
+      def_str = "";
+    };
+    {
+      name = "record_mismatch";
+      typ_str = "";
+      val_str = "{ x = false, y = 2 }";
+      def_str = "";
+    };
+    {
+      name = "recorddefault";
+      typ_str = "";
+      val_str = "{ y = false, ... }";
+      def_str = "";
+    };
+    {
+      name = "recorddefault_mismatch";
+      typ_str = "";
+      val_str = "{ y = 2, ... }";
+      def_str = "";
+    };
     { name = "invalid"; typ_str = ""; val_str = "{#}"; def_str = "" };
   ]
 
 let sub_impl (typ_from : item) (typ_to : item) : (string * string) option =
-  let filename =
-    F.sprintf "impl-%s-to-%s.p4" typ_from.name typ_to.name
-  in
+  let filename = F.sprintf "impl-%s-to-%s.p4" typ_from.name typ_to.name in
   let defs =
     if typ_from.name = typ_to.name then typ_from.def_str
     else F.sprintf "%s%s" typ_from.def_str typ_to.def_str
   in
-  let is_synthtyp typ =
-    typ.typ_str = ""
-  in
+  let is_synthtyp typ = typ.typ_str = "" in
   match (typ_from.name, typ_to.name) with
   | _, _ ->
-    if is_synthtyp typ_to then
-      Option.none
-    else if is_synthtyp typ_from then
-      (filename, F.sprintf "%s\n%s func(){\n  return %s;\n}" defs typ_to.typ_str
-         typ_from.val_str)
-      |> Option.some
-    else
-      (filename, F.sprintf "%s\n%s func(%s a)\n{\n  return a;\n}" defs typ_to.typ_str
-         typ_from.typ_str)
-      |> Option.some
+      if is_synthtyp typ_to then Option.none
+      else if is_synthtyp typ_from then
+        ( filename,
+          F.sprintf "%s\n%s func(){\n  return %s;\n}" defs typ_to.typ_str
+            typ_from.val_str )
+        |> Option.some
+      else
+        ( filename,
+          F.sprintf "%s\n%s func(%s a)\n{\n  return a;\n}" defs typ_to.typ_str
+            typ_from.typ_str )
+        |> Option.some
 
 let sub_expl (typ_from : item) (typ_to : item) : (string * string) option =
-  let filename =
-    F.sprintf "expl-%s-to-%s.p4" typ_from.name typ_to.name
-  in
+  let filename = F.sprintf "expl-%s-to-%s.p4" typ_from.name typ_to.name in
   let defs =
     if typ_from.name = typ_to.name then typ_from.def_str
     else F.sprintf "%s%s" typ_from.def_str typ_to.def_str
   in
-  let is_synthtyp typ =
-    typ.typ_str = ""
-  in
+  let is_synthtyp typ = typ.typ_str = "" in
   match (typ_from.name, typ_to.name) with
   | _, _ ->
-    if is_synthtyp typ_to then
-      Option.none
-    else if is_synthtyp typ_from then
-      (filename, F.sprintf "%s\n%s func(){\n  return (%s) %s;\n}" defs typ_to.typ_str
-         typ_to.typ_str typ_from.val_str)
-      |> Option.some
-    else
-      (filename, F.sprintf "%s\n%s func(%s a)\n{\n  return (%s) a;\n}" defs typ_to.typ_str
-         typ_from.typ_str typ_to.typ_str)
-      |> Option.some
+      if is_synthtyp typ_to then Option.none
+      else if is_synthtyp typ_from then
+        ( filename,
+          F.sprintf "%s\n%s func(){\n  return (%s) %s;\n}" defs typ_to.typ_str
+            typ_to.typ_str typ_from.val_str )
+        |> Option.some
+      else
+        ( filename,
+          F.sprintf "%s\n%s func(%s a)\n{\n  return (%s) a;\n}" defs
+            typ_to.typ_str typ_from.typ_str typ_to.typ_str )
+        |> Option.some
 
 let sub : (string * string) list =
   let sub_impl =
     List.map
       (fun typ_from ->
-         List.map
-           (fun typ_to ->
-              sub_impl typ_from typ_to
-              |> Option.to_list)
-           type_list |> List.flatten)
+        List.map
+          (fun typ_to -> sub_impl typ_from typ_to |> Option.to_list)
+          type_list
+        |> List.flatten)
       type_list
     |> List.flatten
   in
   let sub_expl =
     List.map
       (fun typ_from ->
-         List.map
-           (fun typ_to ->
-              sub_expl typ_from typ_to
-              |> Option.to_list)
-           type_list |> List.flatten)
+        List.map
+          (fun typ_to -> sub_expl typ_from typ_to |> Option.to_list)
+          type_list
+        |> List.flatten)
       type_list
     |> List.flatten
   in
