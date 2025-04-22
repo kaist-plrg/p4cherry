@@ -9,6 +9,7 @@ type item = {
 
 let type_list =
   [
+    (* Primitive types *)
     { name = "string"; typ_str = "string"; val_str = "str"; def_str = "" };
     { name = "bool"; typ_str = "bool"; val_str = "false"; def_str = "" };
     (* Number types *)
@@ -22,14 +23,14 @@ let type_list =
     (* 3. Defined types *)
     (* 3a. Alias types *)
     {
-      name = "def";
+      name = "def_fbit4";
       typ_str = "Def";
       val_str = "";
       def_str = "typedef bit<4> Def;\n";
     };
     (* 3b. Data types *)
     {
-      name = "new";
+      name = "new_fbit4";
       typ_str = "New";
       val_str = "";
       def_str = "type bit<4> New;\n";
@@ -41,7 +42,7 @@ let type_list =
       def_str = "enum Enum { Enum1, Enum2, Enum3 }\n";
     };
     {
-      name = "senum";
+      name = "senum_fbit4";
       typ_str = "SEnum";
       val_str = "";
       def_str = "enum bit<4> SEnum { Enum1 = 1, Enum2 = 2, Enum3 = 3}\n";
@@ -53,43 +54,55 @@ let type_list =
       def_str = "";
     };
     {
-      name = "tuple";
+      name = "tuple_bit4";
       typ_str = "tuple<bit<4>>";
+      val_str = "{ 0 }";
+      def_str = "";
+    };
+    {
+      name = "tuple_bit4_bool";
+      typ_str = "tuple<bit<4>, bool>";
       val_str = "{ 0, false }";
       def_str = "";
     };
     {
-      name = "headerstack";
+      name = "stack_1_fbit4";
+      typ_str = "Stack_inner[1]";
+      val_str = "";
+      def_str = "header Stack_inner {\n  bit<4> x; \n}\n";
+    };
+    {
+      name = "stack_4_fbit4";
       typ_str = "Stack_inner[4]";
       val_str = "";
       def_str = "header Stack_inner {\n  bit<4> x; \n}\n";
     };
     {
-      name = "struct_bit4";
+      name = "struct_fbit4";
       typ_str = "Sbit4";
       val_str = "";
       def_str = "struct Sbit4 {\n  bit<4> x;\n}\n";
     };
     {
-      name = "struct_bit4_bool";
+      name = "struct_fbit4_bool";
       typ_str = "Sbit4bool";
       val_str = "";
       def_str = "struct Sbit4bool {\n  bit<4> x;\n  bool y;\n}\n";
     };
     {
-      name = "header_bit4";
+      name = "header_fbit4";
       typ_str = "Hbit4";
       val_str = "";
       def_str = "header Hbit4 {\n  bit<4> x;\n}\n";
     };
     {
-      name = "header_bit4_bool";
+      name = "header_fbit4_bool";
       typ_str = "Hbit4bool";
       val_str = "";
       def_str = "header Hbit4bool {\n  bit<4> x;\n  bool y;\n}\n";
     };
     {
-      name = "headerunion";
+      name = "union";
       typ_str = "Hu";
       val_str = "";
       def_str =
@@ -105,34 +118,45 @@ let type_list =
     { name = "default"; typ_str = ""; val_str = "..."; def_str = "" };
     { name = "seq"; typ_str = ""; val_str = "{ 0 }"; def_str = "" };
     {
-      name = "seq_mismatch";
+      name = "seq_int_fbit8";
       typ_str = "";
       val_str = "{ 0, 8w3 }";
       def_str = "";
     };
-    { name = "seqdefault"; typ_str = ""; val_str = "{ 2, ... }"; def_str = "" };
     {
-      name = "seqdefault_mismatch";
+      name = "seqdefault_int";
       typ_str = "";
-      val_str = "{ 8w3, ... }";
+      val_str = "{ 2, ... }";
       def_str = "";
     };
     {
-      name = "record";
+      name = "seqdefault_bool";
+      typ_str = "";
+      val_str = "{ false, ... }";
+      def_str = "";
+    };
+    {
+      name = "record_int_bool";
       typ_str = "";
       val_str = "{ x = 2, y = false }";
       def_str = "";
     };
     {
-      name = "record_mismatch";
+      name = "record_bool_int";
       typ_str = "";
-      val_str = "{ x = false, y = 2 }";
+      val_str = "{ y = 2, x = false }";
       def_str = "";
     };
     {
-      name = "recorddefault";
+      name = "recorddefault_bool";
       typ_str = "";
       val_str = "{ y = false, ... }";
+      def_str = "";
+    };
+    {
+      name = "recorddefault_int";
+      typ_str = "";
+      val_str = "{ x = 2, ... }";
       def_str = "";
     };
     {
