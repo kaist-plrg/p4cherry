@@ -16,6 +16,7 @@ let type_list =
     { name = "int"; typ_str = "int"; val_str = "1"; def_str = "" };
     { name = "fint4"; typ_str = "int<4>"; val_str = "4s1"; def_str = "" };
     { name = "fint8"; typ_str = "int<8>"; val_str = "8s2"; def_str = "" };
+    { name = "fbit1"; typ_str = "bit<1>"; val_str = "1w1"; def_str = "" };
     { name = "fbit4"; typ_str = "bit<4>"; val_str = "4w3"; def_str = "" };
     { name = "fbit8"; typ_str = "bit<8>"; val_str = "8w1"; def_str = "" };
     { name = "vbit4"; typ_str = "varbit<4>"; val_str = "4v2"; def_str = "" };
@@ -124,6 +125,12 @@ let type_list =
       def_str = "";
     };
     {
+      name = "seq_int_str";
+      typ_str = "";
+      val_str = "{ 0, \"1\" }";
+      def_str = "";
+    };
+    {
       name = "seqdefault_int";
       typ_str = "";
       val_str = "{ 2, ... }";
@@ -160,12 +167,24 @@ let type_list =
       def_str = "";
     };
     {
+      name = "recorddefault_str";
+      typ_str = "";
+      val_str = "{ x = \"5\", ... }";
+      def_str = "";
+    };
+    {
       name = "recorddefault_mismatch";
       typ_str = "";
       val_str = "{ y = 2, ... }";
       def_str = "";
     };
     { name = "invalid"; typ_str = ""; val_str = "{#}"; def_str = "" };
+    {
+      name = "set";
+      typ_str = "";
+      val_str = "vset";
+      def_str = "value_set<bit<4>>(4) vset;\n";
+    };
   ]
 
 let sub_impl (typ_from : item) (typ_to : item) : (string * string) option =
@@ -178,6 +197,21 @@ let sub_impl (typ_from : item) (typ_to : item) : (string * string) option =
   match (typ_from.name, typ_to.name) with
   | _, _ ->
       if is_synthtyp typ_to then Option.none
+      else if typ_from.name = "set" then
+        ( filename,
+          F.sprintf
+            "%svoid func(%s a){\n\
+            \  return;\n\
+             }\n\
+             parser P() {\n\
+            \  %s\n\
+            \  state start {\n\
+            \    func(%s);\n\
+             transition accept;\n\
+            \  }\n\
+             }"
+            typ_to.def_str typ_to.typ_str typ_from.def_str typ_from.val_str )
+        |> Option.some
       else if is_synthtyp typ_from then
         ( filename,
           F.sprintf "%s\n%s func(){\n  return %s;\n}" defs typ_to.typ_str
@@ -185,7 +219,7 @@ let sub_impl (typ_from : item) (typ_to : item) : (string * string) option =
         |> Option.some
       else
         ( filename,
-          F.sprintf "%s\n%s func(%s a)\n{\n  return a;\n}" defs typ_to.typ_str
+          F.sprintf "%s\n%s func(%s a){\n  return a;\n}" defs typ_to.typ_str
             typ_from.typ_str )
         |> Option.some
 
@@ -199,6 +233,22 @@ let sub_expl (typ_from : item) (typ_to : item) : (string * string) option =
   match (typ_from.name, typ_to.name) with
   | _, _ ->
       if is_synthtyp typ_to then Option.none
+      else if typ_from.name = "set" then
+        ( filename,
+          F.sprintf
+            "%svoid func(%s a){\n\
+            \  return;\n\
+             }\n\
+             parser P() {\n\
+            \  %s\n\
+            \  state start {\n\
+            \    func((%s) %s);\n\
+             transition accept;\n\
+            \  }\n\
+             }"
+            typ_to.def_str typ_to.typ_str typ_from.def_str typ_to.typ_str
+            typ_from.val_str )
+        |> Option.some
       else if is_synthtyp typ_from then
         ( filename,
           F.sprintf "%s\n%s func(){\n  return (%s) %s;\n}" defs typ_to.typ_str
