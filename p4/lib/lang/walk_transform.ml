@@ -14,7 +14,7 @@ type ('note_value,
        'table_action,
        'table_entry,
        'mthd)
-     walker = {
+     transform_walker = {
   walk_num :
     ( 'note_value,
       'note_expr,
@@ -27,9 +27,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     num ->
-    unit;
+    num;
   walk_text :
     ( 'note_value,
       'note_expr,
@@ -42,9 +42,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     text ->
-    unit;
+    text;
   walk_id :
     ( 'note_value,
       'note_expr,
@@ -57,9 +57,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     id ->
-    unit;
+    id;
   walk_var :
     ( 'note_value,
       'note_expr,
@@ -72,9 +72,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     var ->
-    unit;
+    var;
   walk_member :
     ( 'note_value,
       'note_expr,
@@ -87,9 +87,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     member ->
-    unit;
+    member;
   walk_state_label :
     ( 'note_value,
       'note_expr,
@@ -102,9 +102,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     state_label ->
-    unit;
+    state_label;
   walk_match_kind :
     ( 'note_value,
       'note_expr,
@@ -117,9 +117,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     match_kind ->
-    unit;
+    match_kind;
   walk_unop :
     ( 'note_value,
       'note_expr,
@@ -132,9 +132,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     unop ->
-    unit;
+    unop;
   walk_binop :
     ( 'note_value,
       'note_expr,
@@ -147,9 +147,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     binop ->
-    unit;
+    binop;
   walk_dir :
     ( 'note_value,
       'note_expr,
@@ -162,9 +162,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     dir ->
-    unit;
+    dir;
   walk_typ :
     ( 'note_value,
       'note_expr,
@@ -177,9 +177,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'typ typ ->
-    unit;
+    'typ typ;
   walk_value :
     ( 'note_value,
       'note_expr,
@@ -192,9 +192,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_value, 'value) value ->
-    unit;
+    ('note_value, 'value) value;
   walk_anno :
     ( 'note_value,
       'note_expr,
@@ -207,9 +207,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) anno ->
-    unit;
+    ('note_expr, 'expr) anno;
   walk_tparam :
     ( 'note_value,
       'note_expr,
@@ -222,9 +222,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     tparam ->
-    unit;
+    tparam;
   walk_param :
     ( 'note_value,
       'note_expr,
@@ -237,9 +237,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'param param ->
-    unit;
+    'param param;
   walk_cparam :
     ( 'note_value,
       'note_expr,
@@ -252,9 +252,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'param cparam ->
-    unit;
+    'param cparam;
   walk_targ :
     ( 'note_value,
       'note_expr,
@@ -267,9 +267,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'typ targ ->
-    unit;
+    'typ targ;
   walk_arg :
     ( 'note_value,
       'note_expr,
@@ -282,9 +282,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) arg ->
-    unit;
+    ('note_expr, 'expr) arg;
   walk_expr :
     ( 'note_value,
       'note_expr,
@@ -297,9 +297,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) expr ->
-    unit;
+    ('note_expr, 'expr) expr;
   walk_keyset :
     ( 'note_value,
       'note_expr,
@@ -312,9 +312,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) keyset ->
-    unit;
+    ('note_expr, 'expr) keyset;
   walk_select_case :
     ( 'note_value,
       'note_expr,
@@ -327,9 +327,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) select_case ->
-    unit;
+    ('note_expr, 'expr) select_case;
   walk_stmt :
     ( 'note_value,
       'note_expr,
@@ -342,9 +342,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'stmt stmt ->
-    unit;
+    'stmt stmt;
   walk_block :
     ( 'note_value,
       'note_expr,
@@ -357,9 +357,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr, 'stmt) block ->
-    unit;
+    ('note_expr, 'expr, 'stmt) block;
   walk_switch_label :
     ( 'note_value,
       'note_expr,
@@ -372,9 +372,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) switch_label ->
-    unit;
+    ('note_expr, 'expr) switch_label;
   walk_switch_case :
     ( 'note_value,
       'note_expr,
@@ -387,9 +387,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr, 'stmt) switch_case ->
-    unit;
+    ('note_expr, 'expr, 'stmt) switch_case;
   walk_decl :
     ( 'note_value,
       'note_expr,
@@ -402,9 +402,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'decl decl ->
-    unit;
+    'decl decl;
   walk_parser_state :
     ( 'note_value,
       'note_expr,
@@ -417,9 +417,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr, 'stmt) parser_state ->
-    unit;
+    ('note_expr, 'expr, 'stmt) parser_state;
   walk_table :
     ( 'note_value,
       'note_expr,
@@ -432,9 +432,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr, 'table_action, 'table_entry) table ->
-    unit;
+    ('note_expr, 'expr, 'table_action, 'table_entry) table;
   walk_table_property :
     ( 'note_value,
       'note_expr,
@@ -447,9 +447,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr, 'table_action, 'table_entry) table_property ->
-    unit;
+    ('note_expr, 'expr, 'table_action, 'table_entry) table_property;
   walk_table_keys :
     ( 'note_value,
       'note_expr,
@@ -462,9 +462,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) table_keys ->
-    unit;
+    ('note_expr, 'expr) table_keys;
   walk_table_key :
     ( 'note_value,
       'note_expr,
@@ -477,9 +477,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) table_key ->
-    unit;
+    ('note_expr, 'expr) table_key;
   walk_table_actions :
     ( 'note_value,
       'note_expr,
@@ -492,9 +492,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'table_action table_actions ->
-    unit;
+    'table_action table_actions;
   walk_table_action :
     ( 'note_value,
       'note_expr,
@@ -507,9 +507,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'table_action table_action ->
-    unit;
+    'table_action table_action;
   walk_table_entries :
     ( 'note_value,
       'note_expr,
@@ -522,9 +522,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'table_entry table_entries ->
-    unit;
+    'table_entry table_entries;
   walk_table_entry :
     ( 'note_value,
       'note_expr,
@@ -537,9 +537,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'table_entry table_entry ->
-    unit;
+    'table_entry table_entry;
   walk_table_default :
     ( 'note_value,
       'note_expr,
@@ -552,9 +552,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'table_action table_default ->
-    unit;
+    'table_action table_default;
   walk_table_custom :
     ( 'note_value,
       'note_expr,
@@ -567,9 +567,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     ('note_expr, 'expr) table_custom ->
-    unit;
+    ('note_expr, 'expr) table_custom;
   walk_mthd :
     ( 'note_value,
       'note_expr,
@@ -582,9 +582,9 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'mthd mthd ->
-    unit;
+    'mthd mthd;
   walk_program :
     ( 'note_value,
       'note_expr,
@@ -597,24 +597,23 @@ type ('note_value,
       'table_action,
       'table_entry,
       'mthd )
-    walker ->
+    transform_walker ->
     'decl program ->
-    unit;
+    'decl program;
 }
 
 (* Utility functions *)
 
-let walk_alt (f : 'a -> unit) (g : 'b -> unit) (alt : ('a, 'b) alt) : unit =
-  match alt with Left x -> f x | Right y -> g y
+let walk_alt (f : 'a -> 'a) (g : 'b -> 'b) (alt : ('a, 'b) alt) : ('a, 'b) alt =
+  match alt with Left x -> Left (f x) | Right y -> Right (g y)
 
-let walk_list (f : 'a -> unit) (l : 'a list) : unit = List.iter f l
+let walk_list (f : 'a -> 'a) (l : 'a list) : 'a list = List.map f l
+let walk_option (f : 'a -> 'a) (o : 'a option) : 'a option = Option.map f o
+let walk_pair (f_k : 'a -> 'a) (f_v : 'b -> 'b) (x, y) : 'a * 'b = (f_k x, f_v y)
 
-let walk_option (f : 'a -> unit) (o : 'a option) : unit =
-  match o with Some x -> f x | None -> ()
-
-let walk_pair (f_k : 'a -> unit) (f_v : 'b -> unit) (x, y) : unit =
-  f_k x;
-  f_v y
+let walk_it (f : ('a, 'b) note_phrase -> ('a, 'b) note_phrase) (tmp : 'b)
+    (i : 'a) : 'a =
+  i $$ no_info % tmp |> f |> it
 
 (* Numbers *)
 
@@ -631,8 +630,8 @@ let walk_num
         'table_action,
         'table_entry,
         'mthd )
-      walker) _num =
-  ()
+      transform_walker) num =
+  num
 
 (* Texts *)
 
@@ -649,8 +648,8 @@ let walk_text
         'table_action,
         'table_entry,
         'mthd )
-      walker) _text =
-  ()
+      transform_walker) text =
+  text
 
 (* Identifiers *)
 
@@ -667,8 +666,8 @@ let walk_id
         'table_action,
         'table_entry,
         'mthd )
-      walker) _id =
-  ()
+      transform_walker) id =
+  id
 
 (* Variables (scoped identifiers) *)
 
@@ -685,9 +684,14 @@ let walk_var
         'table_action,
         'table_entry,
         'mthd )
-      walker) var =
+      transform_walker) var =
   let walk_id = walker.walk_id walker in
-  match var.it with Top id | Current id -> walk_id id
+  let it =
+    match var.it with
+    | Top id -> Top (walk_id id)
+    | Current id -> Current (walk_id id)
+  in
+  { var with it }
 
 (* Members *)
 
@@ -704,8 +708,8 @@ let walk_member
         'table_action,
         'table_entry,
         'mthd )
-      walker) _member =
-  ()
+      transform_walker) member =
+  member
 
 (* State labels *)
 
@@ -722,8 +726,8 @@ let walk_state_label
         'table_action,
         'table_entry,
         'mthd )
-      walker) _state_label =
-  ()
+      transform_walker) state_label =
+  state_label
 
 (* Match kinds *)
 
@@ -740,8 +744,8 @@ let walk_match_kind
         'table_action,
         'table_entry,
         'mthd )
-      walker) _match_kind =
-  ()
+      transform_walker) match_kind =
+  match_kind
 
 (* Unary operators *)
 
@@ -758,8 +762,8 @@ let walk_unop
         'table_action,
         'table_entry,
         'mthd )
-      walker) _unop =
-  ()
+      transform_walker) unop =
+  unop
 
 (* Binary operators *)
 
@@ -776,8 +780,8 @@ let walk_binop
         'table_action,
         'table_entry,
         'mthd )
-      walker) _binop =
-  ()
+      transform_walker) binop =
+  binop
 
 (* Directions *)
 
@@ -794,8 +798,8 @@ let walk_dir
         'table_action,
         'table_entry,
         'mthd )
-      walker) _dir =
-  ()
+      transform_walker) dir =
+  dir
 
 (* Types *)
 
@@ -816,25 +820,23 @@ let walk_anno
         'table_action,
         'table_entry,
         'mthd )
-      walker) anno =
+      transform_walker) anno =
   let walk_text = walker.walk_text walker in
   let walk_id = walker.walk_id walker in
   let walk_member = walker.walk_member walker in
   let walk_expr = walker.walk_expr walker in
-  match anno.it with
-  | EmptyN text -> walk_text text
-  | TextN (text, texts) ->
-      walk_text text;
-      walk_list walk_text texts
-  | ExprN (id, exprs) ->
-      walk_id id;
-      walk_list walk_expr exprs
-  | RecordN (id, fields) ->
-      let walk_field (member, expr) =
-        walk_pair walk_member walk_expr (member, expr)
-      in
-      walk_id id;
-      walk_list walk_field fields
+  let it =
+    match anno.it with
+    | EmptyN text -> EmptyN (walk_text text)
+    | TextN (text, texts) -> TextN (walk_text text, walk_list walk_text texts)
+    | ExprN (id, exprs) -> ExprN (walk_id id, walk_list walk_expr exprs)
+    | RecordN (id, fields) ->
+        let walk_field (member, expr) =
+          walk_pair walk_member walk_expr (member, expr)
+        in
+        RecordN (walk_id id, walk_list walk_field fields)
+  in
+  { anno with it }
 
 (* Type parameters *)
 
@@ -851,8 +853,8 @@ let walk_tparam
         'table_action,
         'table_entry,
         'mthd )
-      walker) _tparam =
-  ()
+      transform_walker) tparam =
+  tparam
 
 (* Parameters *)
 
@@ -873,7 +875,7 @@ let walk_targ
         'table_action,
         'table_entry,
         'mthd )
-      walker) targ =
+      transform_walker) targ =
   let walk_typ = walker.walk_typ walker in
   walk_typ targ
 
@@ -892,15 +894,16 @@ let walk_arg
         'table_action,
         'table_entry,
         'mthd )
-      walker) arg =
+      transform_walker) arg =
   let walk_id = walker.walk_id walker in
   let walk_expr = walker.walk_expr walker in
-  match arg.it with
-  | ExprA expr -> walk_expr expr
-  | NameA (id, expr) ->
-      walk_id id;
-      walk_option walk_expr expr
-  | AnyA -> ()
+  let it =
+    match arg.it with
+    | ExprA expr -> ExprA (walk_expr expr)
+    | NameA (id, expr) -> NameA (walk_id id, walk_option walk_expr expr)
+    | AnyA -> AnyA
+  in
+  { arg with it }
 
 (* Expressions *)
 
@@ -919,9 +922,15 @@ let walk_keyset
         'table_action,
         'table_entry,
         'mthd )
-      walker) keyset =
+      transform_walker) keyset =
   let walk_expr = walker.walk_expr walker in
-  match keyset.it with ExprK expr -> walk_expr expr | DefaultK | AnyK -> ()
+  let it =
+    match keyset.it with
+    | ExprK expr -> ExprK (walk_expr expr)
+    | DefaultK -> DefaultK
+    | AnyK -> AnyK
+  in
+  { keyset with it }
 
 (* Select-cases for select *)
 
@@ -938,12 +947,16 @@ let walk_select_case
         'table_action,
         'table_entry,
         'mthd )
-      walker) select_case =
+      transform_walker) select_case =
   let walk_state_label = walker.walk_state_label walker in
   let walk_keyset = walker.walk_keyset walker in
-  let keysets, state_label = select_case.it in
-  walk_list walk_keyset keysets;
-  walk_state_label state_label
+  let it =
+    let keysets, state_label = select_case.it in
+    let keysets = walk_list walk_keyset keysets in
+    let state_label = walk_state_label state_label in
+    (keysets, state_label)
+  in
+  { select_case with it }
 
 (* Statements *)
 
@@ -962,10 +975,14 @@ let walk_block
         'table_action,
         'table_entry,
         'mthd )
-      walker) block =
+      transform_walker) block =
   let walk_stmt = walker.walk_stmt walker in
-  let stmts, _annos = block.it in
-  walk_list walk_stmt stmts
+  let it =
+    let stmts, annos = block.it in
+    let stmts = walk_list walk_stmt stmts in
+    (stmts, annos)
+  in
+  { block with it }
 
 (* Match-cases for switch *)
 
@@ -982,9 +999,14 @@ let walk_switch_label
         'table_action,
         'table_entry,
         'mthd )
-      walker) switch_label =
+      transform_walker) switch_label =
   let walk_expr = walker.walk_expr walker in
-  match switch_label.it with ExprL expr -> walk_expr expr | DefaultL -> ()
+  let it =
+    match switch_label.it with
+    | ExprL expr -> ExprL (walk_expr expr)
+    | DefaultL -> DefaultL
+  in
+  { switch_label with it }
 
 let walk_switch_case
     (walker :
@@ -999,14 +1021,16 @@ let walk_switch_case
         'table_action,
         'table_entry,
         'mthd )
-      walker) switch_case =
+      transform_walker) switch_case =
   let walk_switch_label = walker.walk_switch_label walker in
   let walk_block = walker.walk_block walker in
-  match switch_case.it with
-  | MatchC (switch_label, block) ->
-      walk_switch_label switch_label;
-      walk_block block
-  | FallC switch_label -> walk_switch_label switch_label
+  let it =
+    match switch_case.it with
+    | MatchC (switch_label, block) ->
+        MatchC (walk_switch_label switch_label, walk_block block)
+    | FallC switch_label -> FallC (walk_switch_label switch_label)
+  in
+  { switch_case with it }
 
 (* Declarations *)
 
@@ -1025,12 +1049,16 @@ let walk_parser_state
         'table_action,
         'table_entry,
         'mthd )
-      walker) parser_state =
+      transform_walker) parser_state =
   let walk_state_label = walker.walk_state_label walker in
   let walk_block = walker.walk_block walker in
-  let state_label, block, _annos = parser_state.it in
-  walk_state_label state_label;
-  walk_block block
+  let it =
+    let state_label, block, annos = parser_state.it in
+    let state_label = walk_state_label state_label in
+    let block = walk_block block in
+    (state_label, block, annos)
+  in
+  { parser_state with it }
 
 (* Tables *)
 
@@ -1047,7 +1075,7 @@ let walk_table
         'table_action,
         'table_entry,
         'mthd )
-      walker) table =
+      transform_walker) table =
   let walk_table_property = walker.walk_table_property walker in
   walk_list walk_table_property table
 
@@ -1066,18 +1094,18 @@ let walk_table_property
         'table_action,
         'table_entry,
         'mthd )
-      walker) table_property =
+      transform_walker) table_property =
   let walk_table_keys = walker.walk_table_keys walker in
   let walk_table_actions = walker.walk_table_actions walker in
   let walk_table_entries = walker.walk_table_entries walker in
   let walk_table_default = walker.walk_table_default walker in
   let walk_table_custom = walker.walk_table_custom walker in
   match table_property with
-  | KeyP table_keys -> walk_table_keys table_keys
-  | ActionP table_actions -> walk_table_actions table_actions
-  | EntryP table_entries -> walk_table_entries table_entries
-  | DefaultP table_default -> walk_table_default table_default
-  | CustomP table_custom -> walk_table_custom table_custom
+  | KeyP table_keys -> KeyP (walk_table_keys table_keys)
+  | ActionP table_actions -> ActionP (walk_table_actions table_actions)
+  | EntryP table_entries -> EntryP (walk_table_entries table_entries)
+  | DefaultP table_default -> DefaultP (walk_table_default table_default)
+  | CustomP table_custom -> CustomP (walk_table_custom table_custom)
 
 (* Table keys *)
 
@@ -1094,12 +1122,16 @@ let walk_table_key
         'table_action,
         'table_entry,
         'mthd )
-      walker) table_key =
+      transform_walker) table_key =
   let walk_match_kind = walker.walk_match_kind walker in
   let walk_expr = walker.walk_expr walker in
-  let expr, match_kind, _annos = table_key.it in
-  walk_expr expr;
-  walk_match_kind match_kind
+  let it =
+    let expr, match_kind, annos = table_key.it in
+    let expr = walk_expr expr in
+    let match_kind = walk_match_kind match_kind in
+    (expr, match_kind, annos)
+  in
+  { table_key with it }
 
 let walk_table_keys
     (walker :
@@ -1114,9 +1146,10 @@ let walk_table_keys
         'table_action,
         'table_entry,
         'mthd )
-      walker) table_keys =
+      transform_walker) table_keys =
   let walk_table_key = walker.walk_table_key walker in
-  walk_list walk_table_key table_keys.it
+  let it = walk_list walk_table_key table_keys.it in
+  { table_keys with it }
 
 (* Table actions *)
 
@@ -1133,9 +1166,10 @@ let walk_table_actions
         'table_action,
         'table_entry,
         'mthd )
-      walker) table_actions =
+      transform_walker) table_actions =
   let walk_table_action = walker.walk_table_action walker in
-  walk_list walk_table_action table_actions.it
+  let it = walk_list walk_table_action table_actions.it in
+  { table_actions with it }
 
 (* Table entries *)
 
@@ -1152,10 +1186,14 @@ let walk_table_entries
         'table_action,
         'table_entry,
         'mthd )
-      walker) table_entries =
+      transform_walker) table_entries =
   let walk_table_entry = walker.walk_table_entry walker in
-  let _table_entries_const, table_entries = table_entries.it in
-  walk_list walk_table_entry table_entries
+  let it =
+    let table_entries_const, table_entries_inner = table_entries.it in
+    let table_entries_inner = walk_list walk_table_entry table_entries_inner in
+    (table_entries_const, table_entries_inner)
+  in
+  { table_entries with it }
 
 (* Table default properties *)
 
@@ -1172,10 +1210,14 @@ let walk_table_default
         'table_action,
         'table_entry,
         'mthd )
-      walker) table_default =
+      transform_walker) table_default =
   let walk_table_action = walker.walk_table_action walker in
-  let _table_default_const, table_action = table_default.it in
-  walk_table_action table_action
+  let it =
+    let table_default_const, table_action = table_default.it in
+    let table_action = walk_table_action table_action in
+    (table_default_const, table_action)
+  in
+  { table_default with it }
 
 (* Table custom properties *)
 
@@ -1192,12 +1234,16 @@ let walk_table_custom
         'table_action,
         'table_entry,
         'mthd )
-      walker) table_custom =
+      transform_walker) table_custom =
   let walk_id = walker.walk_id walker in
   let walk_expr = walker.walk_expr walker in
-  let _table_custom_const, id, expr, _annos = table_custom.it in
-  walk_id id;
-  walk_expr expr
+  let it =
+    let table_custom_const, id, expr, annos = table_custom.it in
+    let id = walk_id id in
+    let expr = walk_expr expr in
+    (table_custom_const, id, expr, annos)
+  in
+  { table_custom with it }
 
 (* Methods *)
 
@@ -1216,6 +1262,6 @@ let walk_program
         'table_action,
         'table_entry,
         'mthd )
-      walker) program =
+      transform_walker) program =
   let walk_decl = walker.walk_decl walker in
   walk_list walk_decl program

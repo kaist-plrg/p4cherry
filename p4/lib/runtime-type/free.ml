@@ -1,20 +1,20 @@
 open Domain.Dom
-open Tdom
+open Il.Ast
 
 (* Collecting free type variables *)
 
 (* Parameters *)
 
-let rec free_param (param : param) : TIdSet.t =
-  let _, _, typ, _ = param in
-  free_typ typ
+let rec free_param (param : param') : TIdSet.t =
+  let _, _, typ, _, _ = param in
+  free_typ typ.it
 
-and free_params (params : param list) : TIdSet.t =
+and free_params (params : param' list) : TIdSet.t =
   List.map free_param params |> List.fold_left TIdSet.union TIdSet.empty
 
 (* Types *)
 
-and free_typ (typ : typ) : TIdSet.t =
+and free_typ (typ : typ') : TIdSet.t =
   match typ with
   | VoidT | ErrT | MatchKindT | StrT | BoolT | IntT | FIntT _ | FBitT _
   | VBitT _ ->
@@ -22,7 +22,7 @@ and free_typ (typ : typ) : TIdSet.t =
   | VarT id -> TIdSet.singleton id
   | SpecT (td, typs_inner) ->
       free_typdef_poly td |> TIdSet.union (free_typs typs_inner)
-  | DefT typ_inner | NewT (_, typ_inner) -> free_typ typ_inner
+  | DefT (_, typ_inner) | NewT (_, typ_inner) -> free_typ typ_inner
   | EnumT _ -> TIdSet.empty
   | SEnumT (_, typ_inner, _) -> free_typ typ_inner
   | ListT typ_inner -> free_typ typ_inner
@@ -33,8 +33,8 @@ and free_typ (typ : typ) : TIdSet.t =
   | ExternT (_, fdenv) ->
       FIdMap.bindings fdenv |> List.map snd |> List.map free_funcdef
       |> List.fold_left TIdSet.union TIdSet.empty
-  | ParserT params | ControlT params -> free_params params
-  | PackageT typs_inner -> free_typs typs_inner
+  | ParserT (_, params) | ControlT (_, params) -> free_params params
+  | PackageT (_, typs_inner) -> free_typs typs_inner
   | TableT (_, typ_inner) -> free_typ typ_inner
   | AnyT | TableEnumT _ -> TIdSet.empty
   | TableStructT (_, fields) -> List.map snd fields |> free_typs
@@ -44,7 +44,7 @@ and free_typ (typ : typ) : TIdSet.t =
   | SetT typ_inner -> free_typ typ_inner
   | StateT -> TIdSet.empty
 
-and free_typs (typs : typ list) : TIdSet.t =
+and free_typs (typs : typ' list) : TIdSet.t =
   List.map free_typ typs |> List.fold_left TIdSet.union TIdSet.empty
 
 (* Type definitions *)

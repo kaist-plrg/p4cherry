@@ -14,8 +14,8 @@
  *)
 
 module F = Format
-module Num = Runtime_static.Vdomain.Num
-module Value = Runtime_static.Vdomain.Value
+module Num = Runtime_value.Num
+module Value = Runtime_value.Value
 module Numerics = Runtime_static.Numerics
 open Util.Error
 

@@ -1,11 +1,12 @@
 open Domain.Dom
-open Tdom
+open Il.Ast
 open Util.Error
+open Util.Source
 
 let check = check_checker
 let error_no_info = error_checker_no_info
 
-type theta = typ TIdMap.t
+type theta = typ' TIdMap.t
 
 (* Capture-avoiding substitution *)
 
@@ -46,25 +47,25 @@ let subst_forall (theta : theta) (tvars : TId.t list) (frees_in : TIdSet.t) :
 
 (* Parameters *)
 
-let rec subst_param (theta : theta) (param : param) : param =
-  let id, dir, typ, value_default = param in
-  let typ = subst_typ theta typ in
-  (id, dir, typ, value_default)
+let rec subst_param (theta : theta) (param : param') : param' =
+  let id, dir, typ, value_default, annos = param in
+  let typ = subst_typ theta typ.it $ no_info in
+  (id, dir, typ, value_default, annos)
 
-and subst_params (theta : theta) (params : param list) : param list =
+and subst_params (theta : theta) (params : param' list) : param' list =
   List.map (subst_param theta) params
 
 (* Constructor parameters *)
 
-and subst_cparam (theta : theta) (cparam : cparam) : cparam =
+and subst_cparam (theta : theta) (cparam : cparam') : cparam' =
   subst_param theta cparam
 
-and subst_cparams (theta : theta) (cparams : cparam list) : cparam list =
+and subst_cparams (theta : theta) (cparams : cparam' list) : cparam' list =
   subst_params theta cparams
 
 (* Types *)
 
-and subst_typ (theta : theta) (typ : typ) : typ =
+and subst_typ (theta : theta) (typ : typ') : typ' =
   match typ with
   | VoidT | ErrT | MatchKindT | StrT | BoolT | IntT | FIntT _ | FBitT _
   | VBitT _ ->
@@ -74,9 +75,9 @@ and subst_typ (theta : theta) (typ : typ) : typ =
       let tdp = subst_typdef_poly theta tdp in
       let typs_inner = subst_typs theta typs_inner in
       SpecT (tdp, typs_inner)
-  | DefT typ_inner ->
+  | DefT (id, typ_inner) ->
       let typ_inner = subst_typ theta typ_inner in
-      DefT typ_inner
+      DefT (id, typ_inner)
   | NewT (id, typ_inner) ->
       let typ_inner = subst_typ theta typ_inner in
       NewT (id, typ_inner)
@@ -111,15 +112,15 @@ and subst_typ (theta : theta) (typ : typ) : typ =
   | ExternT (id, fdenv) ->
       let fdenv = FIdMap.map (fun fd -> subst_funcdef theta fd) fdenv in
       ExternT (id, fdenv)
-  | ParserT params ->
+  | ParserT (id, params) ->
       let params = subst_params theta params in
-      ParserT params
-  | ControlT params ->
+      ParserT (id, params)
+  | ControlT (id, params) ->
       let params = subst_params theta params in
-      ControlT params
-  | PackageT typs_inner ->
+      ControlT (id, params)
+  | PackageT (id, typs_inner) ->
       let typs_inner = subst_typs theta typs_inner in
-      PackageT typs_inner
+      PackageT (id, typs_inner)
   | TableT (id, typ_inner) ->
       let typ_inner = subst_typ theta typ_inner in
       TableT (id, typ_inner)
@@ -151,7 +152,7 @@ and subst_typ (theta : theta) (typ : typ) : typ =
       SetT typ_inner
   | StateT -> typ
 
-and subst_typs (theta : theta) (typs : typ list) : typ list =
+and subst_typs (theta : theta) (typs : typ' list) : typ' list =
   List.map (subst_typ theta) typs
 
 (* Type definitions *)
@@ -220,8 +221,8 @@ and subst_functyp (theta : theta) (ft : functyp) : functyp =
 
 and subst_funcdef (theta : theta) (fd : funcdef) : funcdef =
   let subst_funcdef' (theta : theta) (frees_in : TIdSet.t)
-      (tparams : tparam list) (tparams_hidden : tparam list) :
-      theta * tparam list * tparam list =
+      (tparams : tparam' list) (tparams_hidden : tparam' list) :
+      theta * tparam' list * tparam' list =
     let frees_in =
       TIdSet.diff frees_in (TIdSet.of_list (tparams @ tparams_hidden))
     in
@@ -257,28 +258,28 @@ and subst_constyp (theta : theta) (ct : constyp) : constyp =
 
 (* Typedef specialization *)
 
-let rec specialize_typdef (td : typdef) (targs : typ list) : typ =
+let rec specialize_typdef (td : typdef) (targs : typ' list) : typ' =
   match td with
   | MonoD tdm -> specialize_typdef_mono tdm targs
   | PolyD tdp -> specialize_typdef_poly tdp targs
 
-and specialize_typdef_mono (tdm : typdef_mono) (targs : typ list) : typ =
+and specialize_typdef_mono (tdm : typdef_mono) (targs : typ' list) : typ' =
   check (targs = [])
     (Format.asprintf
        "(specialize_typdef_mono) type definition %a expects 0 type arguments \
         but %d were given"
-       (Pp.pp_typdef_mono ~level:0)
+       (Il.Pp.pp_typdef_mono ~level:0)
        tdm (List.length targs));
   tdm
 
-and specialize_typdef_poly (tdp : typdef_poly) (targs : typ list) : typ =
+and specialize_typdef_poly (tdp : typdef_poly) (targs : typ' list) : typ' =
   let check_arity tparams =
     check
       (List.length targs = List.length tparams)
       (Format.asprintf
          "(specialize_typdef_poly) type definition %a expects %d type \
           arguments but %d were given"
-         (Pp.pp_typdef_poly ~level:0)
+         (Il.Pp.pp_typdef_poly ~level:0)
          tdp (List.length tparams) (List.length targs))
   in
   let tparams, tparams_hidden, typ_inner = tdp in
@@ -290,15 +291,16 @@ and specialize_typdef_poly (tdp : typdef_poly) (targs : typ list) : typ =
 
 (* Funcdef specialization *)
 
-let specialize_funcdef (fresh : unit -> int) (fd : funcdef) (targs : typ list) :
-    functyp * TId.t list =
+let specialize_funcdef (fresh : unit -> int) (fd : funcdef) (targs : typ' list)
+    : functyp * TId.t list =
   let check_arity tparams =
     check
       (List.length targs = List.length tparams)
       (Format.asprintf
          "(specialize_funcdef) function %a expects %d type arguments but %d \
           were given"
-         (Pp.pp_funcdef ~level:0) fd (List.length tparams) (List.length targs))
+         (Il.Pp.pp_funcdef ~level:0)
+         fd (List.length tparams) (List.length targs))
   in
   match fd with
   | MonoFD ft ->
@@ -342,15 +344,16 @@ let specialize_funcdef (fresh : unit -> int) (fd : funcdef) (targs : typ list) :
 
 (* Constructor definition specialization *)
 
-and specialize_consdef (fresh : unit -> int) (cd : consdef) (targs : typ list) :
-    constyp * TId.t list =
+and specialize_consdef (fresh : unit -> int) (cd : consdef) (targs : typ' list)
+    : constyp * TId.t list =
   let check_arity tparams =
     check
       (List.length targs = List.length tparams)
       (Format.asprintf
          "(specialize_consdef) constructor %a expects %d type arguments but %d \
           were given"
-         (Pp.pp_consdef ~level:0) cd (List.length tparams) (List.length targs))
+         (Il.Pp.pp_consdef ~level:0)
+         cd (List.length tparams) (List.length targs))
   in
   let fresh_tid () = "__WILD_" ^ string_of_int (fresh ()) in
   let fresh_targ tid = VarT tid in
@@ -392,7 +395,7 @@ and specialize_consdef (fresh : unit -> int) (cd : consdef) (targs : typ list) :
 
 (* Unroll: recursive specialization *)
 
-let rec unroll_typ (typ : typ) : typ =
+let rec unroll_typ (typ : typ') : typ' =
   match typ with
   | SpecT (tdp, typs_inner) ->
       specialize_typdef_poly tdp typs_inner |> unroll_typ
@@ -400,10 +403,10 @@ let rec unroll_typ (typ : typ) : typ =
 
 (* Canon: recursive specialization and type alias resolution *)
 
-let rec canon_typ (typ : typ) : typ =
+let rec canon_typ (typ : typ') : typ' =
   match typ with
   | SpecT (tdp, typs_inner) ->
       let typ = specialize_typdef_poly tdp typs_inner in
       canon_typ typ
-  | DefT typ_inner -> canon_typ typ_inner
+  | DefT (_, typ_inner) -> canon_typ typ_inner
   | _ -> typ

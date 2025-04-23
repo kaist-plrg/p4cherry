@@ -1,11 +1,12 @@
 module F = Format
-open Domain.Dom
 module L = Lang.Ast
+open Domain.Dom
+module Num = Runtime_value.Num
+module Value = Runtime_value.Value
 open Il.Ast
-module Num = Runtime_static.Vdomain.Num
-module Value = Runtime_static.Vdomain.Value
-module Types = Runtime_static.Tdomain.Types
+module Types = Runtime_type.Types
 module Type = Types.Type
+module TypeDef = Types.TypeDef
 module Numerics = Runtime_static.Numerics
 module LValue = Runtime_dynamic.Lvalue
 module Table = Runtime_dynamic.Table
@@ -314,6 +315,9 @@ module Make (Arch : ARCH) : INTERP = struct
     let wrap_value value = (ctx, Sig.Cont value) in
     match expr with
     | ValueE { value } -> value.it |> wrap_value
+    | BoolE { boolean } -> Value.BoolV boolean |> wrap_value
+    | StrE { text } -> Value.StrV text.it |> wrap_value
+    | NumE { num } -> eval_num_expr cursor ctx num |> wrap_value
     | VarE { var } -> eval_var_expr cursor ctx var |> wrap_value
     | SeqE { exprs } -> eval_seq_expr ~default:false cursor ctx exprs
     | SeqDefaultE { exprs } -> eval_seq_expr ~default:true cursor ctx exprs
@@ -321,6 +325,7 @@ module Make (Arch : ARCH) : INTERP = struct
     | RecordDefaultE { fields } ->
         eval_record_expr ~default:true cursor ctx fields
     | DefaultE -> Value.DefaultV |> wrap_value
+    | InvalidE -> Value.InvalidV |> wrap_value
     | UnE { unop; expr } -> eval_unop_expr cursor ctx unop expr
     | BinE { binop; expr_l; expr_r } ->
         eval_binop_expr cursor ctx binop expr_l expr_r
@@ -336,6 +341,9 @@ module Make (Arch : ARCH) : INTERP = struct
         eval_array_acc_expr cursor ctx expr_base expr_idx
     | BitAccE { expr_base; value_lo; value_hi } ->
         eval_bitstring_acc_expr cursor ctx expr_base value_lo value_hi
+    | ErrAccE { member } -> eval_error_acc_expr cursor ctx member |> wrap_value
+    | TypeAccE { var_base; member } ->
+        eval_type_acc_expr cursor ctx var_base member |> wrap_value
     | ExprAccE { expr_base; member } ->
         eval_expr_acc_expr cursor ctx expr_base member
     | CallFuncE { var_func; targs; args } ->
@@ -359,6 +367,17 @@ module Make (Arch : ARCH) : INTERP = struct
             let ctx, esign = eval_expr cursor ctx expr in
             cont_sig ctx esign (fun value -> (ctx, Cont (values @ [ value ])))))
       (ctx, Cont []) exprs
+
+  and eval_num_expr (_cursor : Ctx.cursor) (_ctx : Ctx.t) (num : Il.Ast.num) :
+      Value.t =
+    let value =
+      match num.it with
+      | value, Some (width, signed) ->
+          if signed then Runtime_value.Num.int_of_raw_int value width
+          else Runtime_value.Num.bit_of_raw_int value width
+      | value, None -> Value.IntV value
+    in
+    value
 
   and eval_var_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (var : var) : Value.t =
     let value = Ctx.find Ctx.find_value_opt cursor var ctx in
@@ -537,6 +556,36 @@ module Make (Arch : ARCH) : INTERP = struct
           Numerics.eval_bitstring_access value_base value_hi.it value_lo.it
         in
         (ctx, Cont value))
+
+  and eval_error_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t)
+      (member : Il.Ast.member) : Value.t =
+    let value_error = Ctx.find_value_opt cursor ("error." ^ member.it) ctx in
+    Option.get value_error
+
+  and eval_type_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t)
+      (var_base : Il.Ast.var) (member : Il.Ast.member) : Value.t =
+    let td_base = Ctx.find_opt Ctx.find_typdef_opt cursor var_base ctx in
+    let td_base = Option.get td_base in
+    let value =
+      let typ_base =
+        match td_base with
+        | MonoD typ_base -> typ_base
+        | _ ->
+            F.asprintf "(eval_type_acc_expr) Cannot access a generic type %a"
+              (TypeDef.pp ~level:0) td_base
+            |> error_no_info
+      in
+      match Type.canon typ_base with
+      | EnumT (id, _) -> Value.EnumFieldV (id, member.it)
+      | SEnumT (id, _, fields) ->
+          let value_inner = List.assoc member.it fields in
+          Value.SEnumFieldV (id, member.it, value_inner)
+      | _ ->
+          F.asprintf "(eval_type_acc_expr) %a cannot be accessed\n"
+            (TypeDef.pp ~level:0) td_base
+          |> error_no_info
+    in
+    value
 
   and eval_expr_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (expr_base : expr)
       (member : member) : Ctx.t * Value.t Sig.t =

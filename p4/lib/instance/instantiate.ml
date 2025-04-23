@@ -1,15 +1,16 @@
 module F = Format
-open Domain.Dom
 module L = Lang.Ast
-module Ctk = Runtime_static.Ctk
-module Value = Runtime_static.Vdomain.Value
-module Types = Runtime_static.Tdomain.Types
+open Domain.Dom
+module Value = Runtime_value.Value
+open Il.Ast
+module Ctk = Il.Ctk
+module Types = Runtime_type.Types
 module Type = Types.Type
+module TypeDef = Types.TypeDef
 module Numerics = Runtime_static.Numerics
 module Builtins = Runtime_static.Builtins
 module Envs_static = Runtime_static.Envs
 module FDEnv = Envs_static.FDEnv
-open Il.Ast
 module Table = Runtime_dynamic.Table
 module Func = Runtime_dynamic.Func
 module Cons = Runtime_dynamic.Cons
@@ -220,12 +221,16 @@ and eval_expr' (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t) (expr : expr')
     : Sto.t * Value.t =
   match expr with
   | ValueE { value } -> (sto, value.it)
+  | BoolE { boolean } -> (sto, Value.BoolV boolean)
+  | StrE { text } -> (sto, Value.StrV text.it)
+  | NumE { num } -> eval_num_expr cursor ctx sto num
   | VarE { var } -> eval_var_expr cursor ctx sto var
   | SeqE { exprs } -> eval_seq_expr cursor ctx sto exprs
   | SeqDefaultE { exprs } -> eval_seq_default_expr cursor ctx sto exprs
   | RecordE { fields } -> eval_record_expr cursor ctx sto fields
   | RecordDefaultE { fields } -> eval_record_default_expr cursor ctx sto fields
-  | DefaultE -> eval_default_expr cursor ctx sto
+  | DefaultE -> (sto, Value.DefaultV)
+  | InvalidE -> (sto, Value.InvalidV)
   | UnE { unop; expr } -> eval_unop_expr cursor ctx sto unop expr
   | BinE { binop; expr_l; expr_r } ->
       eval_binop_expr cursor ctx sto binop expr_l expr_r
@@ -234,13 +239,16 @@ and eval_expr' (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t) (expr : expr')
   | CastE { typ; expr } -> eval_cast_expr cursor ctx sto typ expr
   | BitAccE { expr_base; value_lo; value_hi } ->
       eval_bitstring_acc_expr cursor ctx sto expr_base value_lo value_hi
+  | ErrAccE { member } -> eval_error_acc_expr cursor ctx sto member
+  | TypeAccE { var_base; member } ->
+      eval_type_acc_expr cursor ctx sto var_base member
   | ExprAccE { expr_base; member } ->
       eval_expr_acc_expr cursor ctx sto expr_base member
   | CallMethodE { expr_base; member; targs; args } ->
       eval_call_method_expr cursor ctx sto expr_base member targs args
   | CallTypeE { typ; member } -> eval_call_type_expr cursor ctx sto typ member
-  | InstE { var_inst; targs; args } ->
-      eval_inst_expr cursor ctx sto var_inst targs args
+  | InstE { var_inst; targs; targs_hidden; args } ->
+      eval_inst_expr cursor ctx sto var_inst (targs @ targs_hidden) args
   | _ ->
       F.asprintf "(eval_expr') %a is not compile-time known"
         (Il.Pp.pp_expr' ~level:0) expr
@@ -253,6 +261,17 @@ and eval_exprs (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
       let sto, value = eval_expr cursor ctx sto expr in
       (sto, values @ [ value ]))
     (sto, []) exprs
+
+and eval_num_expr (_cursor : Ctx.cursor) (_ctx : Ctx.t) (sto : Sto.t)
+    (num : Il.Ast.num) : Sto.t * Value.t =
+  let value =
+    match num.it with
+    | value, Some (width, signed) ->
+        if signed then Runtime_value.Num.int_of_raw_int value width
+        else Runtime_value.Num.bit_of_raw_int value width
+    | value, None -> Value.IntV value
+  in
+  (sto, value)
 
 and eval_var_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t) (var : var)
     : Sto.t * Value.t =
@@ -289,11 +308,6 @@ and eval_record_default_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
   let value = Value.RecordDefaultV fields in
   (sto, value)
 
-and eval_default_expr (_cursor : Ctx.cursor) (_ctx : Ctx.t) (sto : Sto.t) :
-    Sto.t * Value.t =
-  let value = Value.DefaultV in
-  (sto, value)
-
 and eval_unop_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
     (unop : unop) (expr : expr) : Sto.t * Value.t =
   let sto, value = eval_expr cursor ctx sto expr in
@@ -326,6 +340,37 @@ and eval_bitstring_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
   let sto, value_base = eval_expr cursor ctx sto expr_base in
   let value =
     Numerics.eval_bitstring_access value_base value_lo.it value_hi.it
+  in
+  (sto, value)
+
+and eval_error_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
+    (member : Il.Ast.member) : Sto.t * Value.t =
+  let value_error = Ctx.find_value_opt cursor ("error." ^ member.it) ctx in
+  let value_error = Option.get value_error in
+  (sto, value_error)
+
+and eval_type_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
+    (var_base : Il.Ast.var) (member : Il.Ast.member) : Sto.t * Value.t =
+  let td_base = Ctx.find_opt Ctx.find_typdef_opt cursor var_base ctx in
+  let td_base = Option.get td_base in
+  let value =
+    let typ_base =
+      match td_base with
+      | MonoD typ_base -> typ_base
+      | _ ->
+          F.asprintf "(eval_type_acc_expr) Cannot access a generic type %a"
+            (TypeDef.pp ~level:0) td_base
+          |> error_no_info
+    in
+    match Type.canon typ_base with
+    | EnumT (id, _) -> Value.EnumFieldV (id, member.it)
+    | SEnumT (id, _, fields) ->
+        let value_inner = List.assoc member.it fields in
+        Value.SEnumFieldV (id, member.it, value_inner)
+    | _ ->
+        F.asprintf "(eval_type_acc_expr) %a cannot be accessed\n"
+          (TypeDef.pp ~level:0) td_base
+        |> error_no_info
   in
   (sto, value)
 
@@ -484,7 +529,12 @@ and eval_call_inst_stmt (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
   let value = Value.RefV oid in
   let stmt =
     let expr_inst =
-      ValueE { value = value $ no_info }
+      ValueE
+        {
+          value =
+            value
+            $$ (no_info, InstE { var_inst; targs; targs_hidden = []; args });
+        }
       $$ (no_info, { typ = typ.it; ctk = Ctk.CTK })
     in
     let decl_inst =
@@ -539,8 +589,9 @@ and eval_decl' (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t) (decl : decl')
   | ErrD { members } -> eval_error_decl cursor ctx members |> wrap_none
   | MatchKindD { members } ->
       eval_match_kind_decl cursor ctx members |> wrap_none
-  | InstD { id; typ; var_inst; targs; args; init; annos } ->
-      eval_inst_decl cursor ctx sto id typ var_inst targs args init annos
+  | InstD { id; typ; var_inst; targs; targs_hidden; args; init; annos } ->
+      eval_inst_decl cursor ctx sto id typ var_inst (targs @ targs_hidden) args
+        init annos
       |> wrap
   (* Derived type declarations *)
   | StructD { id; tparams; tparams_hidden; fields; annos } ->
@@ -689,7 +740,12 @@ and eval_inst_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t) (id : id)
   let ctx = Ctx.add_value cursor id.it value ctx in
   let decl =
     let expr_inst =
-      ValueE { value = value $ no_info }
+      ValueE
+        {
+          value =
+            value
+            $$ (no_info, InstE { var_inst; targs; targs_hidden = []; args });
+        }
       $$ (no_info, { typ = typ.it; ctk = Ctk.CTK })
     in
     VarD { id; typ; init = Some expr_inst; annos = [] }
@@ -856,7 +912,7 @@ and eval_typedef_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (id : id)
         | Types.PolyD td_poly -> Types.SpecT (td_poly, []))
   in
   let td =
-    let typ_def = Types.DefT typ in
+    let typ_def = Types.DefT (id.it, typ) in
     Types.MonoD typ_def
   in
   Ctx.add_typdef cursor id.it td ctx
@@ -906,11 +962,7 @@ and eval_extern_object_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (id : id)
               let fid = FId.to_fid id params in
               let tparams = List.map it tparams in
               let tparams_hidden = List.map it tparams_hidden in
-              let params =
-                List.map it params
-                |> List.map (fun (id, typ, dir, value_default, _) ->
-                       (id.it, typ.it, dir.it, Option.map it value_default))
-              in
+              let params = List.map it params in
               let ft = Types.ExternAbstractMethodT (params, typ_ret.it) in
               let fd = Types.PolyFD (tparams, tparams_hidden, ft) in
               FDEnv.add fid fd fdenv
@@ -918,11 +970,7 @@ and eval_extern_object_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (id : id)
               let fid = FId.to_fid id params in
               let tparams = List.map it tparams in
               let tparams_hidden = List.map it tparams_hidden in
-              let params =
-                List.map it params
-                |> List.map (fun (id, typ, dir, value_default, _) ->
-                       (id.it, typ.it, dir.it, Option.map it value_default))
-              in
+              let params = List.map it params in
               let ft = Types.ExternMethodT (params, typ_ret.it) in
               let fd = Types.PolyFD (tparams, tparams_hidden, ft) in
               FDEnv.add fid fd fdenv
@@ -964,12 +1012,8 @@ and eval_parser_type_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (id : id)
   let td =
     let tparams = List.map it tparams in
     let tparams_hidden = List.map it tparams_hidden in
-    let params =
-      List.map it params
-      |> List.map (fun (id, typ, dir, value_default, _) ->
-             (id.it, typ.it, dir.it, Option.map it value_default))
-    in
-    let typ_parser = Types.ParserT params in
+    let params = List.map it params in
+    let typ_parser = Types.ParserT (id.it, params) in
     Types.PolyD (tparams, tparams_hidden, typ_parser)
   in
   Ctx.add_typdef cursor id.it td ctx
@@ -1005,7 +1049,19 @@ and eval_table_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t) (id : id)
   let ctx = Ctx.add_value cursor id.it value ctx in
   let decl =
     let expr_inst =
-      ValueE { value = value $ no_info }
+      ValueE
+        {
+          value =
+            value
+            $$ ( no_info,
+                 InstE
+                   {
+                     var_inst = L.Current id $ no_info;
+                     targs = [];
+                     targs_hidden = [];
+                     args = [];
+                   } );
+        }
       $$ (no_info, { typ = typ.it; ctk = Ctk.CTK })
     in
     VarD { id; typ; init = Some expr_inst; annos = [] }
@@ -1022,12 +1078,8 @@ and eval_control_type_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (id : id)
   let td =
     let tparams = List.map it tparams in
     let tparams_hidden = List.map it tparams_hidden in
-    let params =
-      List.map it params
-      |> List.map (fun (id, typ, dir, value_default, _) ->
-             (id.it, typ.it, dir.it, Option.map it value_default))
-    in
-    let typ_parser = Types.ControlT params in
+    let params = List.map it params in
+    let typ_parser = Types.ControlT (id.it, params) in
     Types.PolyD (tparams, tparams_hidden, typ_parser)
   in
   Ctx.add_typdef cursor id.it td ctx
@@ -1053,7 +1105,7 @@ and eval_package_type_decl (cursor : Ctx.cursor) (ctx : Ctx.t) (id : id)
       let typs_inner =
         List.map it cparams |> List.map (fun (_, _, typ, _, _) -> typ.it)
       in
-      Types.PackageT typs_inner
+      Types.PackageT (id.it, typs_inner)
     in
     Types.PolyD (tparams, tparams_hidden, typ_package)
   in
@@ -1111,7 +1163,7 @@ and eval_table_custom (cursor : Ctx.cursor) (ctx : Ctx.t) (sto : Sto.t)
     eval_expr cursor ctx sto expr
   in
   let expr =
-    Il.Ast.ValueE { value = value $ no_info }
+    Il.Ast.ValueE { value = value $$ (no_info, expr.it) }
     $$ (no_info, { typ = expr.note.typ; ctk = expr.note.ctk })
   in
   let table_custom =

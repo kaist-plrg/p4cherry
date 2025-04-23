@@ -1,5 +1,5 @@
-module Value = Vdomain.Value
-module Type = Tdomain.Types.Type
+module Value = Runtime_value.Value
+module Type = Runtime_type.Types.Type
 
 (* Size evaluation *)
 

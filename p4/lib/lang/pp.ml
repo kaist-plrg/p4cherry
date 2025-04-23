@@ -18,7 +18,11 @@ type 'table_action pp_table_action =
   F.formatter -> 'table_action table_action -> unit
 
 type 'table_entry pp_table_entry =
-  F.formatter -> 'table_entry table_entry -> unit
+  ?level:int ->
+  ?table_entries_const:bool ->
+  F.formatter ->
+  'table_entry table_entry ->
+  unit
 
 (* Numbers *)
 
@@ -358,7 +362,7 @@ and pp_table_entries' ?(level = 0)
   let table_entries_const, table_entries = table_entries in
   F.fprintf fmt "%sentries = {\n%a\n%s}"
     (if table_entries_const then "const " else "")
-    (pp_list ~level:(level + 1) pp_table_entry ~sep:Nl)
+    (pp_list ~level:(level + 1) (pp_table_entry ~table_entries_const) ~sep:Nl)
     table_entries (indent level)
 
 and pp_table_entries ?(level = 0) (pp_table_entry : 'table_entry pp_table_entry)

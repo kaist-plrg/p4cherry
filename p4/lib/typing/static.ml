@@ -1,7 +1,8 @@
-module Ctk = Runtime_static.Ctk
-module Value = Runtime_static.Vdomain.Value
-module Types = Runtime_static.Tdomain.Types
+module Value = Runtime_value.Value
+module Ctk = Il.Ctk
+module Types = Runtime_type.Types
 module Type = Types.Type
+module TypeDef = Types.TypeDef
 module Numerics = Runtime_static.Numerics
 module Builtins = Runtime_static.Builtins
 module F = Format
@@ -74,10 +75,11 @@ let rec ctk_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (expr : Il.Ast.expr') :
     Ctk.t =
   match expr with
   | ValueE _ -> LCTK
+  | BoolE _ | StrE _ | NumE _ -> LCTK
   | VarE { var } -> ctk_var_expr cursor ctx var
   | SeqE { exprs } | SeqDefaultE { exprs } -> ctk_seq_expr exprs
   | RecordE { fields } | RecordDefaultE { fields } -> ctk_record_expr fields
-  | DefaultE -> LCTK
+  | DefaultE | InvalidE -> LCTK
   | UnE { unop; expr } -> ctk_unop_expr unop expr
   | BinE { binop; expr_l; expr_r } -> ctk_binop_expr binop expr_l expr_r
   | TernE { expr_cond; expr_then; expr_else } ->
@@ -86,6 +88,7 @@ let rec ctk_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (expr : Il.Ast.expr') :
   | MaskE _ | RangeE _ | SelectE _ | ArrAccE _ -> DYN
   | BitAccE { expr_base; value_lo; value_hi } ->
       ctk_bitstring_acc_expr expr_base value_lo value_hi
+  | ErrAccE _ | TypeAccE _ -> LCTK
   | ExprAccE { expr_base; member } -> ctk_expr_acc_expr expr_base member
   | CallFuncE _ -> DYN
   | CallMethodE { expr_base; member; targs; args } ->
@@ -177,19 +180,23 @@ let rec eval_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (expr : Il.Ast.expr) :
   try
     check_lctk expr;
     let value = eval_expr' cursor ctx expr.it in
-    value $ expr.at
+    value $$ (expr.at, expr.it)
   with CheckErr _ as err -> error_pass_info expr.at err
 
 and eval_expr' (cursor : Ctx.cursor) (ctx : Ctx.t) (expr : Il.Ast.expr') :
     Il.Ast.value' =
   match expr with
   | ValueE { value } -> value.it
+  | BoolE { boolean } -> Value.BoolV boolean
+  | StrE { text } -> Value.StrV text.it
+  | NumE { num } -> eval_num_expr cursor ctx num
   | VarE { var } -> eval_var_expr cursor ctx var
   | SeqE { exprs } -> eval_seq_expr cursor ctx exprs
   | SeqDefaultE { exprs } -> eval_seq_default_expr cursor ctx exprs
   | RecordE { fields } -> eval_record_expr cursor ctx fields
   | RecordDefaultE { fields } -> eval_record_default_expr cursor ctx fields
   | DefaultE -> Value.DefaultV
+  | InvalidE -> Value.InvalidV
   | UnE { unop; expr } -> eval_unop_expr cursor ctx unop expr
   | BinE { binop; expr_l; expr_r } ->
       eval_binop_expr cursor ctx binop expr_l expr_r
@@ -198,6 +205,9 @@ and eval_expr' (cursor : Ctx.cursor) (ctx : Ctx.t) (expr : Il.Ast.expr') :
   | CastE { typ; expr } -> eval_cast_expr cursor ctx typ expr
   | BitAccE { expr_base; value_lo; value_hi } ->
       eval_bitstring_acc_expr cursor ctx expr_base value_lo value_hi
+  | ErrAccE { member } -> eval_error_acc_expr cursor ctx member
+  | TypeAccE { var_base; member } ->
+      eval_type_acc_expr cursor ctx var_base member
   | ExprAccE { expr_base; member } ->
       eval_expr_acc_expr cursor ctx expr_base member
   | CallMethodE { expr_base; member; targs; args } ->
@@ -210,6 +220,14 @@ and eval_expr' (cursor : Ctx.cursor) (ctx : Ctx.t) (expr : Il.Ast.expr') :
 and eval_exprs (cursor : Ctx.cursor) (ctx : Ctx.t) (exprs : Il.Ast.expr list) :
     Il.Ast.value list =
   List.map (eval_expr cursor ctx) exprs
+
+and eval_num_expr (_cursor : Ctx.cursor) (_ctx : Ctx.t) (num : Il.Ast.num) :
+    Value.t =
+  match num.it with
+  | value, Some (width, signed) ->
+      if signed then Runtime_value.Num.int_of_raw_int value width
+      else Runtime_value.Num.bit_of_raw_int value width
+  | value, None -> Value.IntV value
 
 and eval_var_expr (cursor : Ctx.cursor) (ctx : Ctx.t) (var : Il.Ast.var) :
     Value.t =
@@ -284,6 +302,36 @@ and eval_bitstring_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t)
   let value_base = eval_expr cursor ctx expr_base in
   let value =
     Numerics.eval_bitstring_access value_base.it value_hi.it value_lo.it
+  in
+  value
+
+and eval_error_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t)
+    (member : Il.Ast.member) : Value.t =
+  let value_error = Ctx.find_value_opt cursor ("error." ^ member.it) ctx in
+  Option.get value_error
+
+and eval_type_acc_expr (cursor : Ctx.cursor) (ctx : Ctx.t)
+    (var_base : Il.Ast.var) (member : Il.Ast.member) : Value.t =
+  let td_base = Ctx.find_opt Ctx.find_typdef_opt cursor var_base ctx in
+  let td_base = Option.get td_base in
+  let value =
+    let typ_base =
+      match td_base with
+      | MonoD typ_base -> typ_base
+      | _ ->
+          F.asprintf "(eval_type_acc_expr) Cannot access a generic type %a"
+            (TypeDef.pp ~level:0) td_base
+          |> error_no_info
+    in
+    match Type.canon typ_base with
+    | EnumT (id, _) -> Value.EnumFieldV (id, member.it)
+    | SEnumT (id, _, fields) ->
+        let value_inner = List.assoc member.it fields in
+        Value.SEnumFieldV (id, member.it, value_inner)
+    | _ ->
+        F.asprintf "(eval_type_acc_expr) %a cannot be accessed\n"
+          (TypeDef.pp ~level:0) td_base
+        |> error_no_info
   in
   value
 

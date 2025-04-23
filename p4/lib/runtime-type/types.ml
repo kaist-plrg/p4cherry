@@ -1,6 +1,7 @@
-include Tdom
-open Pp
-open Eq
+include Il.Ast
+open Il.Pp
+open Il.Eq
+open Eq_alpha
 open Free
 open Subst
 open Utils
@@ -8,10 +9,10 @@ open Utils
 (* Modules *)
 
 module Type = struct
-  type t = typ
+  type t = typ'
 
-  let pp = pp_typ
-  let eq = eq_typ
+  let pp = pp_typ'
+  let eq = eq_typ'
   let eq_alpha = eq_typ_alpha
   let free = free_typ
   let subst = subst_typ

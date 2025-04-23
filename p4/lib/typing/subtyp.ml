@@ -1,5 +1,5 @@
 open Domain.Dom
-module Types = Runtime_static.Tdomain.Types
+module Types = Runtime_type.Types
 module Type = Types.Type
 
 (* (8.11.1) Explicit casts
@@ -43,8 +43,9 @@ module Type = Types.Type
 
 let check_explicit_castable (typ : Type.t) : bool =
   match typ with
-  | BoolT | IntT | FBitT _ | FIntT _ | NewT _ | SEnumT _ | ListT _ | TupleT _
-  | StructT _ | HeaderT _ | UnionT _ ->
+  | ErrT | BoolT | IntT | FIntT _ | FBitT _ | VBitT _ | NewT _ | EnumT _
+  | SEnumT _ | ListT _ | TupleT _ | StackT _ | StructT _ | HeaderT _ | UnionT _
+    ->
       true
   | _ -> false
 
@@ -180,7 +181,7 @@ let rec explicit (typ_from : Type.t) (typ_to : Type.t) : bool =
      if the destination type appears in this list (this excludes e.g., parsers or externs). *)
   let typ_from = Type.canon typ_from in
   let typ_to = Type.canon typ_to in
-  if Type.eq_alpha typ_from typ_to then check_explicit_castable typ_to
+  if Type.eq_alpha typ_from typ_to then true
   else explicit_unequal typ_from typ_to
 
 (* (8.11.2) Implicit casts

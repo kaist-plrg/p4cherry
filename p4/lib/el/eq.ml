@@ -115,10 +115,10 @@ and eq_annos ?(dbg = false) annos_a annos_b =
 and eq_tparam' tparam_a tparam_b = E.eq_tparam' tparam_a tparam_b
 
 and eq_tparam ?(dbg = false) tparam_a tparam_b =
-  E.eq_tparam ~dbg tparam_a tparam_b
+  E.eq_tparam ~dbg eq_tparam' tparam_a tparam_b
 
 and eq_tparams ?(dbg = false) tparams_a tparams_b =
-  E.eq_tparams ~dbg tparams_a tparams_b
+  E.eq_tparams ~dbg eq_tparam' tparams_a tparams_b
 
 (* Parameters *)
 
@@ -739,10 +739,12 @@ and eq_table_entry ?(dbg = false) table_entry_a table_entry_b =
   |> E.check ~dbg "table_entry" P.pp_table_entry table_entry_a table_entry_b
 
 and eq_table_entries' ?(dbg = false) table_entries_a table_entries_b =
-  E.eq_table_entries' ~dbg P.pp_expr eq_expr table_entries_a table_entries_b
+  E.eq_table_entries' ~dbg P.pp_table_entry eq_table_entry table_entries_a
+    table_entries_b
 
 and eq_table_entries ?(dbg = false) table_entries_a table_entries_b =
-  E.eq_table_entries ~dbg P.pp_expr eq_expr table_entries_a table_entries_b
+  E.eq_table_entries ~dbg P.pp_table_entry eq_table_entry table_entries_a
+    table_entries_b
 
 (* Table default properties *)
 

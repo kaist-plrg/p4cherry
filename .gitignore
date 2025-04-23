@@ -27,3 +27,6 @@ error
 
 # scripts
 run.sh
+
+# MacOS
+*.DS_Store

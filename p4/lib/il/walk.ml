@@ -3,7 +3,8 @@ open Ast
 open Util.Source
 
 type walker =
-  ( note,
+  ( expr',
+    note,
     typ',
     value',
     param',
@@ -101,6 +102,8 @@ let walk_arg (walker : walker) arg = W.walk_arg walker arg
 (* Expressions *)
 
 let walk_expr (walker : walker) expr =
+  let walk_num = walker.walk_num walker in
+  let walk_text = walker.walk_text walker in
   let walk_var = walker.walk_var walker in
   let walk_member = walker.walk_member walker in
   let walk_unop = walker.walk_unop walker in
@@ -113,11 +116,14 @@ let walk_expr (walker : walker) expr =
   let walk_select_case = walker.walk_select_case walker in
   match expr.it with
   | ValueE { value } -> walk_value value
+  | BoolE _ -> ()
+  | StrE { text } -> walk_text text
+  | NumE { num } -> walk_num num
   | VarE { var } -> walk_var var
   | SeqE { exprs } | SeqDefaultE { exprs } -> W.walk_list walk_expr exprs
   | RecordE { fields } | RecordDefaultE { fields } ->
       W.walk_list (W.walk_pair walk_member walk_expr) fields
-  | DefaultE -> ()
+  | DefaultE | InvalidE -> ()
   | UnE { unop; expr } ->
       walk_unop unop;
       walk_expr expr
@@ -148,6 +154,10 @@ let walk_expr (walker : walker) expr =
       walk_expr expr_base;
       walk_value value_lo;
       walk_value value_hi
+  | ErrAccE { member } -> walk_member member
+  | TypeAccE { var_base; member } ->
+      walk_var var_base;
+      walk_member member
   | ExprAccE { expr_base; member } ->
       walk_expr expr_base;
       walk_member member
@@ -163,9 +173,10 @@ let walk_expr (walker : walker) expr =
   | CallTypeE { typ; member } ->
       walk_typ typ;
       walk_member member
-  | InstE { var_inst; targs; args } ->
+  | InstE { var_inst; targs; targs_hidden; args } ->
       walk_var var_inst;
       W.walk_list walk_targ targs;
+      W.walk_list walk_targ targs_hidden;
       W.walk_list walk_arg args
 
 (* Keyset expressions *)
@@ -263,11 +274,13 @@ let walk_decl (walker : walker) decl =
       walk_typ typ;
       W.walk_option walk_expr init
   | ErrD { members } | MatchKindD { members } -> W.walk_list walk_member members
-  | InstD { id; typ; var_inst; targs; args; init; annos = _annos } ->
+  | InstD { id; typ; var_inst; targs; targs_hidden; args; init; annos = _annos }
+    ->
       walk_id id;
       walk_typ typ;
       walk_var var_inst;
       W.walk_list walk_targ targs;
+      W.walk_list walk_targ targs_hidden;
       W.walk_list walk_arg args;
       W.walk_list walk_decl init
   | StructD { id; tparams; tparams_hidden; fields; annos = _annos }
