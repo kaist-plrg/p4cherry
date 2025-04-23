@@ -107,16 +107,16 @@ let test_gen_command =
   Core.Command.basic ~summary:"generate tests"
     (let open Core.Command.Let_syntax in
      let open Core.Command.Param in
-     let%map dir =
-       flag "-d" (required string) ~doc:"output directory"
-     in
+     let%map dir = flag "-d" (required string) ~doc:"output directory" in
      fun () ->
        try
-         let gen_results = Test_gen.Gen.sub_expl in
-         List.iter (fun (filename, contents) ->
+         let gen_results = Test_gen.Gen.sub in
+         List.iter
+           (fun (filename, contents) ->
              let file = open_out (dir ^ "/" ^ filename) in
              Printf.fprintf file "%s" contents;
-             close_out file;) gen_results
+             close_out file)
+           gen_results
        with Error (at, msg) -> Format.printf "%s\n" (string_of_error at msg))
 
 let command =
