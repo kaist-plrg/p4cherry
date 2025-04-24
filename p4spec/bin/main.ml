@@ -113,7 +113,7 @@ let test_gen_command =
      let%map dir = flag "-d" (required string) ~doc:"output directory" in
      fun () ->
        try
-         let gen_results = Test_gen.Gen.sub in
+         let gen_results = Test_gen.Gen.generate in
          List.iter
            (fun (filename, contents) ->
              let file = open_out (dir ^ "/" ^ filename) in

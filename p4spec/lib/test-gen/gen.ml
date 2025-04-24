@@ -115,6 +115,30 @@ let type_list =
          }\n";
     };
     (* 3c. Object types *)
+    {
+      name = "extern";
+      typ_str = "Extn";
+      val_str = "";
+      def_str = "extern Extn {\n  Extn();\n}\n";
+    };
+    {
+      name = "parser";
+      typ_str = "Prsr";
+      val_str = "";
+      def_str = "parser Prsr();\n";
+    };
+    {
+      name = "control";
+      typ_str = "Ctrl";
+      val_str = "";
+      def_str = "control Ctrl();\n";
+    };
+    {
+      name = "package";
+      typ_str = "Pkg";
+      val_str = "";
+      def_str = "package Pkg();\n";
+    };
     (* 4. Synthesized types *)
     { name = "default"; typ_str = ""; val_str = "..."; def_str = "" };
     { name = "seq"; typ_str = ""; val_str = "{ 0 }"; def_str = "" };
@@ -187,13 +211,14 @@ let type_list =
     };
   ]
 
+let is_synthtyp typ = typ.typ_str = ""
+
 let sub_impl (typ_from : item) (typ_to : item) : (string * string) option =
-  let filename = F.sprintf "impl-%s-to-%s.p4" typ_from.name typ_to.name in
+  let filename = F.sprintf "Sub_impl-%s-to-%s.p4" typ_from.name typ_to.name in
   let defs =
     if typ_from.name = typ_to.name then typ_from.def_str
     else F.sprintf "%s%s" typ_from.def_str typ_to.def_str
   in
-  let is_synthtyp typ = typ.typ_str = "" in
   match (typ_from.name, typ_to.name) with
   | _, _ ->
       if is_synthtyp typ_to then Option.none
@@ -224,12 +249,11 @@ let sub_impl (typ_from : item) (typ_to : item) : (string * string) option =
         |> Option.some
 
 let sub_expl (typ_from : item) (typ_to : item) : (string * string) option =
-  let filename = F.sprintf "expl-%s-to-%s.p4" typ_from.name typ_to.name in
+  let filename = F.sprintf "Sub_expl-%s-to-%s.p4" typ_from.name typ_to.name in
   let defs =
     if typ_from.name = typ_to.name then typ_from.def_str
     else F.sprintf "%s%s" typ_from.def_str typ_to.def_str
   in
-  let is_synthtyp typ = typ.typ_str = "" in
   match (typ_from.name, typ_to.name) with
   | _, _ ->
       if is_synthtyp typ_to then Option.none
@@ -251,14 +275,118 @@ let sub_expl (typ_from : item) (typ_to : item) : (string * string) option =
         |> Option.some
       else if is_synthtyp typ_from then
         ( filename,
-          F.sprintf "%s\n%s func(){\n  return (%s) %s;\n}" defs typ_to.typ_str
+          F.sprintf "%s%s func(){\n  return (%s) %s;\n}" defs typ_to.typ_str
             typ_to.typ_str typ_from.val_str )
         |> Option.some
       else
         ( filename,
-          F.sprintf "%s\n%s func(%s a)\n{\n  return (%s) a;\n}" defs
+          F.sprintf "%s%s func(%s a)\n{\n  return (%s) a;\n}" defs
             typ_to.typ_str typ_from.typ_str typ_to.typ_str )
         |> Option.some
+
+type item_template = {
+  name : string;
+  typ_str : string -> string;
+  def_str : string -> string;
+}
+
+let empty_def _ : string = ""
+
+let outer_list =
+  [
+    {
+      name = "list";
+      typ_str = (fun t -> F.sprintf "list<%s>" t);
+      def_str = empty_def;
+    };
+    {
+      name = "tuple";
+      typ_str = (fun t -> F.sprintf "tuple<%s>" t);
+      def_str = empty_def;
+    };
+    {
+      name = "senum";
+      typ_str = (fun _ -> "Senum_Out");
+      def_str = (fun t -> F.sprintf "enum %s Senum_Out;\n" t);
+    };
+    {
+      name = "stack";
+      typ_str = (fun t -> F.sprintf "%s[4]" t);
+      def_str = empty_def;
+    };
+    {
+      name = "struct";
+      typ_str = (fun t -> F.sprintf "S_Out<%s>" t);
+      def_str = (fun _ -> "struct S_Out<T> {\n  T x;\n}\n");
+    };
+    {
+      name = "header";
+      typ_str = (fun t -> F.sprintf "H_Out<%s>" t);
+      def_str = (fun _ -> "header H_Out<T> {\n  T x;\n}\n");
+    };
+    {
+      name = "union";
+      typ_str = (fun t -> F.sprintf "Hu_Out<%s>" t);
+      def_str = (fun _ -> "header_union Hu_Out<T> {\n  T x; \n}\n");
+    };
+    {
+      name = "def";
+      typ_str = (fun _ -> "Def_Out");
+      def_str = (fun t -> F.sprintf "typedef %s Def_Out;\n" t);
+    };
+    {
+      name = "new";
+      typ_str = (fun _ -> "New");
+      def_str = (fun t -> F.sprintf "type %s New_Out;\n" t);
+    };
+  ]
+
+let type_wf_nesting (typ_outer : item_template) (typ_inner : item) :
+    (string * string) option =
+  let filename =
+    F.sprintf "Type_wf-%s-in-%s.p4" typ_inner.name typ_outer.name
+  in
+  let defs = typ_inner.def_str ^ typ_outer.def_str typ_inner.typ_str in
+  if is_synthtyp typ_inner then Option.none
+  else
+    match typ_outer.name with
+    | "senum" ->
+        if typ_inner.val_str = "" then Option.none
+        else
+          ( filename,
+            F.sprintf
+              "%senum %s Senum_Out { V = %s }\n\
+               Senum_Out func(Senum_Out a){\n\
+              \  return a;\n\
+               }"
+              defs typ_inner.typ_str typ_inner.val_str )
+          |> Option.some
+    | _ ->
+        let typ_str = typ_outer.typ_str typ_inner.typ_str in
+        ( filename,
+          F.sprintf "%s%s func(%s a){\n  return a;\n}" defs typ_str typ_str )
+        |> Option.some
+
+let type_wf_double_nesting (typ_outer : item_template) (typ_mid : item_template)
+    (typ_inner : item) : (string * string) option =
+  let filename =
+    F.sprintf "Type_wf-%s-in-%s-in-%s.p4" typ_inner.name typ_mid.name
+      typ_outer.name
+  in
+  let defs =
+    if typ_outer.name = typ_mid.name then
+      typ_inner.def_str ^ typ_mid.def_str typ_inner.typ_str
+    else
+      typ_inner.def_str
+      ^ typ_mid.def_str typ_inner.typ_str
+      ^ typ_outer.def_str (typ_mid.typ_str typ_inner.typ_str)
+  in
+  if is_synthtyp typ_inner then Option.none
+  else if typ_outer.name = "senum" || typ_mid.name = "senum" then Option.none
+  else
+    let typ_str = typ_outer.typ_str (typ_mid.typ_str typ_inner.typ_str) in
+    (filename, F.sprintf "%s%s func(%s a){\n  return a;\n}" defs typ_str typ_str)
+    |> Option.some
 
 let sub : (string * string) list =
   let sub_impl =
@@ -282,3 +410,30 @@ let sub : (string * string) list =
     |> List.flatten
   in
   sub_impl @ sub_expl
+
+let type_wf : (string * string) list =
+  let type_wf_nesting =
+    List.concat_map
+      (fun typ_inner ->
+        List.concat_map
+          (fun typ_outer ->
+            type_wf_nesting typ_outer typ_inner |> Option.to_list)
+          outer_list)
+      type_list
+  in
+  let type_wf_double_nesting =
+    List.concat_map
+      (fun typ_outer ->
+        List.concat_map
+          (fun typ_mid ->
+            List.concat_map
+              (fun typ_inner ->
+                type_wf_double_nesting typ_outer typ_mid typ_inner
+                |> Option.to_list)
+              type_list)
+          outer_list)
+      outer_list
+  in
+  type_wf_nesting @ type_wf_double_nesting
+
+let generate : (string * string) list = sub @ type_wf
