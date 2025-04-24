@@ -634,14 +634,14 @@ and eval_args (ctx : Ctx.t) (args : arg list) : Ctx.t * value list =
 
 and eval_instr (ctx : Ctx.t) (instr : instr) : Ctx.t * Sign.t =
   match instr.it with
-  | IfI (exp_cond, iterexps, instrs_then, instrs_else) ->
-      eval_if_instr ctx exp_cond iterexps instrs_then instrs_else
+  | IfI (exp_cond, iterexps, instrs_then, phantom_opt) ->
+      eval_if_instr ctx exp_cond iterexps instrs_then phantom_opt
+  | CaseI (exp, cases, phantom_opt) -> eval_case_instr ctx exp cases phantom_opt
   | OtherwiseI instr -> eval_instr ctx instr
   | LetI (exp_l, exp_r, iterexps) -> eval_let_instr ctx exp_l exp_r iterexps
   | RuleI (id, notexp, iterexps) -> eval_rule_instr ctx id notexp iterexps
   | ResultI exps -> eval_result_instr ctx exps
   | ReturnI exp -> eval_return_instr ctx exp
-  | PhantomI phantom -> eval_phantom_instr ctx phantom
 
 and eval_instrs (ctx : Ctx.t) (sign : Sign.t) (instrs : instr list) :
     Ctx.t * Sign.t =
@@ -685,10 +685,51 @@ and eval_if_cond_iter (ctx : Ctx.t) (exp_cond : exp) (iterexps : iterexp list) :
   eval_if_cond_iter' ctx exp_cond iterexps
 
 and eval_if_instr (ctx : Ctx.t) (exp_cond : exp) (iterexps : iterexp list)
-    (instrs_then : instr list) (instrs_else : instr list) : Ctx.t * Sign.t =
+    (instrs_then : instr list) (phantom_opt : phantom option) : Ctx.t * Sign.t =
   let ctx, cond = eval_if_cond_iter ctx exp_cond iterexps in
-  if cond then eval_instrs ctx Cont instrs_then
-  else eval_instrs ctx Cont instrs_else
+  let ctx =
+    match phantom_opt with
+    | Some (pid, _) -> Ctx.cover ctx (not cond) pid
+    | None -> ctx
+  in
+  if cond then eval_instrs ctx Cont instrs_then else (ctx, Cont)
+
+(* Case analysis instruction evaluation *)
+
+and eval_cases (ctx : Ctx.t) (exp : exp) (cases : case list) :
+    Ctx.t * instr list option =
+  cases
+  |> List.fold_left
+       (fun (ctx, block_match) (guard, block) ->
+         match block_match with
+         | Some _ -> (ctx, block_match)
+         | None ->
+             let exp_cond =
+               match guard with
+               | BoolG true -> exp.it
+               | BoolG false -> Il.Ast.UnE (`NotOp, `BoolT, exp)
+               | CmpG (cmpop, optyp, exp_r) ->
+                   Il.Ast.CmpE (cmpop, optyp, exp, exp_r)
+               | SubG typ -> Il.Ast.SubE (exp, typ)
+               | MatchG pattern -> Il.Ast.MatchE (exp, pattern)
+             in
+             let exp_cond = exp_cond $$ (exp.at, Il.Ast.BoolT) in
+             let ctx, value_cond = eval_exp ctx exp_cond in
+             let cond = Value.get_bool value_cond in
+             if cond then (ctx, Some block) else (ctx, None))
+       (ctx, None)
+
+and eval_case_instr (ctx : Ctx.t) (exp : exp) (cases : case list)
+    (phantom_opt : phantom option) : Ctx.t * Sign.t =
+  let ctx, instrs_opt = eval_cases ctx exp cases in
+  let ctx =
+    match phantom_opt with
+    | Some (pid, _) -> Ctx.cover ctx (Option.is_none instrs_opt) pid
+    | None -> ctx
+  in
+  match instrs_opt with
+  | Some instrs -> eval_instrs ctx Cont instrs
+  | None -> (ctx, Cont)
 
 (* Let instruction evaluation *)
 
@@ -696,9 +737,43 @@ and eval_let (ctx : Ctx.t) (exp_l : exp) (exp_r : exp) : Ctx.t =
   let ctx, value = eval_exp ctx exp_r in
   assign_exp ctx exp_l value
 
-and eval_let_opt (_ctx : Ctx.t) (_exp_l : exp) (_exp_r : exp) (_vars : var list)
-    (_iterexps : iterexp list) : Ctx.t =
-  failwith "(TODO) eval_let_opt"
+and eval_let_opt (ctx : Ctx.t) (exp_l : exp) (exp_r : exp) (vars : var list)
+    (iterexps : iterexp list) : Ctx.t =
+  (* Discriminate between bound and binding variables *)
+  let vars_bound, vars_binding =
+    List.partition
+      (fun (id, iters) ->
+        Ctx.bound_value Local ctx (id, iters @ [ Il.Ast.Opt ]))
+      vars
+  in
+  let ctx_sub_opt = Ctx.sub_opt ctx vars_bound in
+  let ctx, values_binding =
+    match ctx_sub_opt with
+    (* If the bound variable supposed to guide the iteration is already empty,
+       then the binding variables are also empty *)
+    | None ->
+        let values_binding =
+          List.init (List.length vars_binding) (fun _ -> Il.Ast.OptV None)
+        in
+        (ctx, values_binding)
+    (* Otherwise, evaluate the premise for the subcontext *)
+    | Some ctx_sub ->
+        let ctx_sub = eval_let_iter' ctx_sub exp_l exp_r iterexps in
+        let ctx = Ctx.commit ctx ctx_sub in
+        let values_binding =
+          List.map
+            (fun var_binding ->
+              let value_binding = Ctx.find_value Local ctx_sub var_binding in
+              Il.Ast.OptV (Some value_binding))
+            vars_binding
+        in
+        (ctx, values_binding)
+  in
+  (* Finally, bind the resulting values *)
+  List.fold_left2
+    (fun ctx (id, iters) value_binding ->
+      Ctx.add_value Local ctx (id, iters @ [ Il.Ast.Opt ]) value_binding)
+    ctx vars_binding values_binding
 
 and eval_let_list (ctx : Ctx.t) (exp_l : exp) (exp_r : exp) (vars : var list)
     (iterexps : iterexp list) : Ctx.t =
@@ -863,13 +938,6 @@ and eval_return_instr (ctx : Ctx.t) (exp : exp) : Ctx.t * Sign.t =
   let ctx, value = eval_exp ctx exp in
   (ctx, Ret value)
 
-(* Phantom instruction evaluation *)
-
-and eval_phantom_instr (ctx : Ctx.t) (phantom : phantom) : Ctx.t * Sign.t =
-  let pid, _ = phantom in
-  let ctx = Ctx.cover ctx pid in
-  (ctx, Cont)
-
 (* Invoke a relation *)
 
 and invoke_rel (ctx : Ctx.t) (id : id) (values_input : value list) :
@@ -949,33 +1017,21 @@ let load_spec (ctx : Ctx.t) (spec : spec) : Ctx.t =
 
 (* Entry point: run typing rule from `Prog_ok` relation *)
 
-let run_typing ?(cover : Coverage.t ref = ref Coverage.empty) (spec : spec)
-    (includes_p4 : string list) (filename_p4 : string) : Ctx.t * value list =
+let run_typing ?(cover : Coverage.Cover.t ref = ref Coverage.Cover.empty)
+    (spec : spec) (includes_p4 : string list) (filename_p4 : string) :
+    Ctx.t * value list =
   Builtin.init ();
   let program = P4.In.in_program includes_p4 filename_p4 in
-  let ctx = Ctx.empty cover in
+  let ctx = Ctx.empty filename_p4 cover in
   let ctx = load_spec ctx spec in
   invoke_rel ctx ("Prog_ok" $ no_region) [ program ]
 
-let log_cover (cover : int list) : unit =
-  let rec log_lines cover count =
-    match cover with
-    | [] -> print_newline ()
-    | pid :: cover ->
-        F.asprintf "%d " pid |> print_string;
-        if count = 9 then (
-          print_newline ();
-          log_lines cover 0)
-        else log_lines cover (count + 1)
-  in
-  log_lines cover 0
-
 let cover_typing (spec : spec) (includes_p4 : string list)
-    (filenames_p4 : string list) : unit =
-  let cover = ref Coverage.empty in
+    (filenames_p4 : string list) (dirname_closest_miss_opt : string option) : unit =
+  let cover = ref Coverage.Cover.empty in
   List.iter
     (fun filename_p4 ->
       try run_typing ~cover spec includes_p4 filename_p4 |> ignore
       with _ -> ())
     filenames_p4;
-  Coverage.log spec !cover
+  Coverage.log spec !cover dirname_closest_miss_opt
