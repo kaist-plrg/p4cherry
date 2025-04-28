@@ -112,7 +112,13 @@ and expand_deftyp depth tdenv theta deftyp : value option =
       |> List.filter Option.is_some |> List.map Option.get
       |> random_select
 
-let expand seed depth spec syntax : value option =
+let expand seed depth spec typ : value option =
+  Random.init seed;
+  let tdenv = TDEnv.empty in
+  let tdenv = load_spec tdenv spec in
+  expand_typ depth tdenv typ
+
+let expand_syntax seed depth spec syntax : value option =
   Random.init seed;
   let tdenv = TDEnv.empty in
   let tdenv = load_spec tdenv spec in
