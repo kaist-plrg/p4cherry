@@ -76,41 +76,46 @@ and expand_typ' depth tdenv typ' : value option =
   | VarT (tid, targs) -> (
       let td = TDEnv.find_opt tid tdenv in
       match td with
-      | Some (tparams, typdef) -> (
+      | Some (tparams, typdef) -> 
           let theta = List.combine tparams targs |> TDEnv.of_list in
-          match typdef.it with
-          | PlainT typ ->
-              let typ = subst_typ theta typ in
-              expand_typ depth tdenv typ
-          | StructT typfields ->
-              let atoms, typs = List.split typfields in
-              let* values =
-                typs |> subst_typs theta |> expand_typs depth tdenv
-              in
-              StructV (List.combine atoms values) |> Option.some
-          | VariantT typcases ->
-              let nottyps' = List.map it typcases in
-              let nottyps' =
-                List.map
-                  (fun (mixop, typs) ->
-                    let typs = subst_typs theta typs in
-                    (mixop, typs))
-                  nottyps'
-              in
-              let expand_nottyp' nottyp' =
-                let mixop, typs = nottyp' in
-                let* values = expand_typs depth tdenv typs in
-                CaseV (mixop, values) |> Option.some
-              in
-              (* randomly selects from only successful CaseVs *)
-              List.map expand_nottyp' nottyps'
-              |> List.filter Option.is_some |> List.map Option.get
-              |> random_select)
+          expand_deftyp depth tdenv theta typdef
       (* VarT not found in environment *)
       | None -> None)
 
-let expand depth spec typ : value option =
-  Random.init 161;
+and expand_deftyp depth tdenv theta deftyp : value option =
+    match deftyp.it with
+    | PlainT typ ->
+      let typ = subst_typ theta typ in
+      expand_typ depth tdenv typ
+    | StructT typfields ->
+      let atoms, typs = List.split typfields in
+      let* values =
+        typs |> subst_typs theta |> expand_typs depth tdenv
+      in
+      StructV (List.combine atoms values) |> Option.some
+    | VariantT typcases ->
+      let nottyps' = List.map it typcases in
+      let nottyps' =
+        List.map
+          (fun (mixop, typs) ->
+             let typs = subst_typs theta typs in
+             (mixop, typs))
+          nottyps'
+      in
+      let expand_nottyp' nottyp' =
+        let mixop, typs = nottyp' in
+        let* values = expand_typs depth tdenv typs in
+        CaseV (mixop, values) |> Option.some
+      in
+      (* randomly selects from only successful CaseVs *)
+      List.map expand_nottyp' nottyps'
+      |> List.filter Option.is_some |> List.map Option.get
+      |> random_select
+
+let expand seed depth spec syntax : value option =
+  Random.init seed;
   let tdenv = TDEnv.empty in
   let tdenv = load_spec tdenv spec in
-  expand_typ depth tdenv typ
+  let _, deftyp = TDEnv.find (syntax $ no_region) tdenv in
+  let theta = TDEnv.empty in
+  expand_deftyp depth tdenv theta deftyp
