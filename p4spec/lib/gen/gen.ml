@@ -47,14 +47,18 @@ and expand_typ' depth tdenv typ': value option =
     TupleV values_inner |> Option.some
   | IterT (typ_inner, Opt) -> 
     let i = Random.int 2 in
-    if i = 0 then OptV (None) |> Option.some
+    if depth = 0 || i = 0 then OptV (None) |> Option.some
     else
       (let* value_inner = expand_typ depth tdenv typ_inner in
       OptV (Some value_inner) |> Option.some)
   | IterT (typ_inner, List) ->
-    let l = Random.int 3 in
-    let* values_inner = List.init l (fun _ -> expand_typ depth tdenv typ_inner) |> bind_list in
-    ListV (values_inner) |> Option.some
+    if depth = 0 then ListV ([]) |> Option.some
+    else
+      let max_length = 3 in
+      let l = Random.int max_length in
+      let* values_inner = List.init l (fun _ -> expand_typ depth tdenv typ_inner) |> bind_list in
+      ListV (values_inner) |> Option.some
+  (* Does not expand FuncT *)
   | FuncT -> None
   | VarT (tid, targs) -> 
     let td  = TDEnv.find_opt tid tdenv in      
@@ -87,6 +91,7 @@ and expand_typ' depth tdenv typ': value option =
           (* randomly selects from only successful CaseVs *)
           List.map expand_nottyp' nottyps' |> List.filter (Option.is_some) |> List.map (Option.get) |> random_select
       )
+    (* VarT not found in environment *)
     | None -> None
 
 let expand depth spec typ : value option =
