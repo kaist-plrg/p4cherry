@@ -92,3 +92,8 @@ and expand_typ' tdenv typ': value list =
       )
     | None -> []
 
+
+let expand depth spec typ : value list = 
+  let tdenv = TDEnv.empty in
+  let tdenv = load_spec tdenv spec in
+  expand_typ ~depth tdenv typ
