@@ -125,6 +125,36 @@ let run_testgen_command =
                "Please provide either a warm or cold boot coverage file\n"
        with Error (at, msg) -> Format.printf "%s\n" (string_of_error at msg))
 
+let covers_branch_command = 
+  Core.Command.basic
+    ~summary:"run static semantics of a p4_16 spec based on non-backtracking SL"
+    (let open Core.Command.Let_syntax in
+     let open Core.Command.Param in
+     let%map filenames_spec = anon (sequence ("filename" %: string))
+     and includes_p4 = flag "-i" (listed string) ~doc:"p4 include paths"
+     and pids = flag "-pid" (listed int) ~doc:"phantom ids to Hit"
+     and filename_p4 = flag "-p" (required string) ~doc:"p4 file to typecheck" in
+     fun () ->
+       try
+         let spec = List.concat_map Frontend.Parse.parse_file filenames_spec in
+         let spec_il = Elaborate.Elab.elab_spec spec in
+         let spec_sl = Structure.Struct.struct_spec spec_il in
+         let (well_typed, cover_single) =
+           Interp_sl.Interp.cover_typing spec_sl includes_p4 filename_p4
+         in
+         if not well_typed then (exit 1;)
+         else (
+           let hits_all = 
+             List.fold_left (fun b pid ->
+                 let branch = Interp_sl.Interp.SCov.Cover.find pid cover_single in
+                 match branch.status with
+                 | Hit -> b
+                 | Miss _ -> false)
+               true pids
+           in
+           if hits_all then (exit 0;) else (exit 2;))
+       with Error (at, msg) -> Format.printf "%s\n" (string_of_error at msg))
+
 let command =
   Core.Command.group
     ~summary:"p4spec: a language design framework for the p4_16 language"
@@ -134,6 +164,7 @@ let command =
       ("run-sl", run_sl_command);
       ("cover-sl", cover_sl_command);
       ("testgen", run_testgen_command);
+      ("covers", covers_branch_command);
     ]
 
 let () = Command_unix.run ~version command
