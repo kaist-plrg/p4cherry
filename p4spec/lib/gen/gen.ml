@@ -15,7 +15,8 @@ let load_spec (tdenv : TDEnv.t) (spec : spec) : TDEnv.t =
   List.fold_left load_def tdenv spec
 
 let random_select (values : value list) : value option =
-  Random.int (List.length values) |> List.nth values |> Option.some
+  if List.length values = 0 then None
+  else Random.int (List.length values) |> List.nth values |> Option.some
 
 let ( let* ) x f = Option.bind x f
 
@@ -37,13 +38,19 @@ and expand_typ' depth tdenv typ' : value option =
   | BoolT -> [ BoolV true; BoolV false ] |> random_select
   | NumT `NatT ->
       [
-        NumV (`Nat (Bigint.of_int 0));
+        NumV (`Nat (Bigint.of_int 1));
         NumV (`Nat (Bigint.of_int 4));
         NumV (`Nat (Bigint.of_int 6));
+        NumV (`Nat (Bigint.of_int 8));
       ]
       |> random_select
   | NumT `IntT ->
-      [ NumV (`Int (Bigint.of_int 2)); NumV (`Int (Bigint.of_int (-2))) ]
+      [
+        NumV (`Int (Bigint.of_int (-2)));
+        NumV (`Int (Bigint.of_int 0));
+        NumV (`Int (Bigint.of_int 2));
+        NumV (`Int (Bigint.of_int 3));
+      ]
       |> random_select
   | TextT -> [ TextV "a"; TextV "b" ] |> random_select
   | TupleT typs_inner ->
