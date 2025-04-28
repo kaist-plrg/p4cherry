@@ -106,6 +106,24 @@ let cover_sl_command =
            dirname_closest_miss_opt
        with Error (at, msg) -> Format.printf "%s\n" (string_of_error at msg))
 
+let expand_command =
+  Core.Command.basic ~summary:"take a SpecTec syntax and turn it into a value"
+    (let open Core.Command.Let_syntax in
+     let open Core.Command.Param in
+     let%map filenames_spec = anon (sequence ("filename" %: string))
+     and syntax = flag "-s" (required string) ~doc:"SpecTec syntax to expand"
+     and seed = flag "-r" (required int) ~doc: "Random seed for generation"
+     and depth = flag "-d" (required int) ~doc:"expansion depth" in
+     fun () ->
+       try
+         let spec = List.concat_map Frontend.Parse.parse_file filenames_spec in
+         let spec_il = Elaborate.Elab.elab_spec spec in
+         let value = Gen.Expand.expand_syntax seed depth spec_il syntax in
+         match value with
+         | None -> "None" |> print_endline;
+         | Some value -> Format.printf "%s\n" (Il.Print.string_of_value value);
+       with Error (at, msg) -> Format.printf "%s\n" (string_of_error at msg))
+
 let command =
   Core.Command.group
     ~summary:"p4spec: a language design framework for the p4_16 language"
@@ -115,6 +133,7 @@ let command =
       ("struct", struct_command);
       ("run-sl", run_sl_command);
       ("cover-sl", cover_sl_command);
+      ("expand", expand_command);
     ]
 
 let () = Command_unix.run ~version command
