@@ -669,7 +669,7 @@ expression:
 | info1 = FALSE
     { info1 |> ignore;
       [ Term "FALSE" ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
-| value = STRING_LITERAL
+| value = stringLiteral
     { value }
 | info1 = THIS
     { info1 |> ignore;
