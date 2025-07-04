@@ -233,9 +233,132 @@ and pp_syntax_params fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_params: expected parameter, got %s"
            (id_of_case_v value))
 
-and pp_syntax_expr _fmt (value : value) : unit =
+and pp_syntax_nb_expr fmt (value : value) : unit =
+  let is_binary_op = function
+    | "*" | "/" | "%" | "+" | "|+|" | "-" | "|-|" | "<<" | ">>" | "<=" | ">="
+    | "<" | ">" | "!=" | "==" | "&" | "^" | "|" | "++" | "&&" | "||" ->
+        true
+    | _ -> false
+  in
   match flatten_case_v value with
-  | _ -> failwith "@pp_syntax_expr: not yet implemented"
+  | "nonBraceExpression", [ [ "TRUE" ] ], [] -> F.fprintf fmt "true"
+  | "nonBraceExpression", [ [ "FALSE" ] ], [] -> F.fprintf fmt "false"
+  | "nonBraceExpression", [ [ "THIS" ] ], [] -> F.fprintf fmt "this"
+  | "nonBraceExpression", [ []; [ "[" ]; [ "]" ] ], [ array; index ] ->
+      F.fprintf fmt "(%a)[%a]" pp_case_v array pp_case_v index
+  | "nonBraceExpression", [ []; [ "[" ]; [ ":" ]; [ "]" ] ], [ bits; hi; lo ] ->
+      F.fprintf fmt "(%a)[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
+  | "nonBraceExpression", [ [ "!" ]; [] ], [ arg ] ->
+      F.fprintf fmt "!(%a)" pp_case_v arg
+  | "nonBraceExpression", [ [ "~" ]; [] ], [ arg ] ->
+      F.fprintf fmt "~(%a)" pp_case_v arg
+  | "nonBraceExpression", [ [ "-" ]; [] ], [ arg ] ->
+      F.fprintf fmt "-(%a)" pp_case_v arg
+  | "nonBraceExpression", [ [ "+" ]; [] ], [ arg ] ->
+      F.fprintf fmt "+(%a)" pp_case_v arg
+  | "nonBraceExpression", [ []; [ "." ]; [] ], [ typ; member ] ->
+      F.fprintf fmt "(%a).(%a)" pp_case_v typ pp_case_v member
+  | "nonBraceExpression", [ [ "ERROR"; "." ]; [] ], [ member ] ->
+      F.fprintf fmt "error.(%a)" pp_case_v member
+  | "nonBraceExpression", [ []; [ "." ]; [ "PHTM_5" ] ], [ expr; member ] ->
+      F.fprintf fmt "(%a).(%a)" pp_case_v expr pp_case_v member
+  | "nonBraceExpression", [ []; [ binop ]; [] ], [ arg1; arg2 ]
+    when is_binary_op binop ->
+      F.fprintf fmt "(%a) %s (%a)" pp_case_v arg1 binop pp_case_v arg2
+  | ( "nonBraceExpression",
+      [ []; [ "?" ]; [ ":" ]; [] ],
+      [ cond; true_expr; false_expr ] ) ->
+      F.fprintf fmt "(%a) ? (%a) : (%a)" pp_case_v cond pp_case_v true_expr
+        pp_case_v false_expr
+  | ( "nonBraceExpression",
+      [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
+      [ func; type_args; args ] ) ->
+      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func (pp_list_v ~sep:Comma)
+        type_args (pp_list_v ~sep:Comma) args
+  | "nonBraceExpression", [ []; [ "(" ]; [ ")" ] ], [ func; args ] ->
+      F.fprintf fmt "(%a)(%a)" pp_case_v func (pp_list_v ~sep:Comma) args
+  | "nonBraceExpression", [ []; [ "(" ]; [ ")"; "PHTM_6" ] ], [ typ; args ] ->
+      F.fprintf fmt "(%a)(%a)" pp_case_v typ (pp_list_v ~sep:Comma) args
+  | "nonBraceExpression", [ [ "(" ]; [ ")" ]; [] ], [ typ; expr ] ->
+      F.fprintf fmt "(%a)(%a)" pp_case_v typ pp_case_v expr
+  | "nonBraceExpression", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_nb_expr: ill-formed non-brace expression:\n%a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_nb_expr: expected non-brace expression, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_expr fmt (value : value) : unit =
+  let is_binary_op = function
+    | "*" | "/" | "%" | "+" | "|+|" | "-" | "|-|" | "<<" | ">>" | "<=" | ">="
+    | "<" | ">" | "!=" | "==" | "&" | "^" | "|" | "++" | "&&" | "||" ->
+        true
+    | _ -> false
+  in
+  match flatten_case_v value with
+  | "expression", [ [ "..." ] ], [] -> F.fprintf fmt "..."
+  | "expression", [ [ "TRUE" ] ], [] -> F.fprintf fmt "true"
+  | "expression", [ [ "FALSE" ] ], [] -> F.fprintf fmt "false"
+  | "expression", [ [ "THIS" ] ], [] -> F.fprintf fmt "this"
+  | "expression", [ []; []; [] ], [ dot; name ] ->
+      F.fprintf fmt "%a%a" pp_case_v dot pp_case_v name
+  | "expression", [ []; [ "[" ]; [ "]" ] ], [ array; index ] ->
+      F.fprintf fmt "(%a)[%a]" pp_case_v array pp_case_v index
+  | "expression", [ []; [ "[" ]; [ ":" ]; [ "]" ] ], [ bits; hi; lo ] ->
+      F.fprintf fmt "(%a)[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
+  | "expression", [ [ "{" ]; []; [ "}" ] ], [ exprs; comma ] ->
+      F.fprintf fmt "{ %a%a }" (pp_list_v ~sep:Comma) exprs
+        (pp_opt_v ~postfix:"") comma
+  | "expression", [ [ "INVALID" ] ], [] -> F.fprintf fmt "{#}"
+  | "expression", [ [ "{" ]; []; [ "}"; "PHTM_7" ] ], [ kvs; comma ] ->
+      F.fprintf fmt "{ %a%a }" (pp_list_v ~sep:Comma) kvs (pp_opt_v ~postfix:"")
+        comma
+  | "expression", [ [ "{" ]; [ ","; "..." ]; [ "}" ] ], [ kvs; comma ] ->
+      F.fprintf fmt "{ %a, ...%a }" (pp_list_v ~sep:Comma) kvs
+        (pp_opt_v ~postfix:"") comma
+  | "expression", [ [ "!" ]; [] ], [ arg ] ->
+      F.fprintf fmt "!(%a)" pp_case_v arg
+  | "expression", [ [ "~" ]; [] ], [ arg ] ->
+      F.fprintf fmt "~(%a)" pp_case_v arg
+  | "expression", [ [ "-" ]; [] ], [ arg ] ->
+      F.fprintf fmt "-(%a)" pp_case_v arg
+  | "expression", [ [ "+" ]; [] ], [ arg ] ->
+      F.fprintf fmt "+(%a)" pp_case_v arg
+  | "expression", [ [ "(" ]; [ ")" ]; [] ], [ typ; expr ] ->
+      F.fprintf fmt "(%a)(%a)" pp_case_v typ pp_case_v expr
+  | "expression", [ []; [ "." ]; [] ], [ typ; name ] ->
+      F.fprintf fmt "(%a).(%a)" pp_case_v typ pp_case_v name
+  | "expression", [ [ "ERROR"; "." ]; [] ], [ member ] ->
+      F.fprintf fmt "error.(%a)" pp_case_v member
+  | "expression", [ []; [ "." ]; [ "PHTM_5" ] ], [ expr; member ] ->
+      F.fprintf fmt "(%a).(%a)" pp_case_v expr pp_case_v member
+  | "expression", [ []; [ binop ]; [] ], [ arg1; arg2 ] when is_binary_op binop
+    ->
+      F.fprintf fmt "(%a) %s (%a)" pp_case_v arg1 binop pp_case_v arg2
+  | "expression", [ []; [ "?" ]; [ ":" ]; [] ], [ cond; true_expr; false_expr ]
+    ->
+      F.fprintf fmt "(%a) ? (%a) : (%a)" pp_case_v cond pp_case_v true_expr
+        pp_case_v false_expr
+  | ( "expression",
+      [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
+      [ func; type_args; args ] ) ->
+      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func (pp_list_v ~sep:Comma)
+        type_args (pp_list_v ~sep:Comma) args
+  | "expression", [ []; [ "(" ]; [ ")" ] ], [ func; args ] ->
+      F.fprintf fmt "(%a)(%a)" pp_case_v func (pp_list_v ~sep:Comma) args
+  | "expression", [ []; [ "(" ]; [ ")"; "PHTM_6" ] ], [ typ; args ] ->
+      F.fprintf fmt "(%a)(%a)" pp_case_v typ (pp_list_v ~sep:Comma) args
+  | "expression", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_expr: ill-formed expression:\n%a" pp_case_v
+           value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_nb_expr: expected expression, got %s"
+           (id_of_case_v value))
 
 and pp_syntax_type_arg _fmt (value : value) : unit =
   match flatten_case_v value with
@@ -380,4 +503,6 @@ and pp_case_v fmt (value : value) : unit =
       pp_syntax_type fmt value
   | "typeParameters" -> pp_syntax_tparams fmt value
   | "parameter" | "constructorParameters" -> pp_syntax_params fmt value
+  | "nonBraceExpression" -> pp_syntax_nb_expr fmt value
+  | "expression" -> pp_syntax_expr fmt value
   | _ -> pp_case_v' fmt value
