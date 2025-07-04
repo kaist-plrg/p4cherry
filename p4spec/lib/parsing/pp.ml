@@ -357,8 +357,45 @@ and pp_syntax_expr fmt (value : value) : unit =
            value)
   | _ ->
       failwith
-        (Printf.sprintf "@pp_syntax_nb_expr: expected expression, got %s"
+        (Printf.sprintf "@pp_syntax_expr: expected expression, got %s"
            (id_of_case_v value))
+
+and pp_syntax_keyset_expr fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "simpleKeysetExpression", [ []; [ "&&&" ]; [] ], [ expr; mask ] ->
+      F.fprintf fmt "(%a) &&& (%a)" pp_case_v expr pp_case_v mask
+  | "simpleKeysetExpression", [ []; [ ".." ]; [] ], [ lo; hi ] ->
+      F.fprintf fmt "(%a) .. (%a)" pp_case_v lo pp_case_v hi
+  | "simpleKeysetExpression", [ [ "_" ] ], [] -> F.fprintf fmt "_"
+  | "simpleKeysetExpression", [ [ "DEFAULT" ] ], [] -> F.fprintf fmt "default"
+  | "simpleKeysetExpression", _, _ ->
+      failwith
+        (F.asprintf
+           "@pp_syntax_keyset_expr: ill-formed simple keyset expression:\n%a"
+           pp_case_v value)
+  | "reducedSimpleKeysetExpression", [ []; [ "&&&" ]; [] ], [ expr; mask ] ->
+      F.fprintf fmt "(%a) &&& (%a)" pp_case_v expr pp_case_v mask
+  | "reducedSimpleKeysetExpression", [ []; [ ".." ]; [] ], [ lo; hi ] ->
+      F.fprintf fmt "(%a) .. (%a)" pp_case_v lo pp_case_v hi
+  | "reducedSimpleKeysetExpression", [ [ "_" ] ], [] -> F.fprintf fmt "_"
+  | "reducedSimpleKeysetExpression", [ [ "DEFAULT" ] ], [] ->
+      F.fprintf fmt "default"
+  | "reducedSimpleKeysetExpression", _, _ ->
+      failwith
+        (F.asprintf
+           "@pp_syntax_keyset_expr: ill-formed reduced simple keyset expression:\n\
+            %a"
+           pp_case_v value)
+  | "tupleKeysetExpression", [ [ "(" ]; [ "," ]; [ ")" ] ], [ expr; exprs ] ->
+      F.fprintf fmt "(%a, %a)" pp_case_v expr (pp_list_v ~sep:Comma) exprs
+  | "tupleKeysetExpression", [ [ "(" ]; [ ")"; "PHTM_19" ] ], [ expr ] ->
+      F.fprintf fmt "(%a)" pp_case_v expr
+  | "tupleKeysetExpression", _, _ ->
+      failwith
+        (F.asprintf
+           "@pp_syntax_keyset_expr: ill-formed tuple keyset expression:\n%a"
+           pp_case_v value)
+  | _ -> failwith "@pp_syntax_keyset_expr: not yet implemented"
 
 and pp_syntax_type_arg _fmt (value : value) : unit =
   match flatten_case_v value with
@@ -483,6 +520,9 @@ and pp_case_v' fmt (value : value) : unit =
   | "dotPrefix", [ [ "." ] ], [] -> F.fprintf fmt "."
   (* Type references *)
   | "typeOrVoid", [ [ "VOID" ] ], [] -> F.fprintf fmt "void"
+  (* Key value pair *)
+  | "kvPair", [ []; [ "=" ]; [] ], [ key; value ] ->
+      F.fprintf fmt "(%a) = (%a)" pp_case_v key pp_case_v value
   | _ -> pp_default_case_v fmt value
 
 and pp_case_v fmt (value : value) : unit =
@@ -505,4 +545,7 @@ and pp_case_v fmt (value : value) : unit =
   | "parameter" | "constructorParameters" -> pp_syntax_params fmt value
   | "nonBraceExpression" -> pp_syntax_nb_expr fmt value
   | "expression" -> pp_syntax_expr fmt value
+  | "simpleKeysetExpression" | "reducedSimpleKeysetExpression"
+  | "tupleKeysetExpression" ->
+      pp_syntax_keyset_expr fmt value
   | _ -> pp_case_v' fmt value
