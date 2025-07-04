@@ -46,6 +46,11 @@ let id_of_case_v (v : value) : string =
   | CaseV _, VarT (id, _) -> id.it
   | _ -> failwith "not a case value"
 
+let id_of_list_v (v : value) : string =
+  match (v.it, v.note.typ) with
+  | ListV _, VarT (id, _) -> id.it
+  | _ -> failwith "not a list value"
+
 type syntax' = string list list * value' list
 type syntax = string list list * value list
 
