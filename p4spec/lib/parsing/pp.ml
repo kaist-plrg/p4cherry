@@ -62,7 +62,7 @@ and pp_value fmt (value : value) : unit =
   | ListV [] -> F.fprintf fmt ""
   | ListV values ->
       F.fprintf fmt "%s"
-        (String.concat "; "
+        (String.concat ", "
            (List.map (fun v -> F.asprintf "%a" pp_value v) values))
   | _ -> failwith "@pp_value: TODO"
 
@@ -105,11 +105,95 @@ and pp_syntax_name fmt (value : value) : unit =
   | "nonTypeName", [ [ "ENTRIES" ] ], [] -> F.fprintf fmt "entries"
   | "nonTypeName", [ [ "TYPE" ] ], [] -> F.fprintf fmt "type"
   | "nonTypeName", [ [ "PRIORITY" ] ], [] -> F.fprintf fmt "priority"
+  | "prefixedNonTypeName", [ []; []; [] ], [ dot; non_type_name ] ->
+      F.fprintf fmt "%a%a" pp_case_v dot pp_syntax_name non_type_name
+  | "prefixedType", [ []; []; [] ], [ dot; tid ] ->
+      F.fprintf fmt "%a%a" pp_case_v dot pp_syntax_tid tid
   | "name", [ [ "LIST" ] ], [] -> F.fprintf fmt "list"
   | _ ->
       failwith
         (Printf.sprintf "@pp_syntax_name: expected name, got %s"
            (id_of_case_v value))
+
+and pp_syntax_dir fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "direction", [ [ "IN" ] ], [] -> F.fprintf fmt "in"
+  | "direction", [ [ "OUT" ] ], [] -> F.fprintf fmt "out"
+  | "direction", [ [ "INOUT" ] ], [] -> F.fprintf fmt "inout"
+  | "direction", [ [ "NONE" ] ], [] -> F.fprintf fmt ""
+  | "direction", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_dir: ill-formed direction:\n%a" pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_dir: expected direction, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_type fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "baseType", [ [ "BOOL" ] ], [] -> F.fprintf fmt "bool"
+  | "baseType", [ [ "MATCH_KIND" ] ], [] -> F.fprintf fmt "match_kind"
+  | "baseType", [ [ "ERROR" ] ], [] -> F.fprintf fmt "error"
+  | "baseType", [ [ "BIT" ] ], [] -> F.fprintf fmt "bit"
+  | "baseType", [ [ "STRING" ] ], [] -> F.fprintf fmt "string"
+  | "baseType", [ [ "INT" ] ], [] -> F.fprintf fmt "int"
+  | "baseType", [ [ "BIT"; "<" ]; [ ">" ] ], [ value_int ] ->
+      F.fprintf fmt "bit<%a>" pp_value value_int
+  | "baseType", [ [ "INT"; "<" ]; [ ">" ] ], [ value_int ] ->
+      F.fprintf fmt "int<%a>" pp_value value_int
+  | "baseType", [ [ "VARBIT"; "<" ]; [ ">" ] ], [ value_int ] ->
+      F.fprintf fmt "varbit<%a>" pp_value value_int
+  | "baseType", [ [ "BIT"; "<"; "(" ]; [ ")"; ">" ] ], [ expr ] ->
+      F.fprintf fmt "bit<(%a)>" pp_syntax_expr expr
+  | "baseType", [ [ "INT"; "<"; "(" ]; [ ")"; ">" ] ], [ expr ] ->
+      F.fprintf fmt "int<(%a)>" pp_syntax_expr expr
+  | "baseType", [ [ "VARBIT"; "<"; "(" ]; [ ")"; ">" ] ], [ expr ] ->
+      F.fprintf fmt "varbit<(%a)>" pp_syntax_expr expr
+  | "baseType", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_type: ill-formed base type:\n%a" pp_case_v value)
+  | "specializedType", [ []; [ "<" ]; [ ">" ] ], [ type_name; type_arg_list ] ->
+      F.fprintf fmt "%a<%a>" pp_syntax_name type_name pp_value type_arg_list
+  | "specializedType", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_type: ill-formed specialized type:\n%a"
+           pp_case_v value)
+  | "headerStackType", [ []; [ "[" ]; [ "]" ] ], [ type_name; expr ] ->
+      F.fprintf fmt "%a[%a]" pp_syntax_name type_name pp_syntax_expr expr
+  | "headerStackType", [ []; [ "[" ]; [ "]"; "PHTM_16" ] ], [ spec_type; expr ]
+    ->
+      F.fprintf fmt "%a[%a]" pp_syntax_type spec_type pp_syntax_expr expr
+  | "headerStackType", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_type: ill-formed header stack type:\n%a"
+           pp_case_v value)
+  | "listType", [ [ "LIST"; "<" ]; [ ">" ] ], [ type_arg ] ->
+      F.fprintf fmt "list<%a>" pp_syntax_type_arg type_arg
+  | "listType", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_type: ill-formed list type:\n%a" pp_case_v value)
+  | "tupleType", [ [ "TUPLE"; "<" ]; [ ">" ] ], [ type_arg_list ] ->
+      F.fprintf fmt "tuple<%a>" pp_value type_arg_list
+  | "tupleType", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_type: ill-formed tuple type:\n%a" pp_case_v
+           value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_type: expected type, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_expr _fmt (value : value) : unit =
+  match flatten_case_v value with
+  | _ -> failwith "@pp_syntax_expr: not yet implemented"
+
+and pp_syntax_type_arg _fmt (value : value) : unit =
+  match flatten_case_v value with
+  | _ -> failwith "@pp_syntax_type_arg: not yet implemented"
+
+and pp_syntax_stmt _fmt (value : value) : unit =
+  match flatten_case_v value with
+  | _ -> failwith "@pp_syntax_stmt: not yet implemented"
 
 and pp_syntax_mthd fmt (value : value) : unit =
   match flatten_case_v value with
@@ -149,7 +233,10 @@ and pp_syntax_decls ~level fmt (value : value) : unit =
 
 and pp_syntax_decl ~level fmt (value : value) : unit =
   match flatten_case_v value with
-  | "constantDeclaration", _, _
+  | ( "constantDeclaration",
+      [ []; [ "CONST" ]; []; []; [ ";" ] ],
+      [ _optAnnotations; _typeRef; _name; _init ] ) ->
+      F.fprintf fmt ""
   | "errorDeclaration", _, _
   | "matchKindDeclaration", _, _
   | ( "externDeclaration",
@@ -194,13 +281,22 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
 
 and pp_case_v' fmt (value : value) : unit =
   match flatten_case_v value with
+  (* Misc *)
+  | "trailingComma", [ [ "," ]; [ "PHTM_0" ] ], [] -> F.fprintf fmt ","
+  | "const", [ [ "CONST" ] ], [] -> F.fprintf fmt "const"
+  (* Numbers *)
   | "number", [ []; [ "PHTM_1" ] ], [ value_int ] ->
       F.fprintf fmt "%a" pp_value value_int
+  | "number", [ []; [ "S" ]; [] ], [ value_width; value_int ] ->
+      F.fprintf fmt "%as%a" pp_value value_width pp_value value_int
+  | "number", [ []; [ "W" ]; [] ], [ value_width; value_int ] ->
+      F.fprintf fmt "%aw%a" pp_value value_width pp_value value_int
+  (* Strings *)
   | "stringLiteral", [ []; [ "PHTM_2" ] ], [ value_text ] ->
       pp_value fmt value_text
+  (* Names *)
+  | "dotPrefix", [ [ "." ] ], [] -> F.fprintf fmt "."
   | "direction", [ [ "NONE" ] ], [] -> F.fprintf fmt ""
-  | "baseType", [ [ "INT"; "<" ]; [ ">" ] ], [ value_int ] ->
-      F.fprintf fmt "%a" pp_value value_int
   | _ -> pp_default_case_v fmt value
 
 and pp_case_v fmt (value : value) : unit =
@@ -211,7 +307,8 @@ and pp_case_v fmt (value : value) : unit =
   | "headerTypeDeclaration" | "headerUnionDeclaration" | "structTypeDeclaration"
   | "enumDeclaration" | "typeDeclaration" ->
       pp_syntax_decl ~level:0 fmt value
-  | "nonTypeName" | "name" -> pp_syntax_name fmt value
+  | "nonTypeName" | "name" | "prefixedNonTypeName" -> pp_syntax_name fmt value
   | "typeIdentifier" -> pp_syntax_tid fmt value
   | "identifier" -> pp_syntax_id fmt value
+  | "direction" -> pp_syntax_dir fmt value
   | _ -> pp_case_v' fmt value
