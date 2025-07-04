@@ -728,7 +728,7 @@ expression:
     { info1 |> ignore;
       [ Term "ERROR"; Term "."; NT name ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
 | expr = expression DOT name = member
-    { [ NT expr; Term "."; NT name ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
+    { [ NT expr; Term "."; NT name; Term "PHTM_5" ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
 | arg1 = expression op = binop arg2 = expression
     { [ NT arg1; Term op; NT arg2 ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
 | cond = expression QUESTION tru = expression COLON fls = expression
@@ -742,7 +742,7 @@ expression:
       [ NT func; Term "("; NT args; Term ")" ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
 | typ = namedType L_PAREN args = argumentList info2 = R_PAREN
     { info2 |> ignore;
-      [ NT typ; Term "("; NT args; Term ")" ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
+      [ NT typ; Term "("; NT args; Term ")"; Term "PHTM_6" ] |> wrap_case_v |> with_typ (wrap_var_t "expression") }
 ;
 
 %inline expressionList:
