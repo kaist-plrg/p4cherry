@@ -48,7 +48,8 @@ let id_of_case_v (v : value) : string =
 
 let id_of_list_v (v : value) : string =
   match (v.it, v.note.typ) with
-  | ListV _, VarT (id, _) -> id.it
+  | ListV _, IterT ({ it = VarT (id, _); _ }, _) -> id.it
+  | ListV _, IterT (_, _) -> failwith "ill-typed list value"
   | _ -> failwith "not a list value"
 
 type syntax' = string list list * value' list

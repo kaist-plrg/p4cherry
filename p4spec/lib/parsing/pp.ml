@@ -395,16 +395,69 @@ and pp_syntax_keyset_expr fmt (value : value) : unit =
         (F.asprintf
            "@pp_syntax_keyset_expr: ill-formed tuple keyset expression:\n%a"
            pp_case_v value)
-  | _ -> failwith "@pp_syntax_keyset_expr: not yet implemented"
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_keyset_expr: expected keyset expression, got %s"
+           (id_of_case_v value))
 
-and pp_syntax_type_arg _fmt (value : value) : unit =
+and pp_syntax_targ fmt (value : value) : unit =
   match flatten_case_v value with
-  | _ -> failwith "@pp_syntax_type_arg: not yet implemented"
+  | "realTypeArg", [ [ "VOID" ] ], [] -> F.fprintf fmt "void"
+  | "realTypeArg", [ [ "_" ] ], [] -> F.fprintf fmt "_"
+  | "realTypeArg", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_targ: ill-formed real type argument:\n%a"
+           pp_case_v value)
+  | "typeArg", [ [ "VOID" ] ], [] -> F.fprintf fmt "void"
+  | "typeArg", [ [ "_" ] ], [] -> F.fprintf fmt "_"
+  | "typeArg", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_targ: ill-formed type argument:\n%a" pp_case_v
+           value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_targ: expected type argument, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_arg fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "argument", [ []; [ "=" ]; [] ], [ name; expr ] ->
+      F.fprintf fmt "%a = (%a)" pp_case_v name pp_case_v expr
+  | "argument", [ [ "_" ] ], [] -> F.fprintf fmt "_"
+  | "argument", [ []; [ "="; "_" ] ], [ name ] ->
+      F.fprintf fmt "%a = _" pp_case_v name
+  | "argument", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_arg: ill-formed argument:\n%a" pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_arg: expected argument, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_lvalue fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "lvalue", [ [ "THIS" ] ], [] -> F.fprintf fmt "this"
+  | "lvalue", [ []; [ "." ]; [] ], [ expr; name ] ->
+      F.fprintf fmt "%a.%a" pp_case_v expr pp_case_v name
+  | "lvalue", [ []; [ "[" ]; [ "]" ] ], [ array; index ] ->
+      F.fprintf fmt "%a[%a]" pp_case_v array pp_case_v index
+  | "lvalue", [ []; [ "[" ]; [ ":" ]; [ "]" ] ], [ bits; hi; lo ] ->
+      F.fprintf fmt "%a[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
+  | "lvalue", [ [ "(" ]; [ ")" ] ], [ lvalue ] ->
+      F.fprintf fmt "(%a)" pp_case_v lvalue
+  | "lvalue", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_lvalue: ill-formed l-value:\n%a" pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_lvalue: expected l-value, got %s"
+           (id_of_case_v value))
 
 and pp_syntax_init fmt (value : value) : unit =
   match flatten_case_v value with
   | "initializer", [ [ "=" ]; [] ], [ expr ] ->
-      F.fprintf fmt " = %a" pp_syntax_expr expr
+      F.fprintf fmt " = (%a)" pp_syntax_expr expr
   | "initializer", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_init: ill-formed initializer:\n%a" pp_case_v
@@ -548,4 +601,7 @@ and pp_case_v fmt (value : value) : unit =
   | "simpleKeysetExpression" | "reducedSimpleKeysetExpression"
   | "tupleKeysetExpression" ->
       pp_syntax_keyset_expr fmt value
+  | "realTypeArg" | "typeArg" -> pp_syntax_targ fmt value
+  | "argument" -> pp_syntax_arg fmt value
+  | "lvalue" -> pp_syntax_lvalue fmt value
   | _ -> pp_case_v' fmt value
