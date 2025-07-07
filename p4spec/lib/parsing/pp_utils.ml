@@ -2,11 +2,12 @@ module F = Format
 
 (* Separator *)
 
-type sep = Nl | Comma | CommaNl | Semicolon | SemicolonNl
+type sep = SpaceSep | Nl | Comma | CommaNl | Semicolon | SemicolonNl
 
 let is_nl = function Nl | CommaNl | SemicolonNl -> true | _ -> false
 
 let pp_sep fmt = function
+  | SpaceSep -> F.fprintf fmt " "
   | Nl -> F.fprintf fmt "\n"
   | Comma -> F.fprintf fmt ", "
   | CommaNl -> F.fprintf fmt ",\n"
