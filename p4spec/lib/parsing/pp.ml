@@ -72,17 +72,31 @@ and pp_opt_v ?(postfix = "") fmt (value : value) : unit =
   | OptV None -> F.fprintf fmt ""
   | _ -> failwith "@pp_opt_v: expected OptV value"
 
-and pp_list_v ?(sep = Comma) fmt (value : value) : unit =
-  match (id_of_list_v value, value.it) with
-  | "declaration", ListV [] -> F.fprintf fmt ";"
-  | "declaration", ListV _ -> pp_syntax_decls ~level:0 fmt value
-  | _, ListV [] -> ()
-  | _, ListV values ->
-      values
-      |> List.map (F.asprintf "%a" pp_value)
-      |> String.concat (F.asprintf "%a" pp_sep sep)
-      |> F.fprintf fmt "%s"
-  | _ -> failwith "@pp_list_v: expected ListV value"
+and pp_list_v ?(level = 0) fmt (value : value) : unit =
+  let values =
+    match value.it with
+    | ListV values -> values
+    | _ ->
+        failwith
+          (F.asprintf "@pp_list_v: expected ListV, got %a" pp_value value)
+  in
+  match id_of_list_v value with
+  | "identifier" | "typeParameterList" | "parameter" | "expression" | "kvPair"
+  | "simpleKeysetExpression" | "realTypeArg" | "typeArg" | "argument" ->
+      pp_list pp_case_v ~sep:Comma fmt values
+  | "switchCase" -> pp_list ~level (pp_syntax_stmt' ~level) ~sep:Nl fmt values
+  | "declOrAssignmentOrMethodCallStatement" ->
+      pp_list pp_syntax_decl_or_assign_or_call_stmt ~sep:Comma fmt values
+  | "assignmentOrMethodCallStatement" ->
+      pp_list (pp_syntax_stmt' ~level:0) ~sep:Comma fmt values
+  | "statementOrDeclaration" ->
+      pp_list ~level (pp_syntax_stat_or_decl ~level) ~sep:Nl fmt values
+  | "declaration" when List.compare_length_with values 0 = 0 ->
+      F.fprintf fmt ";"
+  | "declaration" -> pp_list ~level (pp_syntax_decl ~level) ~sep:Nl fmt values
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_list_v: unknown ListV: %s" (id_of_list_v value))
 
 and pp_syntax_id fmt (value : value) : unit =
   match flatten_case_v value with
@@ -166,7 +180,7 @@ and pp_syntax_type fmt (value : value) : unit =
       failwith
         (F.asprintf "@pp_syntax_type: ill-formed base type:\n%a" pp_case_v value)
   | "specializedType", [ []; [ "<" ]; [ ">" ] ], [ type_name; type_arg_list ] ->
-      F.fprintf fmt "%a<%a>" pp_case_v type_name (pp_list_v ~sep:Comma)
+      F.fprintf fmt "%a<%a>" pp_case_v type_name (pp_list_v ~level:0)
         type_arg_list
   | "specializedType", _, _ ->
       failwith
@@ -187,7 +201,7 @@ and pp_syntax_type fmt (value : value) : unit =
       failwith
         (F.asprintf "@pp_syntax_type: ill-formed list type:\n%a" pp_case_v value)
   | "tupleType", [ [ "TUPLE"; "<" ]; [ ">" ] ], [ type_arg_list ] ->
-      F.fprintf fmt "tuple<%a>" (pp_list_v ~sep:Comma) type_arg_list
+      F.fprintf fmt "tuple<%a>" (pp_list_v ~level:0) type_arg_list
   | "tupleType", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_type: ill-formed tuple type:\n%a" pp_case_v
@@ -200,7 +214,7 @@ and pp_syntax_type fmt (value : value) : unit =
 and pp_syntax_tparams fmt (value : value) : unit =
   match flatten_case_v value with
   | "typeParameters", [ [ "<" ]; [ ">" ] ], [ tparams ] ->
-      F.fprintf fmt "<%a>" (pp_list_v ~sep:Comma) tparams
+      F.fprintf fmt "<%a>" (pp_list_v ~level:0) tparams
   | "typeParameters", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_tparams: ill-formed type parameters:\n%a"
@@ -212,22 +226,20 @@ and pp_syntax_tparams fmt (value : value) : unit =
 
 and pp_syntax_params fmt (value : value) : unit =
   match flatten_case_v value with
-  | ( "parameter",
-      [ []; []; []; []; [] ],
-      [ opt_annotations; dir; type_ref; name ] ) ->
-      F.fprintf fmt "%a%a %a %a" (pp_opt_v ~postfix:" ") opt_annotations
-        pp_case_v dir pp_case_v type_ref pp_case_v name
+  | "parameter", [ []; []; []; []; [] ], [ opt_annos; dir; type_ref; name ] ->
+      F.fprintf fmt "%a%a %a %a" (pp_opt_v ~postfix:" ") opt_annos pp_case_v dir
+        pp_case_v type_ref pp_case_v name
   | ( "parameter",
       [ []; []; []; []; []; [] ],
-      [ opt_annotations; dir; type_ref; name; init ] ) ->
-      F.fprintf fmt "%a%a %a %a%a" (pp_opt_v ~postfix:" ") opt_annotations
-        pp_case_v dir pp_case_v type_ref pp_case_v name pp_case_v init
+      [ opt_annos; dir; type_ref; name; init ] ) ->
+      F.fprintf fmt "%a%a %a %a%a" (pp_opt_v ~postfix:" ") opt_annos pp_case_v
+        dir pp_case_v type_ref pp_case_v name pp_case_v init
   | "parameter", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_params: ill-formed parameter:\n%a" pp_case_v
            value)
   | "constructorParameters", [ [ "(" ]; [ ")" ] ], [ params ] ->
-      F.fprintf fmt "(%a)" (pp_list_v ~sep:Comma) params
+      F.fprintf fmt "(%a)" (pp_list_v ~level:0) params
   | _ ->
       failwith
         (Printf.sprintf "@pp_syntax_params: expected parameter, got %s"
@@ -273,12 +285,12 @@ and pp_syntax_nb_expr fmt (value : value) : unit =
   | ( "nonBraceExpression",
       [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
       [ func; type_args; args ] ) ->
-      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func (pp_list_v ~sep:Comma)
-        type_args (pp_list_v ~sep:Comma) args
+      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func (pp_list_v ~level:0) type_args
+        (pp_list_v ~level:0) args
   | "nonBraceExpression", [ []; [ "(" ]; [ ")" ] ], [ func; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v func (pp_list_v ~sep:Comma) args
+      F.fprintf fmt "(%a)(%a)" pp_case_v func (pp_list_v ~level:0) args
   | "nonBraceExpression", [ []; [ "(" ]; [ ")"; "PHTM_6" ] ], [ typ; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v typ (pp_list_v ~sep:Comma) args
+      F.fprintf fmt "(%a)(%a)" pp_case_v typ (pp_list_v ~level:0) args
   | "nonBraceExpression", [ [ "(" ]; [ ")" ]; [] ], [ typ; expr ] ->
       F.fprintf fmt "(%a)(%a)" pp_case_v typ pp_case_v expr
   | "nonBraceExpression", _, _ ->
@@ -310,14 +322,14 @@ and pp_syntax_expr fmt (value : value) : unit =
   | "expression", [ []; [ "[" ]; [ ":" ]; [ "]" ] ], [ bits; hi; lo ] ->
       F.fprintf fmt "(%a)[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
   | "expression", [ [ "{" ]; []; [ "}" ] ], [ exprs; comma ] ->
-      F.fprintf fmt "{ %a%a }" (pp_list_v ~sep:Comma) exprs
-        (pp_opt_v ~postfix:"") comma
+      F.fprintf fmt "{ %a%a }" (pp_list_v ~level:0) exprs (pp_opt_v ~postfix:"")
+        comma
   | "expression", [ [ "INVALID" ] ], [] -> F.fprintf fmt "{#}"
   | "expression", [ [ "{" ]; []; [ "}"; "PHTM_7" ] ], [ kvs; comma ] ->
-      F.fprintf fmt "{ %a%a }" (pp_list_v ~sep:Comma) kvs (pp_opt_v ~postfix:"")
+      F.fprintf fmt "{ %a%a }" (pp_list_v ~level:0) kvs (pp_opt_v ~postfix:"")
         comma
   | "expression", [ [ "{" ]; [ ","; "..." ]; [ "}" ] ], [ kvs; comma ] ->
-      F.fprintf fmt "{ %a, ...%a }" (pp_list_v ~sep:Comma) kvs
+      F.fprintf fmt "{ %a, ...%a }" (pp_list_v ~level:0) kvs
         (pp_opt_v ~postfix:"") comma
   | "expression", [ [ "!" ]; [] ], [ arg ] ->
       F.fprintf fmt "!(%a)" pp_case_v arg
@@ -345,12 +357,12 @@ and pp_syntax_expr fmt (value : value) : unit =
   | ( "expression",
       [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
       [ func; type_args; args ] ) ->
-      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func (pp_list_v ~sep:Comma)
-        type_args (pp_list_v ~sep:Comma) args
+      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func (pp_list_v ~level:0) type_args
+        (pp_list_v ~level:0) args
   | "expression", [ []; [ "(" ]; [ ")" ] ], [ func; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v func (pp_list_v ~sep:Comma) args
+      F.fprintf fmt "(%a)(%a)" pp_case_v func (pp_list_v ~level:0) args
   | "expression", [ []; [ "(" ]; [ ")"; "PHTM_6" ] ], [ typ; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v typ (pp_list_v ~sep:Comma) args
+      F.fprintf fmt "(%a)(%a)" pp_case_v typ (pp_list_v ~level:0) args
   | "expression", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_expr: ill-formed expression:\n%a" pp_case_v
@@ -387,7 +399,7 @@ and pp_syntax_keyset_expr fmt (value : value) : unit =
             %a"
            pp_case_v value)
   | "tupleKeysetExpression", [ [ "(" ]; [ "," ]; [ ")" ] ], [ expr; exprs ] ->
-      F.fprintf fmt "(%a, %a)" pp_case_v expr (pp_list_v ~sep:Comma) exprs
+      F.fprintf fmt "(%a, %a)" pp_case_v expr (pp_list_v ~level:0) exprs
   | "tupleKeysetExpression", [ [ "(" ]; [ ")"; "PHTM_19" ] ], [ expr ] ->
       F.fprintf fmt "(%a)" pp_case_v expr
   | "tupleKeysetExpression", _, _ ->
@@ -467,9 +479,82 @@ and pp_syntax_init fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_init: expected initializer, got %s"
            (id_of_case_v value))
 
-and pp_syntax_stmt _fmt (value : value) : unit =
+and pp_syntax_stmt' ~level fmt (value : value) : unit =
+  let is_assign_op = function
+    | "=" | "+=" | "|+|=" | "-=" | "|-|=" | "*=" | "/=" | "%=" | "<<=" | ">>="
+    | "&=" | "^=" | "|=" ->
+        true
+    | _ -> false
+  in
   match flatten_case_v value with
-  | _ -> failwith "@pp_syntax_stmt: not yet implemented"
+  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
+      [ []; [ "(" ]; [ ")" ] ],
+      [ func; args ] ) ->
+      F.fprintf fmt "%a(%a)" pp_case_v func (pp_list_v ~level) args
+  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
+      [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
+      [ func; targs; args ] ) ->
+      F.fprintf fmt "%a<%a>(%a)" pp_case_v func (pp_list_v ~level) targs
+        (pp_list_v ~level) args
+  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
+      [ []; [ assign_op ]; [] ],
+      [ lhs; rhs ] )
+    when is_assign_op assign_op ->
+      F.fprintf fmt "%a %s (%a)" pp_case_v lhs assign_op pp_case_v rhs
+  | "assignmentOrMethodCallStatementWithoutSemicolon", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_stmt': ill-formed statement helper:\n%a"
+           pp_case_v value)
+  | "switchLabel", [ [ "DEFAULT" ] ], [] -> F.fprintf fmt "default"
+  | "switchCase", [ []; [ ":" ]; [] ], [ label; code ] ->
+      F.fprintf fmt "%a: %a" pp_case_v label (pp_syntax_stmt ~level) code
+  | "switchCase", [ []; [ ":" ] ], [ label ] ->
+      F.fprintf fmt "%a:" pp_case_v label
+  | "forCollectionExpr", [ []; [ ".." ]; [] ], [ expr_l; expr_r ] ->
+      F.fprintf fmt "(%a)..(%a)" pp_case_v expr_l pp_case_v expr_r
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_stmt': expected statement helper, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_stmt ~level fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "assignmentOrMethodCallStatement", [ []; [ ";" ] ], [ stmt' ] ->
+      F.fprintf fmt "%a;" pp_case_v stmt'
+  | ( "directApplication",
+      [ []; [ "."; "APPLY"; "(" ]; [ ")"; ";" ] ],
+      [ named_type; args ] ) ->
+      F.fprintf fmt "%a.apply(%a);" pp_case_v named_type (pp_list_v ~level) args
+  | "conditionalStatement", [ [ "IF"; "(" ]; [ ")" ]; [] ], [ cond; tru ] ->
+      F.fprintf fmt "if (%a) %a" pp_case_v cond (pp_syntax_stmt ~level) tru
+  | "emptyStatement", [ [ ";" ] ], [] -> F.fprintf fmt ";"
+  | "blockStatement", [ []; [ "{" ]; [ "}" ] ], [ annos; stmts ] ->
+      F.fprintf fmt "%a{\n%a\n%s}" (pp_opt_v ~postfix:" ") annos
+        (pp_list_v ~level:(level + 1))
+        stmts (indent level)
+  | "returnStatement", [ [ "RETURN"; ";" ] ], [] -> F.fprintf fmt "return;"
+  | "returnStatement", [ [ "RETURN" ]; [ ";" ] ], [ expr ] ->
+      F.fprintf fmt "return %a;" pp_case_v expr
+  | "breakStatement", [ [ "BREAK"; ";" ] ], [] -> F.fprintf fmt "break;"
+  | "continueStatement", [ [ "CONTINUE"; ";" ] ], [] ->
+      F.fprintf fmt "continue;"
+  | "exitStatement", [ [ "EXIT"; ";" ] ], [] -> F.fprintf fmt "exit;"
+  | ( "switchStatement",
+      [ [ "SWITCH"; "(" ]; [ ")"; "{" ]; [ "}" ] ],
+      [ expr; cases ] ) ->
+      F.fprintf fmt "switch (%a) {\n%a\n%s}" pp_case_v expr (pp_list_v ~level)
+        cases (indent level)
+  | ( "forStatement",
+      [ []; [ "FOR"; "(" ]; [ ";" ]; [ ";" ]; [ ")" ]; [] ],
+      [ anno; init; cond; update; body ] ) ->
+      F.fprintf fmt "%afor (%a; %a; %a) %a"
+        (pp_opt_v ~postfix:(F.sprintf "\n%s" (indent level)))
+        anno (pp_list_v ~level:0) init pp_case_v cond (pp_list_v ~level:0)
+        update (pp_syntax_stmt ~level) body
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_stmt: expected statement, got %s"
+           (id_of_case_v value))
 
 and pp_syntax_mthd fmt (value : value) : unit =
   match flatten_case_v value with
@@ -499,19 +584,44 @@ and pp_syntax_block fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_block: expected block, got %s"
            (id_of_case_v value))
 
-and pp_syntax_decls ~level fmt (value : value) : unit =
-  match value.it with
-  | ListV values -> pp_list ~level (pp_syntax_decl ~level) ~sep:Nl fmt values
+and pp_syntax_stat_or_decl ~level fmt (value : value) : unit =
+  match id_of_case_v value with
+  | "variableDeclaration" | "constantDeclaration" ->
+      pp_syntax_decl ~level fmt value
+  | "assignmentOrMethodCallStatement" | "directApplication"
+  | "conditionalStatement" | "emptyStatement" | "blockStatement"
+  | "returnStatement" | "breakStatement" | "continueStatement" | "exitStatement"
+  | "switchStatement" | "forStatement" ->
+      pp_syntax_stmt ~level fmt value
   | _ ->
       failwith
-        (F.asprintf "@pp_syntax_decls: expected ListV, got %a" pp_value value)
+        (Printf.sprintf
+           "@pp_syntax_stat_or_decl: expected variable declaration, constant \
+            declaration, or statement, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_decl_or_assign_or_call_stmt fmt (value : value) : unit =
+  match id_of_case_v value with
+  | "variableDeclarationWithoutSemicolon" -> pp_case_v fmt value
+  | "assignmentOrMethodCallStatementWithoutSemicolon" ->
+      pp_syntax_stmt' ~level:0 fmt value
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_decl_or_assign_or_call_stmt: expected variable \
+            declaration, assignment statement, or method call statement, got \
+            %s"
+           (id_of_case_v value))
 
 and pp_syntax_decl ~level fmt (value : value) : unit =
   match flatten_case_v value with
   | ( "constantDeclaration",
       [ []; [ "CONST" ]; []; []; [ ";" ] ],
-      [ _optAnnotations; _typeRef; _name; _init ] ) ->
-      F.fprintf fmt ""
+      [ opt_annos; type_ref; name; opt_init ] ) ->
+      F.fprintf fmt "%aconst %a %a%a;" (pp_opt_v ~postfix:" ") opt_annos
+        pp_case_v type_ref pp_case_v name (pp_opt_v ~postfix:"") opt_init
+  | "variableDeclaration", [ []; [ ";" ] ], [ decl ] ->
+      F.fprintf fmt "%a;" pp_case_v decl
   | "errorDeclaration", _, _
   | "matchKindDeclaration", _, _
   | ( "externDeclaration",
@@ -529,7 +639,7 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
     ->
       F.fprintf fmt "%a%a {\n%a\n%sapply %a\n%s}" pp_default_case_v
         control_type_decl pp_value opt_constructor_params
-        (pp_syntax_decls ~level:(level + 1))
+        (pp_list_v ~level:(level + 1))
         control_local_decls
         (indent (level + 1))
         pp_syntax_block body (indent level)
@@ -576,15 +686,21 @@ and pp_case_v' fmt (value : value) : unit =
   (* Key value pair *)
   | "kvPair", [ []; [ "=" ]; [] ], [ key; value ] ->
       F.fprintf fmt "(%a) = (%a)" pp_case_v key pp_case_v value
+  (* Declarations *)
+  | ( "variableDeclarationWithoutSemicolon",
+      [ []; []; []; []; [] ],
+      [ opt_anno; type_ref; name; opt_init ] ) ->
+      F.fprintf fmt "%a%a %a%a" (pp_opt_v ~postfix:" ") opt_anno pp_case_v
+        type_ref pp_case_v name (pp_opt_v ~postfix:"") opt_init
   | _ -> pp_default_case_v fmt value
 
 and pp_case_v fmt (value : value) : unit =
   match id_of_case_v value with
-  | "constantDeclaration" | "errorDeclaration" | "matchKindDeclaration"
-  | "externDeclaration" | "instantiation" | "functionDeclaration"
-  | "actionDeclaration" | "parserDeclaration" | "controlDeclaration"
-  | "headerTypeDeclaration" | "headerUnionDeclaration" | "structTypeDeclaration"
-  | "enumDeclaration" | "typeDeclaration" ->
+  | "constantDeclaration" | "variableDeclaration" | "errorDeclaration"
+  | "matchKindDeclaration" | "externDeclaration" | "instantiation"
+  | "functionDeclaration" | "actionDeclaration" | "parserDeclaration"
+  | "controlDeclaration" | "headerTypeDeclaration" | "headerUnionDeclaration"
+  | "structTypeDeclaration" | "enumDeclaration" | "typeDeclaration" ->
       pp_syntax_decl ~level:0 fmt value
   | "nonTypeName" | "name" | "prefixedNonTypeName" | "prefixedType" ->
       pp_syntax_name fmt value
@@ -604,4 +720,12 @@ and pp_case_v fmt (value : value) : unit =
   | "realTypeArg" | "typeArg" -> pp_syntax_targ fmt value
   | "argument" -> pp_syntax_arg fmt value
   | "lvalue" -> pp_syntax_lvalue fmt value
+  | "assignmentOrMethodCallStatementWithoutSemicolon" | "switchLabel"
+  | "switchCase" | "forCollectionExpr" ->
+      pp_syntax_stmt' ~level:0 fmt value
+  | "assignmentOrMethodCallStatement" | "directApplication"
+  | "conditionalStatement" | "emptyStatement" | "blockStatement"
+  | "returnStatement" | "breakStatement" | "continueStatement" | "exitStatement"
+  | "switchStatement" | "forStatement" ->
+      pp_syntax_stmt ~level:0 fmt value
   | _ -> pp_case_v' fmt value
