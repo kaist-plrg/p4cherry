@@ -91,6 +91,8 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
       pp_list (pp_syntax_stmt' ~level:0) ~sep fmt values
   | "statementOrDeclaration" ->
       pp_list ~level (pp_syntax_stat_or_decl ~level) ~sep fmt values
+  | "methodPrototype" -> pp_list ~level (pp_syntax_mthd ~level) ~sep fmt values
+  | "objDeclaration" -> pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
   | "declaration" when List.compare_length_with values 0 = 0 ->
       F.fprintf fmt ";"
   | "declaration" -> pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
@@ -616,12 +618,24 @@ and pp_syntax_func fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_func: expected function prototype, got %s"
            (id_of_case_v value))
 
-and pp_syntax_mthd fmt (value : value) : unit =
+and pp_syntax_mthd ~level fmt (value : value) : unit =
   match flatten_case_v value with
-  | "methodPrototype", [ []; []; [ ";" ] ], [ _anno; _func ]
-  | "methodPrototype", [ []; [ "ABSTRACT" ]; [ ";" ] ], [ _anno; _func ]
-  | "methodPrototype", [ []; []; [ "(" ]; [ ")"; ";" ] ], [ _anno; _; _func ] ->
-      pp_default_case_v fmt value
+  | "methodPrototype", [ []; []; [ ";" ] ], [ opt_annos; func ] ->
+      F.fprintf fmt "%a%a;"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v func
+  | "methodPrototype", [ []; [ "ABSTRACT" ]; [ ";" ] ], [ opt_annos; func ] ->
+      F.fprintf fmt "%aabstract %a;"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v func
+  | ( "methodPrototype",
+      [ []; []; [ "(" ]; [ ")"; ";" ] ],
+      [ opt_annos; tid; params ] ) ->
+      F.fprintf fmt "%a%a(%a);"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v tid
+        (pp_list_v ~level:0 ~sep:Comma)
+        params
   | "methodPrototype", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_method: ill-formed methodPrototype:\n%a"
@@ -660,6 +674,21 @@ and pp_syntax_decl_or_assign_or_call_stmt fmt (value : value) : unit =
             %s"
            (id_of_case_v value))
 
+and pp_syntax_obj_init ~level fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "objInitializer", [ [ "="; "{" ]; [ "}" ] ], [ decls ] ->
+      F.fprintf fmt " = {\n%a\n%s}" (pp_list_v ~level ~sep:Nl) decls
+        (indent level)
+  | "objInitializer", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_obj_init: ill-formed object initializer:\n%a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_obj_init: expected object initializer, got %s"
+           (id_of_case_v value))
+
 and pp_syntax_decl ~level fmt (value : value) : unit =
   match flatten_case_v value with
   | ( "constantDeclaration",
@@ -686,13 +715,48 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
         comma (indent level)
   | ( "externDeclaration",
       [ []; [ "EXTERN" ]; []; [ "{" ]; [ "}" ] ],
-      [ _; _; _; _ ] )
-  | "externDeclaration", _, _
-  | "instantiation", _, _
-  | "functionDeclaration", [ []; []; []; [] ], [ _; _; _ ]
-  | "actionDeclaration", _, _
-  | "parserDeclaration", _, _ ->
-      pp_default_case_v fmt value
+      [ opt_annos; name; opt_tparams; mthds ] ) ->
+      F.fprintf fmt "%aextern %a%a {%a}"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v name
+        (pp_opt_v ~postfix:"" pp_case_v)
+        opt_tparams (pp_list_v ~level ~sep:Nl) mthds
+  | "externDeclaration", [ []; [ "EXTERN" ]; [ ";" ] ], [ opt_annos; func ] ->
+      F.fprintf fmt "%aextern %a;"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v func
+  | "functionDeclaration", [ []; []; []; [] ], [ opt_annos; func; body ] ->
+      F.fprintf fmt "%a%a %a"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v func (pp_syntax_stmt ~level) body
+  | ( "instantiation",
+      [ []; []; [ "(" ]; [ ")" ]; [ ";" ] ],
+      [ opt_annos; type_ref; args; name ] ) ->
+      F.fprintf fmt "%a%a(%a) %a;"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v type_ref
+        (pp_list_v ~level:0 ~sep:Comma)
+        args pp_case_v name
+  | ( "instantiation",
+      [ []; []; [ "(" ]; [ ")" ]; []; [ ";" ] ],
+      [ opt_annos; type_ref; args; name; init ] ) ->
+      F.fprintf fmt "%a%a(%a) %a%a"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v type_ref
+        (pp_list_v ~level:0 ~sep:Comma)
+        args pp_case_v name
+        (pp_syntax_obj_init ~level)
+        init
+  | ( "actionDeclaration",
+      [ []; [ "ACTION" ]; [ "(" ]; [ ")" ]; [] ],
+      [ opt_annos; name; params; body ] ) ->
+      F.fprintf fmt "%aaction %a(%a) %a"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v name
+        (pp_list_v ~level:0 ~sep:Comma)
+        params (pp_syntax_stmt ~level) body
+  | "tableDeclaration", _, _ -> pp_default_case_v fmt value
+  | "parserDeclaration", _, _ -> pp_default_case_v fmt value
   | ( "controlDeclaration",
       [ []; []; [ "{" ]; [ "APPLY" ]; [ "}" ] ],
       [ control_type_decl; opt_constructor_params; control_local_decls; body ] )
@@ -718,8 +782,6 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
   | "typeDeclaration", [ []; [ ";"; "PHTM_13" ] ], [ _ ]
   | "typeDeclaration", [ []; [ ";"; "PHTM_14" ] ], [ _ ]
   | "typeDeclaration", [ []; [ ";"; "PHTM_15" ] ], [ _ ]
-  | "tableDeclaration", _, _ ->
-      pp_default_case_v fmt value
   | _ ->
       failwith
         (Printf.sprintf "@pp_syntax_decl: expected declaration, got %s"
@@ -788,6 +850,7 @@ and pp_case_v fmt (value : value) : unit =
   | "realTypeArg" | "typeArg" -> pp_syntax_targ fmt value
   | "argument" -> pp_syntax_arg fmt value
   | "lvalue" -> pp_syntax_lvalue fmt value
+  | "initializer" -> pp_syntax_init fmt value
   | "assignmentOrMethodCallStatementWithoutSemicolon" | "switchLabel"
   | "switchCase" | "forCollectionExpr" ->
       pp_syntax_stmt' ~level:0 fmt value
@@ -797,4 +860,5 @@ and pp_case_v fmt (value : value) : unit =
   | "switchStatement" | "forStatement" ->
       pp_syntax_stmt ~level:0 fmt value
   | "functionPrototype" -> pp_syntax_func fmt value
+  | "methodPrototype" -> pp_syntax_mthd ~level:0 fmt value
   | _ -> pp_case_v' fmt value
