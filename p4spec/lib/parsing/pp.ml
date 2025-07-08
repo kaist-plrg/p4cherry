@@ -94,10 +94,14 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
   | "statementOrDeclaration" ->
       pp_list ~level (pp_syntax_stat_or_decl ~level) ~sep fmt values
   | "methodPrototype" -> pp_list ~level (pp_syntax_mthd ~level) ~sep fmt values
-  | "objDeclaration" | "controlLocalDeclaration" ->
+  | "objDeclaration" | "controlLocalDeclaration" | "parserLocalElement" ->
       pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
   | "tableProperty" ->
       pp_list ~level (pp_syntax_table_prop ~level) ~sep fmt values
+  | "parserStatement" ->
+      pp_list ~level (pp_syntax_parser_stmt ~level) ~sep fmt values
+  | "parserState" ->
+      pp_list ~level (pp_syntax_parser_state ~level) ~sep fmt values
   | "declaration" when List.compare_length_with values 0 = 0 ->
       F.fprintf fmt ";"
   | "declaration" -> pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
@@ -889,6 +893,102 @@ and pp_syntax_trans_stmt fmt (value : value) : unit =
            "@pp_syntax_trans_stmt: expected transition statement, got %s"
            (id_of_case_v value))
 
+and pp_syntax_parser_stmt ~level fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "assignmentOrMethodCallStatement", _, _
+  | "directApplication", _, _
+  | "emptyStatement", _, _
+  | "conditionalStatement", _, _ ->
+      pp_syntax_stmt ~level fmt value
+  | "variableDeclaration", _, _ | "constantDeclaration", _, _ ->
+      pp_syntax_decl ~level fmt value
+  | "parserBlockStatement", [ []; [ "{" ]; [ "}" ] ], [ opt_annos; stmts ] ->
+      F.fprintf fmt "%a{\n%a\n%s}"
+        (pp_opt_annos ~level ~sep:SpaceSep)
+        opt_annos
+        (pp_list_v ~level:(level + 1) ~sep:Nl)
+        stmts (indent level)
+  | "parserBlockStatement", _, _ ->
+      failwith
+        (F.asprintf
+           "@pp_syntax_parser_stmt: ill-formed parser block statement:\n%a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_parser_stmt: expected parser statement, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_parser_state ~level fmt (value : value) : unit =
+  match flatten_case_v value with
+  | ( "parserState",
+      [ []; [ "STATE" ]; [ "{" ]; []; [ "}" ] ],
+      [ opt_annos; name; stmts; trans ] ) ->
+      F.fprintf fmt "%astate %a {\n%a\n%s%a\n%s}"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v name
+        (pp_list_v ~level:(level + 1) ~sep:Nl)
+        stmts
+        (indent (level + 1))
+        pp_case_v trans (indent level)
+  | "parserState", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_parser_state: ill-formed parser state:\n%a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_parser_state: expected parser state, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_parser_type_decl ~level fmt (value : value) : unit =
+  match flatten_case_v value with
+  | ( "parserTypeDeclaration",
+      [ []; [ "PARSER" ]; []; [ "(" ]; [ ")" ] ],
+      [ opt_annos; name; opt_tparams; params ] ) ->
+      F.fprintf fmt "%aparser %a%a(%a)"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v name
+        (pp_opt_v ~postfix:"" pp_case_v)
+        opt_tparams
+        (pp_list_v ~level:0 ~sep:Comma)
+        params
+  | "parserTypeDeclaration", _, _ ->
+      failwith
+        (F.asprintf
+           "@pp_syntax_parser_type_decl: ill-formed parser type declaration:\n\
+            %a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_parser_type_decl: expected parser type declaration, got \
+            %s"
+           (id_of_case_v value))
+
+and pp_syntax_pckg_type_decl ~level fmt (value : value) : unit =
+  match flatten_case_v value with
+  | ( "packageTypeDeclaration",
+      [ []; [ "PACKAGE" ]; []; [ "(" ]; [ ")" ] ],
+      [ opt_annos; name; opt_tparams; params ] ) ->
+      F.fprintf fmt "%apackage %a%a(%a)"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v name
+        (pp_opt_v ~postfix:"" pp_case_v)
+        opt_tparams
+        (pp_list_v ~level:0 ~sep:Comma)
+        params
+  | "packageTypeDeclaration", _, _ ->
+      failwith
+        (F.asprintf
+           "@pp_syntax_pckg_type_decl: ill-formed package type declaration:\n%a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_pckg_type_decl: expected package type declaration, got \
+            %s"
+           (id_of_case_v value))
+
 and pp_syntax_decl ~level fmt (value : value) : unit =
   match flatten_case_v value with
   | ( "constantDeclaration",
@@ -994,7 +1094,20 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
       F.fprintf fmt "%avalueset<%a>(%a) %a"
         (pp_opt_annos ~level ~sep:Nl)
         opt_annos pp_case_v type_name pp_case_v size pp_case_v name
-  | "parserDeclaration", _, _ -> pp_default_case_v fmt value
+  | ( "parserDeclaration",
+      [ []; []; [ "{" ]; []; [ "}" ] ],
+      [ decl; params; locals; states ] ) ->
+      F.fprintf fmt "%a%a {\n%s%a\n%s%a\n%s}"
+        (pp_syntax_parser_type_decl ~level)
+        decl
+        (pp_opt_v ~postfix:"" pp_case_v)
+        params
+        (indent (level + 1))
+        (pp_list_v ~level:(level + 1) ~sep:Nl)
+        locals
+        (indent (level + 1))
+        (pp_list_v ~level:(level + 1) ~sep:Nl)
+        states (indent level)
   | ( "headerTypeDeclaration",
       [ []; [ "HEADER" ]; []; [ "{" ]; [ "}" ] ],
       [ _; _; _; _ ] )
@@ -1102,4 +1215,9 @@ and pp_case_v fmt (value : value) : unit =
   | "controlTypeDeclaration" -> pp_syntax_ctrl_typ_decl ~level:0 fmt value
   | "selectCase" -> pp_syntax_select_case fmt value
   | "selectExpression" -> pp_syntax_select_expr ~level:0 fmt value
+  | "transitionStatement" -> pp_syntax_trans_stmt fmt value
+  | "parserBlockStatement" -> pp_syntax_parser_stmt ~level:0 fmt value
+  | "parserState" -> pp_syntax_parser_state ~level:0 fmt value
+  | "parserTypeDeclaration" -> pp_syntax_parser_type_decl ~level:0 fmt value
+  | "packageTypeDeclaration" -> pp_syntax_pckg_type_decl ~level:0 fmt value
   | _ -> pp_case_v' fmt value
