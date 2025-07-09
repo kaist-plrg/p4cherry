@@ -83,7 +83,7 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
   match id_of_list_v value with
   | "identifier" | "typeParameterList" | "parameter" | "expression" | "kvPair"
   | "simpleKeysetExpression" | "realTypeArg" | "typeArg" | "argument"
-  | "keyElement" | "action" | "entry" | "selectCase" | "specifiedIdentifier"
+  | "keyElement" | "entry" | "selectCase" | "specifiedIdentifier"
   | "structField" | "simpleAnnotation" ->
       pp_list ~level pp_case_v ~sep fmt values
   | "switchCase" -> pp_list ~level (pp_syntax_stmt' ~level) ~sep fmt values
@@ -96,6 +96,7 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
   | "methodPrototype" -> pp_list ~level (pp_syntax_mthd ~level) ~sep fmt values
   | "objDeclaration" | "controlLocalDeclaration" | "parserLocalElement" ->
       pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
+  | "action" -> pp_list ~level (pp_syntax_action ~level) ~sep fmt values
   | "tableProperty" ->
       pp_list ~level (pp_syntax_table_prop ~level) ~sep fmt values
   | "parserStatement" ->
@@ -284,11 +285,11 @@ and pp_syntax_nb_expr fmt (value : value) : unit =
   | "nonBraceExpression", [ [ "+" ]; [] ], [ arg ] ->
       F.fprintf fmt "+(%a)" pp_case_v arg
   | "nonBraceExpression", [ []; [ "." ]; [] ], [ typ; member ] ->
-      F.fprintf fmt "(%a).(%a)" pp_case_v typ pp_case_v member
+      F.fprintf fmt "%a.%a" pp_case_v typ pp_case_v member
   | "nonBraceExpression", [ [ "ERROR"; "." ]; [] ], [ member ] ->
-      F.fprintf fmt "error.(%a)" pp_case_v member
+      F.fprintf fmt "error.%a" pp_case_v member
   | "nonBraceExpression", [ []; [ "." ]; [ "PHTM_5" ] ], [ expr; member ] ->
-      F.fprintf fmt "(%a).(%a)" pp_case_v expr pp_case_v member
+      F.fprintf fmt "%a.%a" pp_case_v expr pp_case_v member
   | "nonBraceExpression", [ []; [ binop ]; [] ], [ arg1; arg2 ]
     when is_binary_op binop ->
       F.fprintf fmt "(%a) %s (%a)" pp_case_v arg1 binop pp_case_v arg2
@@ -300,19 +301,15 @@ and pp_syntax_nb_expr fmt (value : value) : unit =
   | ( "nonBraceExpression",
       [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
       [ func; type_args; args ] ) ->
-      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func
+      F.fprintf fmt "%a<%a>(%a)" pp_case_v func
         (pp_list_v ~level:0 ~sep:Comma)
         type_args
         (pp_list_v ~level:0 ~sep:Comma)
         args
   | "nonBraceExpression", [ []; [ "(" ]; [ ")" ] ], [ func; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v func
-        (pp_list_v ~level:0 ~sep:Comma)
-        args
+      F.fprintf fmt "%a(%a)" pp_case_v func (pp_list_v ~level:0 ~sep:Comma) args
   | "nonBraceExpression", [ []; [ "(" ]; [ ")"; "PHTM_6" ] ], [ typ; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v typ
-        (pp_list_v ~level:0 ~sep:Comma)
-        args
+      F.fprintf fmt "%a(%a)" pp_case_v typ (pp_list_v ~level:0 ~sep:Comma) args
   | "nonBraceExpression", [ [ "(" ]; [ ")" ]; [] ], [ typ; expr ] ->
       F.fprintf fmt "(%a)(%a)" pp_case_v typ pp_case_v expr
   | "nonBraceExpression", _, _ ->
@@ -340,9 +337,9 @@ and pp_syntax_expr fmt (value : value) : unit =
   | "expression", [ []; []; [] ], [ dot; name ] ->
       F.fprintf fmt "%a%a" pp_case_v dot pp_case_v name
   | "expression", [ []; [ "[" ]; [ "]" ] ], [ array; index ] ->
-      F.fprintf fmt "(%a)[%a]" pp_case_v array pp_case_v index
+      F.fprintf fmt "%a[%a]" pp_case_v array pp_case_v index
   | "expression", [ []; [ "[" ]; [ ":" ]; [ "]" ] ], [ bits; hi; lo ] ->
-      F.fprintf fmt "(%a)[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
+      F.fprintf fmt "%a[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
   | "expression", [ [ "{" ]; []; [ "}" ] ], [ exprs; comma ] ->
       F.fprintf fmt "{ %a%a }"
         (pp_list_v ~level:0 ~sep:Comma)
@@ -373,11 +370,11 @@ and pp_syntax_expr fmt (value : value) : unit =
   | "expression", [ [ "(" ]; [ ")" ]; [] ], [ typ; expr ] ->
       F.fprintf fmt "(%a)(%a)" pp_case_v typ pp_case_v expr
   | "expression", [ []; [ "." ]; [] ], [ typ; name ] ->
-      F.fprintf fmt "(%a).(%a)" pp_case_v typ pp_case_v name
+      F.fprintf fmt "%a.%a" pp_case_v typ pp_case_v name
   | "expression", [ [ "ERROR"; "." ]; [] ], [ member ] ->
-      F.fprintf fmt "error.(%a)" pp_case_v member
+      F.fprintf fmt "error.%a" pp_case_v member
   | "expression", [ []; [ "." ]; [ "PHTM_5" ] ], [ expr; member ] ->
-      F.fprintf fmt "(%a).(%a)" pp_case_v expr pp_case_v member
+      F.fprintf fmt "%a.%a" pp_case_v expr pp_case_v member
   | "expression", [ []; [ binop ]; [] ], [ arg1; arg2 ] when is_binary_op binop
     ->
       F.fprintf fmt "(%a) %s (%a)" pp_case_v arg1 binop pp_case_v arg2
@@ -388,19 +385,15 @@ and pp_syntax_expr fmt (value : value) : unit =
   | ( "expression",
       [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
       [ func; type_args; args ] ) ->
-      F.fprintf fmt "(%a)<%a>(%a)" pp_case_v func
+      F.fprintf fmt "%a<%a>(%a)" pp_case_v func
         (pp_list_v ~level:0 ~sep:Comma)
         type_args
         (pp_list_v ~level:0 ~sep:Comma)
         args
   | "expression", [ []; [ "(" ]; [ ")" ] ], [ func; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v func
-        (pp_list_v ~level:0 ~sep:Comma)
-        args
+      F.fprintf fmt "%a(%a)" pp_case_v func (pp_list_v ~level:0 ~sep:Comma) args
   | "expression", [ []; [ "(" ]; [ ")"; "PHTM_6" ] ], [ typ; args ] ->
-      F.fprintf fmt "(%a)(%a)" pp_case_v typ
-        (pp_list_v ~level:0 ~sep:Comma)
-        args
+      F.fprintf fmt "%a(%a)" pp_case_v typ (pp_list_v ~level:0 ~sep:Comma) args
   | "expression", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_expr: ill-formed expression:\n%a" pp_case_v
@@ -580,7 +573,7 @@ and pp_syntax_stmt ~level fmt (value : value) : unit =
   | "emptyStatement", [ [ ";" ] ], [] -> F.fprintf fmt ";"
   | "blockStatement", [ []; [ "{" ]; [ "}" ] ], [ opt_annos; stmts ] ->
       F.fprintf fmt "%a{\n%a\n%s}"
-        (pp_opt_annos ~level ~sep:SpaceSep)
+        (pp_opt_annos ~level ~sep:Nl)
         opt_annos
         (pp_list_v ~level:(level + 1) ~sep:Nl)
         stmts (indent level)
@@ -749,11 +742,11 @@ and pp_syntax_action_ref fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_action_ref: expected action ref, got %s"
            (id_of_case_v value))
 
-and pp_syntax_action fmt (value : value) : unit =
+and pp_syntax_action ~level fmt (value : value) : unit =
   match flatten_case_v value with
   | "action", [ []; []; [ ";" ] ], [ opt_annos; action_ref ] ->
       F.fprintf fmt "%a%a;"
-        (pp_opt_annos ~level:0 ~sep:SpaceSep)
+        (pp_opt_annos ~level ~sep:Nl)
         opt_annos pp_case_v action_ref
   | "action", _, _ ->
       failwith
@@ -1078,7 +1071,7 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
   | ( "instantiation",
       [ []; []; [ "(" ]; [ ")" ]; []; [ ";" ] ],
       [ opt_annos; type_ref; args; name; init ] ) ->
-      F.fprintf fmt "%a%a(%a) %a%a"
+      F.fprintf fmt "%a%a(%a) %a%a;"
         (pp_opt_annos ~level ~sep:Nl)
         opt_annos pp_case_v type_ref
         (pp_list_v ~level:0 ~sep:Comma)
@@ -1117,19 +1110,19 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
   | ( "valueSetDeclaration",
       [ []; [ "VALUESET"; "<" ]; [ ">"; "(" ]; [ ")" ]; [ ";" ] ],
       [ opt_annos; base_type; size; name ] ) ->
-      F.fprintf fmt "%avalueset<%a>(%a) %a"
+      F.fprintf fmt "%avalue_set<%a>(%a) %a;"
         (pp_opt_annos ~level ~sep:Nl)
         opt_annos pp_case_v base_type pp_case_v size pp_case_v name
   | ( "valueSetDeclaration",
       [ []; [ "VALUESET"; "<" ]; [ ">"; "(" ]; [ ")" ]; [ ";"; "PHTM_17" ] ],
       [ opt_annos; tuple; size; name ] ) ->
-      F.fprintf fmt "%avalueset<%a>(%a) %a"
+      F.fprintf fmt "%avalue_set<%a>(%a) %a;"
         (pp_opt_annos ~level ~sep:Nl)
         opt_annos pp_case_v tuple pp_case_v size pp_case_v name
   | ( "valueSetDeclaration",
       [ []; [ "VALUESET"; "<" ]; [ ">"; "(" ]; [ ")" ]; [ ";"; "PHTM_18" ] ],
       [ opt_annos; type_name; size; name ] ) ->
-      F.fprintf fmt "%avalueset<%a>(%a) %a"
+      F.fprintf fmt "%avalue_set<%a>(%a) %a;"
         (pp_opt_annos ~level ~sep:Nl)
         opt_annos pp_case_v type_name pp_case_v size pp_case_v name
   | ( "parserDeclaration",
@@ -1275,7 +1268,7 @@ and pp_syntax_anno_token fmt (value : value) : unit =
   | "annotationToken", [ [ "TUPLE" ] ], [] -> F.fprintf fmt "tuple"
   | "annotationToken", [ [ "TYPEDEF" ] ], [] -> F.fprintf fmt "typedef"
   | "annotationToken", [ [ "VARBIT" ] ], [] -> F.fprintf fmt "varbit"
-  | "annotationToken", [ [ "VALUESET" ] ], [] -> F.fprintf fmt "valueset"
+  | "annotationToken", [ [ "VALUESET" ] ], [] -> F.fprintf fmt "value_set"
   | "annotationToken", [ [ "LIST" ] ], [] -> F.fprintf fmt "list"
   | "annotationToken", [ [ "VOID" ] ], [] -> F.fprintf fmt "void"
   | "annotationToken", [ [ "_" ] ], [] -> F.fprintf fmt "_"
@@ -1381,7 +1374,7 @@ and pp_opt_annos ?(level = 0) ~sep fmt (value : value) : unit =
 and pp_case_v' fmt (value : value) : unit =
   match flatten_case_v value with
   (* Misc *)
-  | "trailingComma", [ [ "," ]; [ "PHTM_0" ] ], [] -> F.fprintf fmt ","
+  | "trailingComma", [ [ ","; "PHTM_0" ] ], [] -> F.fprintf fmt ","
   | "const", [ [ "CONST" ] ], [] -> F.fprintf fmt "const"
   (* Numbers *)
   | "number", [ []; [ "PHTM_1" ] ], [ value_int ] ->
@@ -1399,7 +1392,7 @@ and pp_case_v' fmt (value : value) : unit =
   | "typeOrVoid", [ [ "VOID" ] ], [] -> F.fprintf fmt "void"
   (* Key value pair *)
   | "kvPair", [ []; [ "=" ]; [] ], [ key; value ] ->
-      F.fprintf fmt "(%a) = (%a)" pp_case_v key pp_case_v value
+      F.fprintf fmt "%a = %a" pp_case_v key pp_case_v value
   (* Declarations *)
   | ( "variableDeclarationWithoutSemicolon",
       [ []; []; []; []; [] ],
@@ -1460,7 +1453,7 @@ and pp_case_v fmt (value : value) : unit =
   | "methodPrototype" -> pp_syntax_mthd ~level:0 fmt value
   | "keyElement" -> pp_syntax_key fmt value
   | "actionRef" -> pp_syntax_action_ref fmt value
-  | "action" -> pp_syntax_action fmt value
+  | "action" -> pp_syntax_action ~level:0 fmt value
   | "entryPriority" -> pp_syntax_entry_prio fmt value
   | "entry" -> pp_syntax_entry fmt value
   | "tableProperty" -> pp_syntax_table_prop ~level:0 fmt value
