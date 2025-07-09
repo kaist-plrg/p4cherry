@@ -35,7 +35,7 @@ exception TestCheckErr of string * region * float
 exception TestCheckNegErr of float
 exception TestUnknownErr of float
 exception TestParseErr of string * region * float
-exception TestParseRoundtripErr of float
+exception TestParseRoundtripErr of string * string * float
 
 (* Timer *)
 
@@ -79,6 +79,31 @@ let collect_excludes (paths_exclude : string list) =
 
 (* Parser test *)
 
+let show_diff str1 str2 =
+  let temp1 = Filename.temp_file "original" ".p4" in
+  let temp2 = Filename.temp_file "roundtrip" ".p4" in
+  let () =
+    let oc1 = open_out temp1 in
+    output_string oc1 str1;
+    close_out oc1;
+    let oc2 = open_out temp2 in
+    output_string oc2 str2;
+    close_out oc2
+  in
+  let diff_cmd = Printf.sprintf "diff -u %s %s || true" temp1 temp2 in
+  let diff_output =
+    let ic = Unix.open_process_in diff_cmd in
+    let result = In_channel.input_all ic in
+    let _ = Unix.close_process_in ic in
+    result
+  in
+  let () =
+    Sys.remove temp1;
+    Sys.remove temp2
+  in
+  if String.equal diff_output "" then "No differences found (but ASTs differ)"
+  else diff_output
+
 let run_parser includes filename =
   let time_start = start () in
   try
@@ -86,11 +111,12 @@ let run_parser includes filename =
     let file' = Format.asprintf "%a\n" Parsing.Pp.pp_value program_1 in
     let program_2 = Parsing.Parse.parse_string filename file' in
     if not (Il.Eq.eq_value program_1 program_2) then
-      raise (TestParseRoundtripErr time_start);
-    time_start
+      let file'' = Format.asprintf "%a\n" Parsing.Pp.pp_value program_2 in
+      raise (TestParseRoundtripErr (file', file'', time_start))
+    else time_start
   with
   | ParseError (at, msg) -> raise (TestParseErr (msg, at, time_start))
-  | TestParseRoundtripErr t -> raise (TestParseRoundtripErr t)
+  | TestParseRoundtripErr _ as err -> raise err
   | _ -> raise (TestUnknownErr time_start)
 
 let run_parser_test stat includes excludes filename =
@@ -126,10 +152,12 @@ let run_parser_test stat includes excludes filename =
           durations = duration :: stat.durations;
           fail_run = stat.fail_run + 1;
         }
-    | TestParseRoundtripErr time_start ->
+    | TestParseRoundtripErr (str1, str2, time_start) ->
         let duration = stop time_start in
+        let diff_output = show_diff str1 str2 in
         let log =
-          Format.asprintf "Error on parser: roundtrip fail in %s" filename
+          Format.asprintf "Error on parser: roundtrip fail in %s\n%s" filename
+            diff_output
         in
         log |> print_endline;
         Format.eprintf "%s\n" log;
