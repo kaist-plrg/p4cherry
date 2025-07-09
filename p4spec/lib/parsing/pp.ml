@@ -84,7 +84,7 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
   | "identifier" | "typeParameterList" | "parameter" | "expression" | "kvPair"
   | "simpleKeysetExpression" | "realTypeArg" | "typeArg" | "argument"
   | "keyElement" | "action" | "entry" | "selectCase" | "specifiedIdentifier"
-  | "structField" | "annotation" | "simpleAnnotation" ->
+  | "structField" | "simpleAnnotation" ->
       pp_list ~level pp_case_v ~sep fmt values
   | "switchCase" -> pp_list ~level (pp_syntax_stmt' ~level) ~sep fmt values
   | "declOrAssignmentOrMethodCallStatement" ->
@@ -102,6 +102,7 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
       pp_list ~level (pp_syntax_parser_stmt ~level) ~sep fmt values
   | "parserState" ->
       pp_list ~level (pp_syntax_parser_state ~level) ~sep fmt values
+  | "annotation" -> pp_list_no_start_indent ~level pp_case_v ~sep fmt values
   | "declaration" when List.compare_length_with values 0 = 0 ->
       F.fprintf fmt ";"
   | "declaration" -> pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
@@ -606,6 +607,22 @@ and pp_syntax_stmt ~level fmt (value : value) : unit =
         init pp_case_v cond
         (pp_list_v ~level:0 ~sep:Comma)
         update (pp_syntax_stmt ~level) body
+  | ( "forStatement",
+      [ []; [ "FOR"; "(" ]; []; [ "IN" ]; [ ")" ]; [] ],
+      [ opt_annos; typ; name; collection; body ] ) ->
+      F.fprintf fmt "%afor (%a %a in %a) %a"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v typ pp_case_v name pp_case_v collection
+        (pp_syntax_stmt ~level) body
+  | ( "forStatement",
+      [ []; [ "FOR"; "(" ]; []; []; [ "IN" ]; [ ")" ]; [] ],
+      [ opt_annos; opt_annos_in; typ; name; collection; body ] ) ->
+      F.fprintf fmt "%afor (%a%a %a in %a) %a"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos
+        (pp_opt_annos ~level:0 ~sep:SpaceSep)
+        opt_annos_in pp_case_v typ pp_case_v name pp_case_v collection
+        (pp_syntax_stmt ~level) body
   | _ ->
       failwith
         (Printf.sprintf "@pp_syntax_stmt: expected statement, got %s"
@@ -812,7 +829,7 @@ and pp_syntax_table_prop ~level fmt (value : value) : unit =
   | ( "tableProperty",
       [ []; []; []; []; [ ";" ] ],
       [ opt_annos; opt_const; name; init ] ) ->
-      F.fprintf fmt "%a%a%a%a"
+      F.fprintf fmt "%a%a%a%a;"
         (pp_opt_annos ~level ~sep:Nl)
         opt_annos
         (pp_opt_v ~postfix:" " pp_case_v)
@@ -1208,6 +1225,155 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_decl: expected declaration, got %s"
            (id_of_case_v value))
 
+and pp_syntax_anno_token fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "annotationToken", [ [ "UNEXPECTED_TOKEN" ] ], [] ->
+      F.fprintf fmt "unexpected_token"
+  | "annotationToken", [ [ "ABSTRACT" ] ], [] -> F.fprintf fmt "abstract"
+  | "annotationToken", [ [ "ACTION" ] ], [] -> F.fprintf fmt "action"
+  | "annotationToken", [ [ "ACTIONS" ] ], [] -> F.fprintf fmt "actions"
+  | "annotationToken", [ [ "APPLY" ] ], [] -> F.fprintf fmt "apply"
+  | "annotationToken", [ [ "BOOL" ] ], [] -> F.fprintf fmt "bool"
+  | "annotationToken", [ [ "BIT" ] ], [] -> F.fprintf fmt "bit"
+  | "annotationToken", [ [ "BREAK" ] ], [] -> F.fprintf fmt "break"
+  | "annotationToken", [ [ "CONST" ] ], [] -> F.fprintf fmt "const"
+  | "annotationToken", [ [ "CONTINUE" ] ], [] -> F.fprintf fmt "continue"
+  | "annotationToken", [ [ "CONTROL" ] ], [] -> F.fprintf fmt "control"
+  | "annotationToken", [ [ "DEFAULT" ] ], [] -> F.fprintf fmt "default"
+  | "annotationToken", [ [ "ELSE" ] ], [] -> F.fprintf fmt "else"
+  | "annotationToken", [ [ "ENTRIES" ] ], [] -> F.fprintf fmt "entries"
+  | "annotationToken", [ [ "ENUM" ] ], [] -> F.fprintf fmt "enum"
+  | "annotationToken", [ [ "ERROR" ] ], [] -> F.fprintf fmt "error"
+  | "annotationToken", [ [ "EXIT" ] ], [] -> F.fprintf fmt "exit"
+  | "annotationToken", [ [ "EXTERN" ] ], [] -> F.fprintf fmt "extern"
+  | "annotationToken", [ [ "FALSE" ] ], [] -> F.fprintf fmt "false"
+  | "annotationToken", [ [ "FOR" ] ], [] -> F.fprintf fmt "for"
+  | "annotationToken", [ [ "HEADER" ] ], [] -> F.fprintf fmt "header"
+  | "annotationToken", [ [ "HEADER_UNION" ] ], [] ->
+      F.fprintf fmt "header_union"
+  | "annotationToken", [ [ "IF" ] ], [] -> F.fprintf fmt "if"
+  | "annotationToken", [ [ "IN" ] ], [] -> F.fprintf fmt "in"
+  | "annotationToken", [ [ "INOUT" ] ], [] -> F.fprintf fmt "inout"
+  | "annotationToken", [ [ "INT" ] ], [] -> F.fprintf fmt "int"
+  | "annotationToken", [ [ "KEY" ] ], [] -> F.fprintf fmt "key"
+  | "annotationToken", [ [ "MATCH_KIND" ] ], [] -> F.fprintf fmt "match_kind"
+  | "annotationToken", [ [ "TYPE" ] ], [] -> F.fprintf fmt "type"
+  | "annotationToken", [ [ "OUT" ] ], [] -> F.fprintf fmt "out"
+  | "annotationToken", [ [ "PARSER" ] ], [] -> F.fprintf fmt "parser"
+  | "annotationToken", [ [ "PACKAGE" ] ], [] -> F.fprintf fmt "package"
+  | "annotationToken", [ [ "PRAGMA" ] ], [] -> F.fprintf fmt "pragma"
+  | "annotationToken", [ [ "RETURN" ] ], [] -> F.fprintf fmt "return"
+  | "annotationToken", [ [ "SELECT" ] ], [] -> F.fprintf fmt "select"
+  | "annotationToken", [ [ "STATE" ] ], [] -> F.fprintf fmt "state"
+  | "annotationToken", [ [ "STRING" ] ], [] -> F.fprintf fmt "string"
+  | "annotationToken", [ [ "STRUCT" ] ], [] -> F.fprintf fmt "struct"
+  | "annotationToken", [ [ "SWITCH" ] ], [] -> F.fprintf fmt "switch"
+  | "annotationToken", [ [ "TABLE" ] ], [] -> F.fprintf fmt "table"
+  | "annotationToken", [ [ "THIS" ] ], [] -> F.fprintf fmt "this"
+  | "annotationToken", [ [ "TRANSITION" ] ], [] -> F.fprintf fmt "transition"
+  | "annotationToken", [ [ "TRUE" ] ], [] -> F.fprintf fmt "true"
+  | "annotationToken", [ [ "TUPLE" ] ], [] -> F.fprintf fmt "tuple"
+  | "annotationToken", [ [ "TYPEDEF" ] ], [] -> F.fprintf fmt "typedef"
+  | "annotationToken", [ [ "VARBIT" ] ], [] -> F.fprintf fmt "varbit"
+  | "annotationToken", [ [ "VALUESET" ] ], [] -> F.fprintf fmt "valueset"
+  | "annotationToken", [ [ "LIST" ] ], [] -> F.fprintf fmt "list"
+  | "annotationToken", [ [ "VOID" ] ], [] -> F.fprintf fmt "void"
+  | "annotationToken", [ [ "_" ] ], [] -> F.fprintf fmt "_"
+  | "annotationToken", [ [ "&&&" ] ], [] -> F.fprintf fmt "&&&"
+  | "annotationToken", [ [ ".." ] ], [] -> F.fprintf fmt ".."
+  | "annotationToken", [ [ "<<" ] ], [] -> F.fprintf fmt "<<"
+  | "annotationToken", [ [ "&&" ] ], [] -> F.fprintf fmt "&&"
+  | "annotationToken", [ [ "||" ] ], [] -> F.fprintf fmt "||"
+  | "annotationToken", [ [ "==" ] ], [] -> F.fprintf fmt "=="
+  | "annotationToken", [ [ "!=" ] ], [] -> F.fprintf fmt "!="
+  | "annotationToken", [ [ ">=" ] ], [] -> F.fprintf fmt ">="
+  | "annotationToken", [ [ "<=" ] ], [] -> F.fprintf fmt "<="
+  | "annotationToken", [ [ "++" ] ], [] -> F.fprintf fmt "++"
+  | "annotationToken", [ [ "+" ] ], [] -> F.fprintf fmt "+"
+  | "annotationToken", [ [ "|+|" ] ], [] -> F.fprintf fmt "|+|"
+  | "annotationToken", [ [ "-" ] ], [] -> F.fprintf fmt "-"
+  | "annotationToken", [ [ "|-|" ] ], [] -> F.fprintf fmt "|-|"
+  | "annotationToken", [ [ "*" ] ], [] -> F.fprintf fmt "*"
+  | "annotationToken", [ [ "/" ] ], [] -> F.fprintf fmt "/"
+  | "annotationToken", [ [ "%" ] ], [] -> F.fprintf fmt "%%"
+  | "annotationToken", [ [ "|" ] ], [] -> F.fprintf fmt "|"
+  | "annotationToken", [ [ "&" ] ], [] -> F.fprintf fmt "&"
+  | "annotationToken", [ [ "^" ] ], [] -> F.fprintf fmt "^"
+  | "annotationToken", [ [ "~" ] ], [] -> F.fprintf fmt "~"
+  | "annotationToken", [ [ "[" ] ], [] -> F.fprintf fmt "["
+  | "annotationToken", [ [ "]" ] ], [] -> F.fprintf fmt "]"
+  | "annotationToken", [ [ "{" ] ], [] -> F.fprintf fmt "{"
+  | "annotationToken", [ [ "}" ] ], [] -> F.fprintf fmt "}"
+  | "annotationToken", [ [ "<" ] ], [] -> F.fprintf fmt "<"
+  | "annotationToken", [ [ ">" ] ], [] -> F.fprintf fmt ">"
+  | "annotationToken", [ [ "!" ] ], [] -> F.fprintf fmt "!"
+  | "annotationToken", [ [ ":" ] ], [] -> F.fprintf fmt ":"
+  | "annotationToken", [ [ ","; "PHTM_21" ] ], [] -> F.fprintf fmt ","
+  | "annotationToken", [ [ "?" ] ], [] -> F.fprintf fmt "?"
+  | "annotationToken", [ [ "." ] ], [] -> F.fprintf fmt "."
+  | "annotationToken", [ [ "=" ] ], [] -> F.fprintf fmt "="
+  | "annotationToken", [ [ ";" ] ], [] -> F.fprintf fmt ";"
+  | "annotationToken", [ [ "@" ] ], [] -> F.fprintf fmt "@"
+  | "annotationToken", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_anno_token: ill-formed annotation token:\n%a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_anno_token: expected annotation token, got %s"
+           (id_of_case_v value))
+
+and pp_syntax_struct_anno_body fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "structuredAnnotationBody", [ []; []; [] ], [ exprs; opt_comma ] ->
+      F.fprintf fmt "%a%a"
+        (pp_list_v ~level:0 ~sep:Comma)
+        exprs
+        (pp_opt_v ~postfix:"" pp_case_v)
+        opt_comma
+  | "structuredAnnotationBody", [ []; []; [ "PHTM_20" ] ], [ kvs; opt_comma ] ->
+      F.fprintf fmt "%a%a"
+        (pp_list_v ~level:0 ~sep:Comma)
+        kvs
+        (pp_opt_v ~postfix:"" pp_case_v)
+        opt_comma
+  | "structuredAnnotationBody", _, _ ->
+      failwith
+        (F.asprintf
+           "@pp_syntax_struct_anno_body: ill-formed structured annotation body:\n\
+            %a"
+           pp_case_v value)
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_struct_anno_body: expected structured annotation body, \
+            got %s"
+           (id_of_case_v value))
+
+and pp_syntax_anno fmt (value : value) : unit =
+  match flatten_case_v value with
+  | "annotation", [ [ "@" ]; [] ], [ name ] ->
+      F.fprintf fmt "@%a" pp_case_v name
+  | "annotation", [ [ "@" ]; [ "(" ]; [ ")" ] ], [ name; body ] ->
+      F.fprintf fmt "@%a(%a)" pp_case_v name
+        (pp_list_v ~level:0 ~sep:Comma)
+        body
+  | "annotation", [ [ "@" ]; [ "[" ]; [ "]" ] ], [ name; body ] ->
+      F.fprintf fmt "@%a[%a]" pp_case_v name pp_case_v body
+  | "annotation", [ [ "PRAGMA" ]; []; [ "PRAGMA_END" ] ], [ name; body ] ->
+      F.fprintf fmt "@pragma %a %a" pp_case_v name
+        (pp_list_v ~level:0 ~sep:SpaceSep)
+        body
+  | "annotation", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_anno: ill-formed annotation:\n%a" pp_case_v
+           value)
+  | _ ->
+      failwith
+        (Printf.sprintf "@pp_syntax_anno: expected annotation, got %s"
+           (id_of_case_v value))
+
 and pp_opt_annos ?(level = 0) ~sep fmt (value : value) : unit =
   let postfix = if is_nl sep then F.sprintf "\n%s" (indent level) else " " in
   pp_opt_v ~postfix (pp_list_v ~level ~sep) fmt value
@@ -1226,7 +1392,7 @@ and pp_case_v' fmt (value : value) : unit =
       F.fprintf fmt "%aw%a" pp_value value_width pp_value value_int
   (* Strings *)
   | "stringLiteral", [ []; [ "PHTM_2" ] ], [ value_text ] ->
-      pp_value fmt value_text
+      F.fprintf fmt "\"%a\"" pp_text_v value_text
   (* Names *)
   | "dotPrefix", [ [ "." ] ], [] -> F.fprintf fmt "."
   (* Type references *)
@@ -1249,6 +1415,9 @@ and pp_case_v' fmt (value : value) : unit =
       F.fprintf fmt "%a%a %a;"
         (pp_opt_annos ~level:0 ~sep:SpaceSep)
         opt_annos pp_case_v type_ref pp_case_v name
+  (* Annotations *)
+  | "simpleAnnotation", [ [ "(" ]; [ ")" ] ], [ body ] ->
+      F.fprintf fmt "(%a)" (pp_list_v ~level:0 ~sep:Comma) body
   | _ -> pp_default_case_v fmt value
 
 and pp_case_v fmt (value : value) : unit =
@@ -1304,4 +1473,7 @@ and pp_case_v fmt (value : value) : unit =
   | "parserState" -> pp_syntax_parser_state ~level:0 fmt value
   | "parserTypeDeclaration" -> pp_syntax_parser_type_decl ~level:0 fmt value
   | "packageTypeDeclaration" -> pp_syntax_pckg_type_decl ~level:0 fmt value
+  | "annotationToken" -> pp_syntax_anno_token fmt value
+  | "structuredAnnotationBody" -> pp_syntax_struct_anno_body fmt value
+  | "annotation" -> pp_syntax_anno fmt value
   | _ -> pp_case_v' fmt value
