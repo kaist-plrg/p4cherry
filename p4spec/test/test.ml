@@ -35,6 +35,7 @@ exception TestCheckErr of string * region * float
 exception TestCheckNegErr of float
 exception TestUnknownErr of float
 exception TestParseErr of string * region * float
+exception TestParseRoundtripErr of float
 
 (* Timer *)
 
@@ -81,10 +82,15 @@ let collect_excludes (paths_exclude : string list) =
 let run_parser includes filename =
   let time_start = start () in
   try
-    let _program = Parsing.Parse.parse_file includes filename in
+    let program_1 = Parsing.Parse.parse_file includes filename in
+    let file' = Format.asprintf "%a\n" Parsing.Pp.pp_value program_1 in
+    let program_2 = Parsing.Parse.parse_string filename file' in
+    if not (Il.Eq.eq_value program_1 program_2) then
+      raise (TestParseRoundtripErr time_start);
     time_start
   with
   | ParseError (at, msg) -> raise (TestParseErr (msg, at, time_start))
+  | TestParseRoundtripErr t -> raise (TestParseRoundtripErr t)
   | _ -> raise (TestUnknownErr time_start)
 
 let run_parser_test stat includes excludes filename =
@@ -111,6 +117,19 @@ let run_parser_test stat includes excludes filename =
         let log =
           Format.asprintf "Error on parser: %s\n%s" filename
             (string_of_error at msg)
+        in
+        log |> print_endline;
+        Format.eprintf "%s\n" log;
+        Format.eprintf ">>> took %.6f seconds\n" duration;
+        {
+          stat with
+          durations = duration :: stat.durations;
+          fail_run = stat.fail_run + 1;
+        }
+    | TestParseRoundtripErr time_start ->
+        let duration = stop time_start in
+        let log =
+          Format.asprintf "Error on parser: roundtrip fail in %s" filename
         in
         log |> print_endline;
         Format.eprintf "%s\n" log;
