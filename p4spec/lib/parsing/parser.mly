@@ -30,7 +30,7 @@
 %token<Source.info> END
 %token TYPENAME IDENTIFIER
 %token<Il.Ast.value> NAME STRING_LITERAL
-%token<Il.Ast.value * string> NUMBER
+%token<Il.Ast.value * string> NUMBER_INT NUMBER
 %token<Source.info> LE GE SHL AND OR NE EQ
 %token<Source.info> PLUS MINUS PLUS_SAT MINUS_SAT MUL INVALID DIV MOD
 %token<Source.info> BIT_OR BIT_AND BIT_XOR COMPLEMENT
@@ -84,7 +84,6 @@
 %type <Il.Ast.value list> separated_nonempty_opt_trailing_list(COMMA,__anonymous_0) separated_nonempty_opt_trailing_list(COMMA,kvPair) separated_nonempty_trailing_list(COMMA,kvPair) separated_opt_trailing_list(COMMA,expression) separated_nonempty_opt_trailing_list(COMMA,specifiedIdentifier)
 %type <Il.Ast.value list> declarationList kvList expressionList
 %type <Il.Ast.value> push_name push_externName
-(* %type <Il.Ast.value option> lib_parsing_parser_option(COMMA) lib_parsing_parser_option(annotations) lib_parsing_parser_option(const) lib_parsing_parser_option(constructorParameters) lib_parsing_parser_option(initialValue) lib_parsing_parser_option(trailingComma) lib_parsing_parser_option(typeParameters) *)
 %type <unit> push_scope pop_scope go_toplevel go_local
 %%
 
@@ -211,6 +210,11 @@ list(X):
 ;
 
 (**************************** P4-16 GRAMMAR ******************************)
+(******** Built-in ********)
+int:
+| int = NUMBER_INT
+    { fst int }
+;
 
 (******** Misc ********)
 
@@ -237,6 +241,8 @@ optCONST:
 (******** Numbers ********)
 (* Spec Mismatch: Processed by lexer *)
 number:
+| int = int
+      { [ NT int; Term "PHTM_1" ] |> wrap_case_v |> with_typ (wrap_var_t "number") }
 | number = NUMBER
     { fst number }
 ;
@@ -391,19 +397,19 @@ baseType:
 | info = INT
     { info |> ignore;
       [ Term "INT" ] |> wrap_case_v |> with_typ (wrap_var_t "baseType") }
-| info1 = BIT l_angle value = number info_r = r_angle
+| info1 = BIT l_angle value = int info_r = r_angle
     { let tags = Source.merge info1 info_r in
       tags |> ignore;
       [ Term "BIT"; Term "<"; NT value; Term ">" ]
       |> wrap_case_v 
       |> with_typ (wrap_var_t "baseType") }
-| info1 = INT l_angle value = number info_r = r_angle
+| info1 = INT l_angle value = int info_r = r_angle
     { let tags = Source.merge info1 info_r in
       tags |> ignore;
       [ Term "INT"; Term "<"; NT value; Term ">" ]
       |> wrap_case_v 
       |> with_typ (wrap_var_t "baseType") }
-| info1 = VARBIT l_angle value = number info_r = r_angle
+| info1 = VARBIT l_angle value = int info_r = r_angle
     { let tags = Source.merge info1 info_r in
       tags |> ignore;
       [ Term "VARBIT"; Term "<"; NT value; Term ">" ]
