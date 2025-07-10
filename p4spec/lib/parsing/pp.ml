@@ -50,7 +50,7 @@ and pp_value fmt (value : value) : unit =
   match value.it with
   | BoolV b -> F.fprintf fmt "%b" b
   | NumV n -> F.fprintf fmt "%a" pp_num n
-  | TextV _ -> pp_text_v fmt value
+  | TextV _ -> pp_text_v ~escaped:false fmt value
   | StructV _ -> failwith "not implemented"
   | CaseV _ -> pp_case_v fmt value
   | TupleV values ->
@@ -61,9 +61,10 @@ and pp_value fmt (value : value) : unit =
   | ListV _ -> pp_list_v ~sep:Nl fmt value
   | _ -> failwith "@pp_value: TODO"
 
-and pp_text_v fmt (value : value) : unit =
+and pp_text_v ~escaped fmt (value : value) : unit =
   match value.it with
-  | TextV text -> F.fprintf fmt "%s" text
+  | TextV text ->
+      if escaped then F.fprintf fmt "%S" text else F.fprintf fmt "%s" text
   | _ -> failwith "@pp_text_v: expected TextV value"
 
 and pp_opt_v ?(postfix = "") pp_v fmt (value : value) : unit =
@@ -113,7 +114,8 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
 
 and pp_syntax_id fmt (value : value) : unit =
   match flatten_case_v value with
-  | "identifier", [ [ "$" ]; [] ], [ value_text ] -> pp_text_v fmt value_text
+  | "identifier", [ [ "$" ]; [] ], [ value_text ] ->
+      pp_text_v ~escaped:false fmt value_text
   | "identifier", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_id: ill-formed identifier:\n%a"
@@ -126,7 +128,7 @@ and pp_syntax_id fmt (value : value) : unit =
 and pp_syntax_tid fmt (value : value) : unit =
   match flatten_case_v value with
   | "typeIdentifier", [ [ "@" ]; [] ], [ value_text ] ->
-      pp_text_v fmt value_text
+      pp_text_v ~escaped:false fmt value_text
   | "typeIdentifier", _, _ ->
       failwith
         (F.asprintf "@pp_syntax_tid: ill-formed typeIdentifier:\n%a"
@@ -289,7 +291,7 @@ and pp_syntax_nb_expr fmt (value : value) : unit =
   | "nonBraceExpression", [ [ "ERROR"; "." ]; [] ], [ member ] ->
       F.fprintf fmt "error.%a" pp_case_v member
   | "nonBraceExpression", [ []; [ "." ]; [ "PHTM_5" ] ], [ expr; member ] ->
-      F.fprintf fmt "%a.%a" pp_case_v expr pp_case_v member
+      F.fprintf fmt "(%a).%a" pp_case_v expr pp_case_v member
   | "nonBraceExpression", [ []; [ binop ]; [] ], [ arg1; arg2 ]
     when is_binary_op binop ->
       F.fprintf fmt "(%a) %s (%a)" pp_case_v arg1 binop pp_case_v arg2
@@ -337,9 +339,9 @@ and pp_syntax_expr fmt (value : value) : unit =
   | "expression", [ []; []; [] ], [ dot; name ] ->
       F.fprintf fmt "%a%a" pp_case_v dot pp_case_v name
   | "expression", [ []; [ "[" ]; [ "]" ] ], [ array; index ] ->
-      F.fprintf fmt "%a[%a]" pp_case_v array pp_case_v index
+      F.fprintf fmt "(%a)[%a]" pp_case_v array pp_case_v index
   | "expression", [ []; [ "[" ]; [ ":" ]; [ "]" ] ], [ bits; hi; lo ] ->
-      F.fprintf fmt "%a[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
+      F.fprintf fmt "(%a)[%a:%a]" pp_case_v bits pp_case_v hi pp_case_v lo
   | "expression", [ [ "{" ]; []; [ "}" ] ], [ exprs; comma ] ->
       F.fprintf fmt "{ %a%a }"
         (pp_list_v ~level:0 ~sep:Comma)
@@ -374,7 +376,7 @@ and pp_syntax_expr fmt (value : value) : unit =
   | "expression", [ [ "ERROR"; "." ]; [] ], [ member ] ->
       F.fprintf fmt "error.%a" pp_case_v member
   | "expression", [ []; [ "." ]; [ "PHTM_5" ] ], [ expr; member ] ->
-      F.fprintf fmt "%a.%a" pp_case_v expr pp_case_v member
+      F.fprintf fmt "(%a).%a" pp_case_v expr pp_case_v member
   | "expression", [ []; [ binop ]; [] ], [ arg1; arg2 ] when is_binary_op binop
     ->
       F.fprintf fmt "(%a) %s (%a)" pp_case_v arg1 binop pp_case_v arg2
@@ -1385,7 +1387,7 @@ and pp_case_v' fmt (value : value) : unit =
       F.fprintf fmt "%aw%a" pp_value value_width pp_value value_int
   (* Strings *)
   | "stringLiteral", [ []; [ "PHTM_2" ] ], [ value_text ] ->
-      F.fprintf fmt "\"%a\"" pp_text_v value_text
+      F.fprintf fmt "%a" (pp_text_v ~escaped:true) value_text
   (* Names *)
   | "dotPrefix", [ [ "." ] ], [] -> F.fprintf fmt "."
   (* Type references *)
