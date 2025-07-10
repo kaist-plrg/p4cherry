@@ -1352,7 +1352,7 @@ and pp_syntax_anno fmt (value : value) : unit =
       F.fprintf fmt "@%a" pp_case_v name
   | "annotation", [ [ "@" ]; [ "(" ]; [ ")" ] ], [ name; body ] ->
       F.fprintf fmt "@%a(%a)" pp_case_v name
-        (pp_list_v ~level:0 ~sep:Comma)
+        (pp_list_v ~level:0 ~sep:SpaceSep)
         body
   | "annotation", [ [ "@" ]; [ "[" ]; [ "]" ] ], [ name; body ] ->
       F.fprintf fmt "@%a[%a]" pp_case_v name pp_case_v body
@@ -1412,7 +1412,7 @@ and pp_case_v' fmt (value : value) : unit =
         opt_annos pp_case_v type_ref pp_case_v name
   (* Annotations *)
   | "simpleAnnotation", [ [ "(" ]; [ ")" ] ], [ body ] ->
-      F.fprintf fmt "(%a)" (pp_list_v ~level:0 ~sep:Comma) body
+      F.fprintf fmt "(%a)" (pp_list_v ~level:0 ~sep:SpaceSep) body
   | _ -> pp_default_case_v fmt value
 
 and pp_case_v fmt (value : value) : unit =
