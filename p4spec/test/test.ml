@@ -111,9 +111,7 @@ let run_parser includes filename =
     let file' = Format.asprintf "%a\n" Parsing.Pp.pp_value program_1 in
     let program_2 = Parsing.Parse.parse_string filename file' in
     if not (Il.Eq.eq_value program_1 program_2) then
-      let file'' = Format.asprintf "%a\n" Parsing.Pp.pp_value program_2 in
-      let diff = show_diff file' file'' in
-      raise (TestParseRoundtripErr (diff, time_start))
+      raise (TestParseRoundtripErr (file', time_start))
     else time_start
   with
   | ParseError (at, msg) -> raise (TestParseErr (msg, at, time_start))
@@ -153,11 +151,12 @@ let run_parser_test stat includes excludes filename =
           durations = duration :: stat.durations;
           fail_run = stat.fail_run + 1;
         }
-    | TestParseRoundtripErr (diff, time_start) ->
+    | TestParseRoundtripErr (str, time_start) ->
         let duration = stop time_start in
         let log =
-          Format.asprintf "Error on parser: roundtrip fail in %s\n%s" filename
-            diff
+          Format.asprintf
+            "Error on parser: roundtrip fail in %s\nParsed file:\n%s" filename
+            str
         in
         log |> print_endline;
         Format.eprintf "%s\n" log;
