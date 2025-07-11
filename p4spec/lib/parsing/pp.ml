@@ -425,7 +425,7 @@ and pp_syntax_params fmt (value : value) : unit =
       failwith
         (F.asprintf "@pp_syntax_params: ill-formed parameter:\n%a" pp_case_v
            value)
-  (** Constructor parameters **)
+  (* Constructor parameters *)
   | "constructorParameters", [ [ "(" ]; [ ")" ] ], [ params ] ->
       F.fprintf fmt "(%a)" (pp_list_v ~level:0 ~sep:Comma) params
   | _ ->
@@ -713,6 +713,39 @@ and pp_syntax_init fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_init: expected initializer, got %s"
            (id_of_case_v value))
 
+(* Statements in for init statements *)
+
+and pp_syntax_decl_or_assign_or_call_stmt fmt (value : value) : unit =
+  match id_of_case_v value with
+  | "variableDeclarationWithoutSemicolon" -> pp_case_v fmt value
+  | "assignmentOrMethodCallStatementWithoutSemicolon" ->
+      pp_syntax_stmt ~level:0 fmt value
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_decl_or_assign_or_call_stmt: expected variable \
+            declaration, assignment statement, or method call statement, got \
+            %s"
+           (id_of_case_v value))
+
+(* Statements or declarations in block statements *)
+
+and pp_syntax_stat_or_decl ~level fmt (value : value) : unit =
+  match id_of_case_v value with
+  | "variableDeclaration" | "constantDeclaration" ->
+      pp_syntax_decl ~level fmt value
+  | "assignmentOrMethodCallStatement" | "directApplication"
+  | "conditionalStatement" | "emptyStatement" | "blockStatement"
+  | "returnStatement" | "breakStatement" | "continueStatement" | "exitStatement"
+  | "switchStatement" | "forStatement" ->
+      pp_syntax_stmt ~level fmt value
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_stat_or_decl: expected variable declaration, constant \
+            declaration, or statement, got %s"
+           (id_of_case_v value))
+
 (* Statements *)
 
 and pp_syntax_stmt ~level fmt (value : value) : unit =
@@ -723,6 +756,27 @@ and pp_syntax_stmt ~level fmt (value : value) : unit =
     | _ -> false
   in
   match flatten_case_v value with
+  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
+      [ []; [ "(" ]; [ ")" ] ],
+      [ func; args ] ) ->
+      F.fprintf fmt "%a(%a)" pp_case_v func (pp_list_v ~level:0 ~sep:Comma) args
+  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
+      [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
+      [ func; targs; args ] ) ->
+      F.fprintf fmt "%a<%a>(%a)" pp_case_v func
+        (pp_list_v ~level:0 ~sep:Comma)
+        targs
+        (pp_list_v ~level:0 ~sep:Comma)
+        args
+  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
+      [ []; [ assign_op ]; [] ],
+      [ lhs; rhs ] )
+    when is_assign_op assign_op ->
+      F.fprintf fmt "%a %s (%a)" pp_case_v lhs assign_op pp_case_v rhs
+  | "assignmentOrMethodCallStatementWithoutSemicolon", _, _ ->
+      failwith
+        (F.asprintf "@pp_syntax_stmt: ill-formed statement helper:\n%a"
+           pp_case_v value)
   | "assignmentOrMethodCallStatement", [ []; [ ";" ] ], [ stmt' ] ->
       F.fprintf fmt "%a;" pp_case_v stmt'
   | ( "directApplication",
@@ -752,6 +806,11 @@ and pp_syntax_stmt ~level fmt (value : value) : unit =
   | "continueStatement", [ [ "CONTINUE"; ";" ] ], [] ->
       F.fprintf fmt "continue;"
   | "exitStatement", [ [ "EXIT"; ";" ] ], [] -> F.fprintf fmt "exit;"
+  | "switchLabel", [ [ "DEFAULT" ] ], [] -> F.fprintf fmt "default"
+  | "switchCase", [ []; [ ":" ]; [] ], [ label; code ] ->
+      F.fprintf fmt "%a: %a" pp_case_v label (pp_syntax_stmt ~level) code
+  | "switchCase", [ []; [ ":" ] ], [ label ] ->
+      F.fprintf fmt "%a:" pp_case_v label
   | ( "switchStatement",
       [ [ "SWITCH"; "(" ]; [ ")"; "{" ]; [ "}" ] ],
       [ expr; cases ] ) ->
@@ -784,32 +843,6 @@ and pp_syntax_stmt ~level fmt (value : value) : unit =
         (pp_opt_annos ~level:0 ~sep:Space)
         opt_annos_in pp_case_v typ pp_case_v name pp_case_v collection
         (pp_syntax_stmt ~level) body
-  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
-      [ []; [ "(" ]; [ ")" ] ],
-      [ func; args ] ) ->
-      F.fprintf fmt "%a(%a)" pp_case_v func (pp_list_v ~level:0 ~sep:Comma) args
-  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
-      [ []; [ "<" ]; [ ">"; "(" ]; [ ")" ] ],
-      [ func; targs; args ] ) ->
-      F.fprintf fmt "%a<%a>(%a)" pp_case_v func
-        (pp_list_v ~level:0 ~sep:Comma)
-        targs
-        (pp_list_v ~level:0 ~sep:Comma)
-        args
-  | ( "assignmentOrMethodCallStatementWithoutSemicolon",
-      [ []; [ assign_op ]; [] ],
-      [ lhs; rhs ] )
-    when is_assign_op assign_op ->
-      F.fprintf fmt "%a %s (%a)" pp_case_v lhs assign_op pp_case_v rhs
-  | "assignmentOrMethodCallStatementWithoutSemicolon", _, _ ->
-      failwith
-        (F.asprintf "@pp_syntax_stmt: ill-formed statement helper:\n%a"
-           pp_case_v value)
-  | "switchLabel", [ [ "DEFAULT" ] ], [] -> F.fprintf fmt "default"
-  | "switchCase", [ []; [ ":" ]; [] ], [ label; code ] ->
-      F.fprintf fmt "%a: %a" pp_case_v label (pp_syntax_stmt ~level) code
-  | "switchCase", [ []; [ ":" ] ], [ label ] ->
-      F.fprintf fmt "%a:" pp_case_v label
   | "forCollectionExpr", [ []; [ ".." ]; [] ], [ expr_l; expr_r ] ->
       F.fprintf fmt "(%a)..(%a)" pp_case_v expr_l pp_case_v expr_r
   | _ ->
@@ -865,39 +898,6 @@ and pp_syntax_mthd ~level fmt (value : value) : unit =
   | _ ->
       failwith
         (Printf.sprintf "@pp_syntax_method: expected methodPrototype, got %s"
-           (id_of_case_v value))
-
-(* Statements or declarations in block statements *)
-
-and pp_syntax_stat_or_decl ~level fmt (value : value) : unit =
-  match id_of_case_v value with
-  | "variableDeclaration" | "constantDeclaration" ->
-      pp_syntax_decl ~level fmt value
-  | "assignmentOrMethodCallStatement" | "directApplication"
-  | "conditionalStatement" | "emptyStatement" | "blockStatement"
-  | "returnStatement" | "breakStatement" | "continueStatement" | "exitStatement"
-  | "switchStatement" | "forStatement" ->
-      pp_syntax_stmt ~level fmt value
-  | _ ->
-      failwith
-        (Printf.sprintf
-           "@pp_syntax_stat_or_decl: expected variable declaration, constant \
-            declaration, or statement, got %s"
-           (id_of_case_v value))
-
-(* Statements in for init statements *)
-
-and pp_syntax_decl_or_assign_or_call_stmt fmt (value : value) : unit =
-  match id_of_case_v value with
-  | "variableDeclarationWithoutSemicolon" -> pp_case_v fmt value
-  | "assignmentOrMethodCallStatementWithoutSemicolon" ->
-      pp_syntax_stmt ~level:0 fmt value
-  | _ ->
-      failwith
-        (Printf.sprintf
-           "@pp_syntax_decl_or_assign_or_call_stmt: expected variable \
-            declaration, assignment statement, or method call statement, got \
-            %s"
            (id_of_case_v value))
 
 (* Object initializers *)
@@ -1205,12 +1205,6 @@ and pp_syntax_struct_field fmt (value : value) : unit =
 
 and pp_syntax_decl ~level fmt (value : value) : unit =
   match flatten_case_v value with
-  | ( "constantDeclaration",
-      [ []; [ "CONST" ]; []; []; [ ";" ] ],
-      [ opt_annos; type_ref; name; init ] ) ->
-      F.fprintf fmt "%aconst %a %a%a;"
-        (pp_opt_annos ~level ~sep:Nl)
-        opt_annos pp_case_v type_ref pp_case_v name pp_case_v init
   | ( "variableDeclarationWithoutSemicolon",
       [ []; []; []; []; [] ],
       [ opt_annos; type_ref; name; opt_init ] ) ->
@@ -1221,6 +1215,12 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
         opt_init
   | "variableDeclaration", [ []; [ ";" ] ], [ decl ] ->
       F.fprintf fmt "%a;" pp_case_v decl
+  | ( "constantDeclaration",
+      [ []; [ "CONST" ]; []; []; [ ";" ] ],
+      [ opt_annos; type_ref; name; init ] ) ->
+      F.fprintf fmt "%aconst %a %a%a;"
+        (pp_opt_annos ~level ~sep:Nl)
+        opt_annos pp_case_v type_ref pp_case_v name pp_case_v init
   | ( "matchKindDeclaration",
       [ [ "MATCH_KIND"; "{" ]; []; [ "}" ] ],
       [ ids; comma ] ) ->
