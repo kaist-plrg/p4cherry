@@ -2,26 +2,17 @@ module F = Format
 
 (* Separator *)
 
-type sep = SpaceSep | Nl | Comma | CommaNl | Semicolon | SemicolonNl
+type sep = Space | Nl | Comma | CommaNl | Semicolon | SemicolonNl
 
 let is_nl = function Nl | CommaNl | SemicolonNl -> true | _ -> false
 
 let pp_sep fmt = function
-  | SpaceSep -> F.fprintf fmt " "
+  | Space -> F.fprintf fmt " "
   | Nl -> F.fprintf fmt "\n"
   | Comma -> F.fprintf fmt ", "
   | CommaNl -> F.fprintf fmt ",\n"
   | Semicolon -> F.fprintf fmt "; "
   | SemicolonNl -> F.fprintf fmt ";\n"
-
-(* Relations *)
-
-type rel = Space | Colon | Eq
-
-let pp_rel fmt = function
-  | Space -> F.fprintf fmt " "
-  | Colon -> F.fprintf fmt ": "
-  | Eq -> F.fprintf fmt " = "
 
 (* Printers *)
 
@@ -44,7 +35,7 @@ let pp_list_no_start_indent ?(level = 0) pp_elem ~(sep : sep) fmt l =
       if i < List.length l - 1 then pp_sep fmt sep)
     l
 
-let pp_pairs ?(trailing = false) ?(level = 0) pp_k pp_v ~(rel : rel)
+(* let pp_pairs ?(trailing = false) ?(level = 0) pp_k pp_v ~(rel : rel)
     ~(sep : sep) fmt pairs =
   List.iteri
     (fun i (k, v) ->
@@ -52,4 +43,4 @@ let pp_pairs ?(trailing = false) ?(level = 0) pp_k pp_v ~(rel : rel)
       F.fprintf fmt "%s%a%a%a" startline pp_k k pp_rel rel pp_v v;
       if i < List.length pairs - 1 then pp_sep fmt sep)
     pairs;
-  if trailing && pairs <> [] then pp_sep fmt sep
+  if trailing && pairs <> [] then pp_sep fmt sep *)
