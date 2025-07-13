@@ -356,7 +356,7 @@ name:
 (* From Petr4: optional trailing comma *)
 identifierList:
 | ids = separated_nonempty_opt_trailing_list(COMMA, id = name { id })
-    { wrap_list_v "identifier" ids }
+    { wrap_list_v "name" ids }
 ;
 member:
 | name = name
@@ -510,7 +510,7 @@ typeOrVoid:
 
 typeParameterList:
 | names = separated_nonempty_list(COMMA, name) 
-    { wrap_list_v "typeParameterList" names }
+    { wrap_list_v "name" names }
 ;
 typeParameters:
 | l_angle type_params = typeParameterList r_angle
@@ -1102,12 +1102,12 @@ forInitStatements:
 ;
 forUpdateStatementsNonEmpty:
 | assignments = separated_nonempty_list(COMMA, assignmentOrMethodCallStatementWithoutSemicolon)
-    { wrap_list_v "assignmentOrMethodCallStatement" assignments }
+    { wrap_list_v "assignmentOrMethodCallStatementWithoutSemicolon" assignments }
 ;
 
 forUpdateStatements:
 | assignments = separated_list(COMMA, assignmentOrMethodCallStatementWithoutSemicolon)
-    { wrap_list_v "assignmentOrMethodCallStatement" assignments }
+    { wrap_list_v "assignmentOrMethodCallStatementWithoutSemicolon" assignments }
 ;
 
 forCollectionExpr:

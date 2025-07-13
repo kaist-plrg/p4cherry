@@ -66,46 +66,50 @@ and pp_text_v ~escaped fmt (value : value) : unit =
 
 and pp_case_v fmt (value : value) : unit =
   match id_of_case_v value with
-  | "constantDeclaration" | "variableDeclarationWithoutSemicolon"
-  | "variableDeclaration" | "errorDeclaration" | "matchKindDeclaration"
-  | "externDeclaration" | "instantiation" | "functionDeclaration"
-  | "actionDeclaration" | "parserDeclaration" | "controlTypeDeclaration"
-  | "controlDeclaration" | "valueSetDeclaration" | "headerTypeDeclaration"
-  | "headerUnionDeclaration" | "structTypeDeclaration" | "parserTypeDeclaration"
-  | "enumDeclaration" | "typedefDeclaration" | "typeDeclaration"
-  | "packageTypeDeclaration" ->
-      pp_syntax_decl ~level:0 fmt value
+  (* Misc *)
   | "trailingComma" -> pp_syntax_comma fmt value
   | "const" -> pp_syntax_const fmt value
+  (* Numbers *)
   | "number" -> pp_syntax_num fmt value
+  (* Strings *)
   | "stringLiteral" -> pp_syntax_str fmt value
+  (* Names *)
+  | "identifier" -> pp_syntax_id fmt value
+  | "typeIdentifier" -> pp_syntax_tid fmt value
   | "dotPrefix" | "nonTypeName" | "name" | "prefixedNonTypeName"
   | "prefixedType" ->
       pp_syntax_name fmt value
-  | "typeIdentifier" -> pp_syntax_tid fmt value
-  | "identifier" -> pp_syntax_id fmt value
+  (* Directions *)
   | "direction" -> pp_syntax_dir fmt value
+  (* Types *)
   | "baseType" | "specializedType" | "headerStackType" | "listType"
   | "tupleType" | "typeOrVoid" ->
       pp_syntax_type fmt value
+  (* Type parameters, parameters, constructor parameters *)
   | "typeParameters" -> pp_syntax_tparams fmt value
   | "parameter" | "constructorParameters" -> pp_syntax_params fmt value
+  (* Expressions *)
   | "nonBraceExpression" -> pp_syntax_nb_expr fmt value
   | "expression" -> pp_syntax_expr fmt value
+  (* Keyset expressions *)
   | "simpleKeysetExpression" | "reducedSimpleKeysetExpression"
   | "tupleKeysetExpression" ->
       pp_syntax_keyset_expr fmt value
+  (* Expression key-value pairs *)
   | "kvPair" -> pp_syntax_kvpair fmt value
+  (* Type arguments *)
   | "realTypeArg" | "typeArg" -> pp_syntax_targ fmt value
+  (* Arguments *)
   | "argument" -> pp_syntax_arg fmt value
+  (* L-values *)
   | "lvalue" -> pp_syntax_lvalue fmt value
+  (* Statements and declarations *)
   | "initializer" -> pp_syntax_init fmt value
-  | "assignmentOrMethodCallStatementWithoutSemicolon" | "switchLabel"
-  | "switchCase" | "forCollectionExpr"
-  | "assignmentOrMethodCallStatement" | "directApplication"
-  | "conditionalStatement" | "emptyStatement" | "blockStatement"
-  | "returnStatement" | "breakStatement" | "continueStatement" | "exitStatement"
-  | "switchStatement" | "forStatement" ->
+  | "assignmentOrMethodCallStatementWithoutSemicolon"
+  | "assignmentOrMethodCallStatement" | "directApplication" | "conditionalStatement"
+  | "emptyStatement" | "blockStatement" | "returnStatement" | "breakStatement"
+  | "continueStatement" | "exitStatement" | "switchLabel" | "switchCase"
+  | "switchStatement" | "forCollectionExpr" | "forStatement" ->
       pp_syntax_stmt ~level:0 fmt value
   | "functionPrototype" -> pp_syntax_func fmt value
   | "methodPrototype" -> pp_syntax_mthd ~level:0 fmt value
@@ -120,9 +124,20 @@ and pp_case_v fmt (value : value) : unit =
   | "stateExpression" -> pp_syntax_state_expr ~level:0 fmt value
   | "transitionStatement" -> pp_syntax_trans_stmt ~level:0 fmt value
   | "parserBlockStatement" -> pp_syntax_parser_stmt ~level:0 fmt value
+  | "variableDeclarationWithoutSemicolon" | "variableDeclaration"
+  | "constantDeclaration" | "errorDeclaration" | "matchKindDeclaration"
+  | "externDeclaration" | "instantiation" | "functionDeclaration"
+  | "actionDeclaration" | "parserDeclaration" | "typeDeclaration"
+  | "controlDeclaration" | "headerTypeDeclaration"
+  | "headerUnionDeclaration" | "structTypeDeclaration" | "enumDeclaration"
+  | "typedefDeclaration" | "parserTypeDeclaration" | "controlTypeDeclaration"
+  | "packageTypeDeclaration" | "valueSetDeclaration"
+  ->
+      pp_syntax_decl ~level:0 fmt value
   | "parserState" -> pp_syntax_parser_state ~level:0 fmt value
   | "specifiedIdentifier" -> pp_syntax_spec_id fmt value
   | "structField" -> pp_syntax_struct_field fmt value
+  (* Annotations *)
   | "annotationToken" -> pp_syntax_anno_token fmt value
   | "simpleAnnotation" | "structuredAnnotationBody" ->
       pp_syntax_anno_body fmt value
@@ -163,28 +178,35 @@ and pp_list_v ?(level = 0) ~sep fmt (value : value) : unit =
           (F.asprintf "@pp_list_v: expected ListV, got %a" pp_value value)
   in
   match id_of_list_v value with
-  | "identifier" | "typeParameterList" | "parameter" | "expression" | "kvPair"
-  | "simpleKeysetExpression" | "realTypeArg" | "typeArg" | "argument"
-  | "keyElement" | "entry" | "selectCase" | "specifiedIdentifier"
-  | "structField" | "simpleAnnotation" ->
+  | "name" | "parameter" | "expression" | "simpleKeysetExpression"
+  | "kvPair" | "realTypeArg" | "typeArg" | "argument" ->
       pp_list ~level pp_case_v ~sep fmt values
   | "switchCase" -> pp_list ~level (pp_syntax_stmt ~level) ~sep fmt values
   | "declOrAssignmentOrMethodCallStatement" ->
       pp_list pp_syntax_decl_or_assign_or_call_stmt ~sep fmt values
-  | "assignmentOrMethodCallStatement" ->
-      pp_list (pp_syntax_stmt ~level:0) ~sep fmt values
+  | "assignmentOrMethodCallStatementWithoutSemicolon" ->
+      pp_list pp_syntax_decl_or_assign_or_call_stmt ~sep fmt values
   | "statementOrDeclaration" ->
-      pp_list ~level (pp_syntax_stat_or_decl ~level) ~sep fmt values
+      pp_list ~level (pp_syntax_stmt_or_decl ~level) ~sep fmt values
   | "methodPrototype" -> pp_list ~level (pp_syntax_mthd ~level) ~sep fmt values
-  | "objDeclaration" | "controlLocalDeclaration" | "parserLocalElement" ->
-      pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
+  | "objDeclaration" -> pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
+  | "keyElement" -> pp_list ~level pp_case_v ~sep fmt values
   | "action" -> pp_list ~level (pp_syntax_action ~level) ~sep fmt values
+  | "entry" -> pp_list ~level pp_case_v ~sep fmt values
   | "tableProperty" ->
       pp_list ~level (pp_syntax_table_prop ~level) ~sep fmt values
+  | "controlLocalDeclaration" ->
+      pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
+  | "selectCase" -> pp_list ~level pp_case_v ~sep fmt values
   | "parserStatement" ->
       pp_list ~level (pp_syntax_parser_stmt ~level) ~sep fmt values
   | "parserState" ->
       pp_list ~level (pp_syntax_parser_state ~level) ~sep fmt values
+  | "parserLocalElement" ->
+      pp_list ~level (pp_syntax_decl ~level) ~sep fmt values
+  | "specifiedIdentifier"
+  | "structField" | "simpleAnnotation" ->
+      pp_list ~level pp_case_v ~sep fmt values
   | "annotation" -> pp_list_no_start_indent ~level pp_case_v ~sep fmt values
   | "declaration" when List.compare_length_with values 0 = 0 ->
       F.fprintf fmt ";"
@@ -698,7 +720,7 @@ and pp_syntax_lvalue fmt (value : value) : unit =
 
 (** Statements and declarations **)
 
-(* Initializers *)
+(* Variable and constant declarations *)
 
 and pp_syntax_init fmt (value : value) : unit =
   match flatten_case_v value with
@@ -713,7 +735,7 @@ and pp_syntax_init fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_init: expected initializer, got %s"
            (id_of_case_v value))
 
-(* Statements in for init statements *)
+(* For statements *)
 
 and pp_syntax_decl_or_assign_or_call_stmt fmt (value : value) : unit =
   match id_of_case_v value with
@@ -726,24 +748,6 @@ and pp_syntax_decl_or_assign_or_call_stmt fmt (value : value) : unit =
            "@pp_syntax_decl_or_assign_or_call_stmt: expected variable \
             declaration, assignment statement, or method call statement, got \
             %s"
-           (id_of_case_v value))
-
-(* Statements or declarations in block statements *)
-
-and pp_syntax_stat_or_decl ~level fmt (value : value) : unit =
-  match id_of_case_v value with
-  | "variableDeclaration" | "constantDeclaration" ->
-      pp_syntax_decl ~level fmt value
-  | "assignmentOrMethodCallStatement" | "directApplication"
-  | "conditionalStatement" | "emptyStatement" | "blockStatement"
-  | "returnStatement" | "breakStatement" | "continueStatement" | "exitStatement"
-  | "switchStatement" | "forStatement" ->
-      pp_syntax_stmt ~level fmt value
-  | _ ->
-      failwith
-        (Printf.sprintf
-           "@pp_syntax_stat_or_decl: expected variable declaration, constant \
-            declaration, or statement, got %s"
            (id_of_case_v value))
 
 (* Statements *)
@@ -850,7 +854,24 @@ and pp_syntax_stmt ~level fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_stmt: expected statement, got %s"
            (id_of_case_v value))
 
-(* Function prototypes *)
+and pp_syntax_stmt_or_decl ~level fmt (value : value) : unit =
+  match id_of_case_v value with
+  | "variableDeclaration" | "constantDeclaration" ->
+      pp_syntax_decl ~level fmt value
+  | "assignmentOrMethodCallStatement" | "directApplication"
+  | "conditionalStatement" | "emptyStatement" | "blockStatement"
+  | "returnStatement" | "breakStatement" | "continueStatement" | "exitStatement"
+  | "switchStatement" | "forStatement" ->
+      pp_syntax_stmt ~level fmt value
+  | _ ->
+      failwith
+        (Printf.sprintf
+           "@pp_syntax_stmt_or_decl: expected variable declaration, constant \
+            declaration, or statement, got %s"
+           (id_of_case_v value))
+
+
+(* Extern declarations *)
 
 and pp_syntax_func fmt (value : value) : unit =
   match flatten_case_v value with
@@ -870,8 +891,6 @@ and pp_syntax_func fmt (value : value) : unit =
       failwith
         (Printf.sprintf "@pp_syntax_func: expected function prototype, got %s"
            (id_of_case_v value))
-
-(* Method prototypes *)
 
 and pp_syntax_mthd ~level fmt (value : value) : unit =
   match flatten_case_v value with
@@ -918,7 +937,7 @@ and pp_syntax_obj_init ~level fmt (value : value) : unit =
            "@pp_syntax_obj_init: expected object initializer, got %s"
            (id_of_case_v value))
 
-(* Table key elements *)
+(* Table key property *)
 
 and pp_syntax_key fmt (value : value) : unit =
   match flatten_case_v value with
@@ -937,7 +956,7 @@ and pp_syntax_key fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_key: expected key element, got %s"
            (id_of_case_v value))
 
-(* Table actions *)
+(* Table actions property *)
 
 and pp_syntax_action_ref fmt (value : value) : unit =
   match flatten_case_v value with
@@ -966,7 +985,7 @@ and pp_syntax_action ~level fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_action: expected action, got %s"
            (id_of_case_v value))
 
-(* Table entries *)
+(* Table entry property *)
 
 and pp_syntax_entry_prio fmt (value : value) : unit =
   match flatten_case_v value with
@@ -1168,7 +1187,7 @@ and pp_syntax_parser_state ~level fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_parser_state: expected parser state, got %s"
            (id_of_case_v value))
 
-(* Specified identifiers for enum declarations *)
+(* Enum type declaration *)
 
 and pp_syntax_spec_id fmt (value : value) : unit =
   match flatten_case_v value with
@@ -1184,7 +1203,7 @@ and pp_syntax_spec_id fmt (value : value) : unit =
            "@pp_syntax_spec_id: expected specified identifier, got %s"
            (id_of_case_v value))
 
-(* Struct fields *)
+(* Struct, header, and union type declarations *)
 
 and pp_syntax_struct_field fmt (value : value) : unit =
   match flatten_case_v value with
@@ -1201,7 +1220,7 @@ and pp_syntax_struct_field fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_struct_field: expected struct field, got %s"
            (id_of_case_v value))
 
-(* Declarations *)
+(* Declaration *)
 
 and pp_syntax_decl ~level fmt (value : value) : unit =
   match flatten_case_v value with
@@ -1436,7 +1455,7 @@ and pp_syntax_decl ~level fmt (value : value) : unit =
         (Printf.sprintf "@pp_syntax_decl: expected declaration, got %s"
            (id_of_case_v value))
 
-(* Annotations *)
+(** Annotations **)
 
 and pp_syntax_anno_token fmt (value : value) : unit =
   match flatten_case_v value with
