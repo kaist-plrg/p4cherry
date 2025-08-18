@@ -1,20 +1,16 @@
-# P4-SpecTec
+# Update: 2025-08-19
 
-An implementation of the P4 language.
+This repository used to hold two projects: `p4cherry` and `p4-spectec`.
+`p4cherry` is an OCaml implementation of the P4 language, while `p4-spectec` is a formal, mechanized specification for P4 using the SpecTec framework.
+We have now split these projects into their own repositories for better organization and clarity.
+Now, `p4-spectec` can be found at: [P4-SpecTec](https://github.com/kaist-plrg/p4-spectec).
+
+# P4Cherry
+
+An OCaml implementation of the P4 language.
 This reuses parts of the [Petr4](https://github.com/verified-network-toolchain/petr4) codebase, especially the parser and numerics implementation.
 
-Also a to-be formal specification for P4, using the SpecTec framework.
-
 ## Building
-
-This uses SpecTec as its submodule.
-
-```shell
-$ git submodule init
-$ git submodule update
-```
-
-### Prerequisites for p4cherry
 
 * Install `opam` version 2.0.5 or higher.
   ```shell
@@ -38,31 +34,19 @@ $ git submodule update
   $ cd ..
   ```
 
-### Prerequisites for SpecTec
-
-* Create OCaml switch for version 5.0.0.
-  Install `dune` version 3.11.0, `menhir` version 20230608, `mdx` version 2.3.1, and `zarith` version 1.13, via `opam` (default versions).
-  ```shell
-  $ opam switch create 5.0.0
-  $ eval $(opam env)
-  $ opam install dune menhir mdx zarith
-  ```
-
 ### Building the Project
 
 ```shell
 $ make build
 ```
 
-This creates executables `p4cherry`, `p4cherry-test`, and `watsup` in the project root.
+This creates an executable `p4cherry` in the project root.
 
 ### Additional Notes
 
 You may also need `libgmp-dev` and `pkg-config`, if the error message says so.
 
-## p4cherry: A language implementation for P4
-
-### To Run p4cherry
+## To Run p4cherry
 
 ```shell
 $ ./p4cherry parse -i p4/testdata/arch [FILENAME].p4
@@ -71,7 +55,7 @@ $ ./p4cherry instantiate -i p4/testdata/arch [FILENAME].p4
 $ ./p4cherry run -a v1model -i p4/testdata/arch [FILENAME].p4 [TESTNAME].stf
 ```
 
-Note that p4cherry currently only supports the V1Model architecture.
+Note that p4cherry currently only supports the V1Model architecture, and partly the eBPF architecture.
 
 ### Current Test Status
 
@@ -111,16 +95,6 @@ Instantiation of stateful objects ([p4c](p4/test/instantiate_p4c.expected) / [pe
 Running STF tests against the p4c compiler test suite and petr4 custom test suite (for V1Model) ([p4c](p4/test/run_v1model_p4c.expected) / [petr4](p4/test/run_v1model_petr4.expected))
 
 Analysis of test failures: [p4c](p4/status/p4c/run-v1model.analysis.md) / [petr4](p4/status/petr4/run-v1model.analysis.md)
-
-## P4-SpecTec: A language specification for P4
-
-### To Build the Spec and Output in LaTeX
-
-```shell
-$ make spec
-```
-
-This creates a PDF spec in spec/spec.pdf.
 
 ### Contributing
 
