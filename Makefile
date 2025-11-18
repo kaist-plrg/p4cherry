@@ -1,15 +1,13 @@
 MAIN = p4cherry
-SPEC = watsup
 
 # Compile
 
-.PHONY: build build-p4 build-spectec
+.PHONY: build build-p4
 
 EXEMAIN = p4/_build/default/bin/main.exe
 EXETEST = p4/_build/default/bin/test.exe
-EXESPEC = spectec/spectec/_build/default/src/exe-watsup/main.exe
 
-build: build-p4 build-spectec
+build: build-p4
 
 build-p4:
 	rm -f ./$(MAIN)
@@ -22,19 +20,6 @@ build-p4-release:
 	opam switch 5.1.0
 	cd p4 && opam exec -- dune build --profile release bin/main.exe && echo
 	ln -f $(EXEMAIN) ./$(MAIN)
-
-build-spectec:
-	rm -f ./$(SPEC)
-	opam switch 5.0.0
-	cd spectec/spectec && opam exec make
-	ln -f $(EXESPEC) ./$(SPEC)
-
-# Spec
-
-spec: build-spectec
-	./$(SPEC) --latex spec/*.watsup	> spec/spec-gen.include
-	cd spec && pdflatex spec.tex
-	echo "Spec generation completed: spec/spec.pdf"
 
 # Format
 
@@ -68,6 +53,5 @@ coverage:
 .PHONY: clean
 
 clean:
-	rm -f ./$(MAIN) ./$(SPEC)
+	rm -f ./$(MAIN)
 	cd p4 && dune clean
-	cd spectec/spectec && dune clean
